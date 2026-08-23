@@ -1,257 +1,207 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FT Owner</title>
 <style>
-  :root{
-    --bg:#f6f7f9;
-    --panel:#ffffff;
-    --border:#e6e7eb;
-    --ink:#16181d;
-    --ink-soft:#6b7280;
-    --blue:#2f6fed;
-    --blue-soft:#eaf1ff;
-    --green:#16a34a;
-    --green-soft:#e9f9ee;
-    --red:#dc2626;
-    --red-soft:#fdecec;
-    --purple:#7c3aed;
-    --purple-soft:#f2ebfe;
-    --gray-soft:#f0f1f3;
-    --radius:10px;
-    --font-display: 'Manrope', 'Segoe UI', sans-serif;
-    --font-body: 'Inter', 'Segoe UI', sans-serif;
-  }
-  *{box-sizing:border-box;}
-  body{margin:0;font-family:var(--font-body);background:var(--bg);color:var(--ink);}
-  .app{display:flex;min-height:640px;border:1px solid var(--border);border-radius:14px;overflow:hidden;background:var(--panel);}
+:root {
+  --bg: #f6f7f9;
+  --panel: #ffffff;
+  --border: #e6e7eb;
+  --ink: #16181d;
+  --ink-soft: #6b7280;
+  --blue: #2f6fed;
+  --blue-soft: #eaf1ff;
+  --green: #16a34a;
+  --green-soft: #e9f9ee;
+  --red: #dc2626;
+  --red-soft: #fdecec;
+  --purple: #7c3aed;
+  --purple-soft: #f2ebfe;
+  --gray-soft: #f0f1f3;
+  --radius: 10px;
+  --font-display: 'Manrope', 'Segoe UI', sans-serif;
+  --font-body: 'Inter', 'Segoe UI', sans-serif;
+}
+*{box-sizing:border-box;}
+body{margin:0;font-family:var(--font-body);background:var(--bg);color:var(--ink);}
 
-  /* Sidebar */
-  .sidebar{width:230px;flex-shrink:0;background:#fff;border-right:1px solid var(--border);padding:18px 14px;display:flex;flex-direction:column;}
-  .brand{display:flex;align-items:center;gap:8px;padding:4px 6px 18px 6px;font-family:var(--font-display);font-weight:800;font-size:16px;}
-  .brand .dot{width:20px;height:20px;border-radius:6px;background:var(--blue);display:inline-block;}
-  .brand .blog{font-weight:600;color:var(--ink-soft);font-style:italic;font-size:14px;margin-left:2px;}
-  .nav-label{font-size:11px;letter-spacing:.06em;color:#a7abb4;font-weight:700;margin:10px 8px 6px;text-transform:uppercase;}
-  .nav-item{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:8px;font-size:14px;font-weight:600;color:#4b4f58;cursor:pointer;margin-bottom:2px;transition:.12s;}
-  .nav-item:hover{background:var(--gray-soft);}
-  .nav-item.active{background:var(--blue-soft);color:var(--blue);}
-  .nav-item .ic{width:18px;text-align:center;font-size:14px;}
-  .sidebar-bottom{margin-top:auto;padding-top:14px;border-top:1px solid var(--border);}
-  .pill-btn{display:flex;align-items:center;gap:8px;padding:9px 10px;border-radius:8px;font-size:13px;font-weight:600;margin-bottom:6px;cursor:default;}
-  .pill-btn.site{background:var(--blue-soft);color:var(--blue);}
-  .pill-btn.logout{background:var(--red-soft);color:var(--red);}
-  .pill-btn.dev{color:#a7abb4;font-weight:500;}
+.screen{display:none;width:100vw;height:100vh;align-items:center;justify-content:center;background:var(--bg);}
+.screen.active{display:flex;}
 
-  /* Main */
-  .main{flex:1;display:flex;flex-direction:column;min-width:0;}
-  .topbar{display:flex;justify-content:flex-end;align-items:center;padding:14px 22px;border-bottom:1px solid var(--border);}
-  .user-chip{display:flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:#4b4f58;}
-  .content{padding:22px 26px;overflow-y:auto;}
+.auth-card{background:var(--panel);border:1px solid var(--border);border-radius:16px;padding:32px;width:100%;max-width:380px;box-shadow:0 10px 25px rgba(0,0,0,0.04);}
+.auth-title{font-family:var(--font-display);font-size:22px;font-weight:800;margin-bottom:6px;}
+.auth-sub{font-size:13px;color:var(--ink-soft);margin-bottom:20px;}
+.form-group{margin-bottom:16px;}
+.form-group label{display:block;font-size:12px;font-weight:700;color:var(--ink-soft);margin-bottom:6px;text-transform:uppercase;letter-spacing:.03em;}
+.form-input{width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:8px;font-size:14px;outline:none;transition:.15s;}
+.form-input:focus{border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-soft);}
+.error-msg{color:var(--red);font-size:12px;margin-top:6px;display:none;}
+.error-msg.show{display:block;}
 
-  .page-title{font-family:var(--font-display);font-size:20px;font-weight:800;margin:0 0 4px;}
-  .page-sub{color:var(--ink-soft);font-size:13px;margin:0 0 20px;}
+.app-container{display:none;width:100vw;height:100vh;overflow:hidden;}
+.app-container.active{display:flex;}
 
-  /* Generic cards */
-  .card{background:#fff;border:1px solid var(--border);border-radius:var(--radius);padding:16px 18px;margin-bottom:12px;}
-  .grid{display:grid;gap:12px;}
-  .grid-3{grid-template-columns:repeat(3,1fr);}
-  .grid-2{grid-template-columns:repeat(2,1fr);}
+.sidebar{width:230px;flex-shrink:0;background:var(--panel);border-right:1px solid var(--border);padding:18px 14px;display:flex;flex-direction:column;}
+.brand{display:flex;align-items:center;gap:8px;padding:4px 6px 18px 6px;font-family:var(--font-display);font-weight:800;font-size:16px;}
+.brand .dot{width:20px;height:20px;border-radius:6px;background:var(--blue);display:inline-block;}
+.brand .blog{font-weight:600;color:var(--ink-soft);font-style:italic;font-size:14px;margin-left:2px;}
+.nav-label{font-size:11px;letter-spacing:.06em;color:#a7abb4;font-weight:700;margin:10px 8px 6px;text-transform:uppercase;}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:8px;font-size:14px;font-weight:600;color:#4b4f58;cursor:pointer;margin-bottom:2px;transition:.12s;}
+.nav-item:hover{background:var(--gray-soft);}
+.nav-item.active{background:var(--blue-soft);color:var(--blue);}
 
-  .badge{display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border-radius:20px;font-size:11.5px;font-weight:700;}
-  .badge.green{background:var(--green-soft);color:var(--green);}
-  .badge.mint{background:#eafcf3;color:#4fae86;}
-  .badge.red{background:var(--red-soft);color:var(--red);}
-  .badge.blue{background:var(--blue-soft);color:var(--blue);}
-  .badge.purple{background:var(--purple-soft);color:var(--purple);}
-  .badge.gray{background:var(--gray-soft);color:#6b7280;}
-  .badge.orange{background:#fff3e6;color:#c2670a;}
-  .badge.cyan{background:#e6fbff;color:#0891b2;}
-  .badge.amber{background:#fef7e0;color:#a16207;}
-  .badge.pink{background:#fdecf3;color:#be185d;}
-  .badge.teal{background:#e3f8f3;color:#0f766e;}
+.main-content{flex:1;overflow-y:auto;padding:28px 36px;}
+.page-title{font-family:var(--font-display);font-size:24px;font-weight:800;margin-bottom:4px;}
+.page-sub{font-size:13px;color:var(--ink-soft);margin-bottom:20px;}
 
-  table{width:100%;border-collapse:collapse;table-layout:fixed;font-size:13.5px;}
-  th{text-align:left;color:#9297a1;font-weight:700;font-size:11.5px;text-transform:uppercase;letter-spacing:.04em;padding:10px 12px;border-bottom:1px solid var(--border);}
-  td{padding:12px;border-bottom:1px solid var(--border);vertical-align:middle;height:52px;}
-  tr:last-child td{border-bottom:none;}
-  .avatar{width:28px;height:28px;border-radius:50%;background:var(--blue-soft);color:var(--blue);display:inline-flex;align-items:center;justify-content:center;font-weight:800;font-size:12px;margin-right:8px;vertical-align:middle;flex-shrink:0;object-fit:cover;}
-  .name-cell{display:flex;align-items:center;height:100%;}
-  .rank-cell{display:flex;flex-wrap:wrap;gap:4px;align-items:center;}
-  .row-actions{display:flex;gap:6px;flex-wrap:wrap;}
-  .muted{color:var(--ink-soft);}
-  .stat-num{font-family:var(--font-display);font-size:22px;font-weight:800;}
-  .stat-label{font-size:12px;color:var(--ink-soft);margin-top:2px;}
+.card{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:18px;margin-bottom:16px;}
+.grid{display:grid;gap:16px;}
+.grid-2{grid-template-columns:1fr 1fr;}
+.grid-3{grid-template-columns:1fr 1fr 1fr;}
 
-  .btn{border:none;border-radius:8px;padding:8px 14px;font-size:13px;font-weight:700;cursor:pointer;}
-  .btn.dark{background:#16181d;color:#fff;}
-  .btn.outline{background:#fff;border:1px solid var(--border);color:#4b4f58;}
-  .btn.danger{background:var(--red-soft);color:var(--red);border:1px solid transparent;}
-  .btn.danger:hover{background:#fbdada;}
-  .btn.danger.confirming{background:var(--red);color:#fff;}
-  .btn-sm{padding:6px 10px;font-size:12px;}
+table{width:100%;border-collapse:collapse;font-size:13px;}
+th,td{padding:10px 12px;text-align:left;border-bottom:1px solid var(--border);}
+th{font-weight:700;color:var(--ink-soft);font-size:11px;text-transform:uppercase;letter-spacing:.04em;background:#fafafa;}
+tr:last-child td{border-bottom:none;}
 
-  .rank-filter-bar{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;}
-  .rank-filter-chip{padding:8px 16px;border-radius:20px;font-size:13px;font-weight:700;cursor:pointer;border:1.5px solid transparent;opacity:.55;transition:.12s;}
-  .rank-filter-chip.selected{opacity:1;border-color:currentColor;}
-  .rank-filter-chip.all{background:var(--gray-soft);color:#4b4f58;}
-  .rank-filter-chip.beta{background:#eafcf3;color:#4fae86;}
-  .rank-filter-chip.alpha{background:#fff3e6;color:#c2670a;}
-  .rank-filter-chip.stazher{background:var(--blue-soft);color:var(--blue);}
-  .rank-filter-chip.method{background:var(--green-soft);color:var(--green);}
+.badge{display:inline-flex;align-items:center;padding:3px 8px;border-radius:6px;font-size:11px;font-weight:700;}
+.badge.green{background:var(--green-soft);color:var(--green);}
+.badge.blue{background:var(--blue-soft);color:var(--blue);}
+.badge.purple{background:var(--purple-soft);color:var(--purple);}
+.badge.red{background:var(--red-soft);color:var(--red);}
+.badge.gray{background:var(--gray-soft);color:var(--ink-soft);}
+.badge.orange{background:#fff3e0;color:#e65100;}
+.badge.mint{background:#e0f2f1;color:#00695c;}
+.badge.cyan{background:#e0f7fa;color:#00838f;}
+.badge.pink{background:#fce4ec;color:#c2185b;}
+.badge.amber{background:#fff8e1;color:#ff8f00;}
+.badge.teal{background:#e0f2f1;color:#004d40;}
 
-  .empty-hint{font-size:12px;color:#a7abb4;margin-top:14px;}
+.btn{display:inline-flex;align-items:center;justify-content:center;padding:8px 14px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;border:none;outline:none;transition:.12s;gap:6px;}
+.btn.dark{background:var(--ink);color:#fff;}
+.btn.dark:hover{background:#2d3139;}
+.btn.outline{background:transparent;border:1px solid var(--border);color:var(--ink);}
+.btn.outline:hover{background:var(--gray-soft);}
+.btn.danger{background:var(--red-soft);color:var(--red);}
+.btn.danger:hover{background:#f8d7d7;}
+.btn.danger.confirming{background:var(--red);color:#fff;}
+.btn-sm{padding:4px 8px;font-size:11px;border-radius:6px;}
 
-  /* Login screen */
-  .login-wrap{min-height:640px;display:flex;align-items:center;justify-content:center;border:1px solid var(--border);border-radius:14px;background:linear-gradient(180deg,#fafbfc, #f2f3f6);}
-  .login-card{width:340px;background:#fff;border:1px solid var(--border);border-radius:14px;padding:30px 28px;box-shadow:0 10px 30px rgba(20,22,30,.06);}
-  .login-brand{display:flex;align-items:center;gap:8px;font-family:var(--font-display);font-weight:800;font-size:17px;margin-bottom:4px;}
-  .login-brand .dot{width:20px;height:20px;border-radius:6px;background:var(--blue);display:inline-block;}
-  .login-brand .blog{font-weight:600;color:var(--ink-soft);font-style:italic;font-size:14px;}
-  .login-sub{font-size:13px;color:var(--ink-soft);margin:2px 0 22px;}
-  .field{margin-bottom:14px;}
-  .field label{display:block;font-size:12px;font-weight:700;color:#4b4f58;margin-bottom:6px;}
-  .field input{width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:8px;font-size:14px;font-family:var(--font-body);outline:none;background:#fafbfc;}
-  .field input:focus{border-color:var(--blue);background:#fff;}
-  .login-btn{width:100%;padding:10px;border:none;border-radius:8px;background:#16181d;color:#fff;font-weight:700;font-size:14px;cursor:pointer;margin-top:6px;}
-  .login-btn:hover{background:#000;}
-  .login-error{display:none;background:var(--red-soft);color:var(--red);font-size:12.5px;font-weight:600;padding:8px 10px;border-radius:7px;margin-bottom:12px;}
-  .login-error.show{display:block;}
-  .login-hint{font-size:11.5px;color:#a7abb4;margin-top:16px;text-align:center;}
+.rank-filter-bar{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;}
+.rank-filter-chip{padding:5px 12px;border-radius:20px;font-size:12px;font-weight:600;background:var(--panel);border:1px solid var(--border);cursor:pointer;transition:.12s;}
+.rank-filter-chip.selected{background:var(--ink);color:#fff;border-color:var(--ink);}
 
-  /* Modal */
-  .modal-overlay{position:fixed;inset:0;background:rgba(15,17,22,.45);display:none;align-items:center;justify-content:center;z-index:50;}
-  .modal-overlay.show{display:flex;}
-  .modal{width:380px;max-height:88vh;overflow-y:auto;background:#fff;border-radius:14px;padding:24px 24px 20px;box-shadow:0 20px 50px rgba(20,22,30,.25);}
-  .modal-title{font-family:var(--font-display);font-weight:800;font-size:17px;margin-bottom:2px;}
-  .modal-sub{font-size:12.5px;color:var(--ink-soft);margin-bottom:18px;}
-  .modal .field label{display:flex;justify-content:space-between;}
-  .rank-grid{display:flex;flex-wrap:wrap;gap:8px;}
-  .rank-chip{padding:7px 12px;border-radius:20px;font-size:12.5px;font-weight:700;cursor:pointer;border:1.5px solid transparent;opacity:.55;user-select:none;transition:.12s;}
-  .rank-chip.selected{opacity:1;border-color:currentColor;}
-  .rank-chip.beta{background:#eafcf3;color:#4fae86;}
-  .rank-chip.alpha{background:#fff3e6;color:#c2670a;}
-  .rank-chip.stazher{background:var(--blue-soft);color:var(--blue);}
-  .rank-chip.method{background:var(--green-soft);color:var(--green);}
-  .rank-chip.pos-gray{background:var(--gray-soft);color:#6b7280;}
-  .rank-chip.pos-red{background:var(--red-soft);color:var(--red);}
-  .rank-chip.pos-purple{background:var(--purple-soft);color:var(--purple);}
-  .rank-chip.pos-blue{background:var(--blue-soft);color:var(--blue);}
-  .rank-chip.pos-cyan{background:#e6fbff;color:#0891b2;}
-  .rank-chip.pos-pink{background:#fdecf3;color:#be185d;}
-  .rank-chip.pos-amber{background:#fef7e0;color:#a16207;}
-  .rank-chip.pos-teal{background:#e3f8f3;color:#0f766e;}
-  .pos-select{width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:8px;font-size:14px;font-family:var(--font-body);background:#fafbfc;outline:none;}
-  .pos-select:focus{border-color:var(--blue);background:#fff;}
-  .modal-actions{display:flex;gap:8px;margin-top:20px;}
-  .modal-actions .btn{flex:1;padding:10px;text-align:center;}
-  .modal-close{background:none;border:none;font-size:18px;color:#a7abb4;cursor:pointer;float:right;line-height:1;margin-top:-4px;}
+.avatar{width:28px;height:28px;border-radius:50%;object-fit:cover;display:inline-block;vertical-align:middle;background:var(--blue-soft);color:var(--blue);font-weight:700;font-size:11px;line-height:28px;text-align:center;}
+.name-cell{display:flex;align-items:center;gap:10px;font-weight:600;}
+.rank-cell{display:flex;gap:4px;flex-wrap:wrap;}
+.row-actions{text-align:right;white-space:nowrap;}
+.empty-hint{font-size:12px;color:var(--ink-soft);margin-top:8px;}
+
+.modal-overlay{display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.4);align-items:center;justify-content:center;z-index:1000;}
+.modal-overlay.show{display:flex;}
+.modal{background:var(--panel);border-radius:14px;padding:24px;width:100%;max-width:440px;box-shadow:0 20px 40px rgba(0,0,0,0.15);}
+.modal-title{font-family:var(--font-display);font-size:18px;font-weight:800;margin-bottom:16px;}
+.rank-selector{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;}
+.rank-chip{padding:6px 10px;border-radius:6px;font-size:12px;font-weight:600;border:1px solid var(--border);background:var(--bg);cursor:pointer;}
+.rank-chip.selected{background:var(--blue);color:#fff;border-color:var(--blue);}
+.stat-num{font-family:var(--font-display);font-size:22px;font-weight:800;color:var(--ink);}
+.stat-label{font-size:12px;color:var(--ink-soft);margin-top:2px;}
 </style>
+</head>
+<body>
 
-<div id="loginScreen" class="login-wrap">
-  <div class="login-card">
-    <div class="login-brand"><span class="dot"></span>FT Owner</div>
-    <div class="login-sub">Войдите в панель управления</div>
-    <div id="loginError" class="login-error">Неверный логин или пароль</div>
-    <div class="field">
+<div class="screen active" id="loginScreen">
+  <div class="auth-card">
+    <div class="auth-title">Вход в панель</div>
+    <div class="auth-sub">Введите ваши учётные данные FT Owner</div>
+    <div class="form-group">
       <label>Логин</label>
-      <input id="loginInput" type="text" placeholder="Введите ник" autocomplete="username">
+      <input type="text" class="form-input" id="loginInput" placeholder="Введите логин">
     </div>
-    <div class="field">
+    <div class="form-group">
       <label>Пароль</label>
-      <input id="passInput" type="password" placeholder="••••••••••••" autocomplete="current-password">
+      <input type="password" class="form-input" id="passInput" placeholder="Введите пароль">
+      <div class="error-msg" id="loginError">Неверный логин или пароль</div>
     </div>
-    <button class="login-btn" id="loginBtn">Войти</button>
-    <div class="login-hint">Доступ только для сотрудников FT Owner</div>
+    <button class="btn dark" style="width:100%;padding:10px;" id="loginBtn">Далее</button>
   </div>
 </div>
 
-<div id="twoFaScreen" class="login-wrap" style="display:none;">
-  <div class="login-card">
-    <div class="login-brand"><span class="dot"></span>FT Owner</div>
-    <div class="login-sub">Двухэтапная аутентификация</div>
-    <div id="twoFaError" class="login-error">Неверный код</div>
-    <div class="field">
-      <label>Код из Authenticator</label>
-      <input id="twoFaInput" type="text" inputmode="numeric" maxlength="6" placeholder="••••••" autocomplete="one-time-code" style="letter-spacing:4px;text-align:center;font-weight:700;font-size:18px;">
+<div class="screen" id="twoFaScreen">
+  <div class="auth-card">
+    <div class="auth-title">Двухэтапная проверка</div>
+    <div class="auth-sub">Введите 6-значный код подтверждения</div>
+    <div class="form-group">
+      <label>Код из приложения</label>
+      <input type="text" class="form-input" id="twoFaInput" maxlength="6" placeholder="000000" style="letter-spacing:4px;font-weight:700;text-align:center;font-size:18px;">
+      <div class="error-msg" id="twoFaError">Неверный код</div>
     </div>
-    <button class="login-btn" id="twoFaBtn">Подтвердить</button>
-    <div class="login-hint">Откройте приложение Authenticator и введите текущий 6-значный код</div>
-    <div class="login-hint" style="cursor:pointer;text-decoration:underline;margin-top:6px;" id="backToLoginBtn">Назад ко входу</div>
+    <button class="btn dark" style="width:100%;padding:10px;" id="twoFaBtn">Подтвердить</button>
+    <button class="btn outline" style="width:100%;padding:10px;margin-top:8px;" id="backToLoginBtn">Назад</button>
   </div>
 </div>
 
-<div class="app" id="appScreen" style="display:none;">
+<div class="app-container" id="appScreen">
   <div class="sidebar">
-    <div class="brand"><span class="dot"></span>FT Owner</div>
-
-    <div class="nav-label">Главное</div>
-    <div class="nav-item" data-page="main"><span class="ic">🏠</span>Главная</div>
-    <div class="nav-item" data-page="staff"><span class="ic">👥</span>Сотрудники</div>
-    <div class="nav-item" data-page="hides"><span class="ic">📝</span>Хайды</div>
-    <div class="nav-item" data-page="access"><span class="ic">🔑</span>Доступ</div>
-
-    <div class="nav-label">Профиль</div>
-    <div class="nav-item" data-page="payouts"><span class="ic">💳</span>Мои выплаты</div>
-
-    <div class="sidebar-bottom">
-      <div class="pill-btn site">↗ На сайт</div>
-      <div class="pill-btn logout">⎋ Выйти</div>
-      <div class="pill-btn dev">&lt;/&gt; Developer</div>
+    <div class="brand">
+      <span class="dot"></span>
+      <span>FT Owner</span>
     </div>
+    <div class="nav-label">Разделы</div>
+    <div class="nav-item active" data-page="main">Главная</div>
+    <div class="nav-item" data-page="staff">Сотрудники</div>
+    <div class="nav-item" data-page="hides">Хайды</div>
+    <div class="nav-item" data-page="access">Доступ</div>
+    <div class="nav-item" data-page="payouts">Мои выплаты</div>
   </div>
-
-  <div class="main">
-    <div class="topbar"><div class="user-chip">👤 SniperPUBG</div></div>
-    <div class="content" id="content"></div>
-  </div>
+  <div class="main-content" id="content"></div>
 </div>
 
 <div class="modal-overlay" id="addModalOverlay">
   <div class="modal">
-    <button class="modal-close" onclick="closeAddModal()">✕</button>
     <div class="modal-title" id="modalTitle">Добавить сотрудника</div>
-    <div class="modal-sub">Заполните данные, чтобы добавить нового участника команды.</div>
-
-    <div class="field">
-      <label>Ник</label>
-      <input id="empNick" type="text" placeholder="Например, KillerFrost">
+    <div class="form-group">
+      <label>Имя / Никнейм</label>
+      <input type="text" class="form-input" id="empNick" placeholder="Например: Иван Иванов">
     </div>
-
-    <div class="field">
-      <label>Ранг <span class="muted" style="font-weight:500;">(можно выбрать несколько)</span></label>
-      <div class="rank-grid">
-        <div class="rank-chip beta" data-rank="Бета" onclick="toggleRank(this)">Бета</div>
-        <div class="rank-chip alpha" data-rank="Альфа" onclick="toggleRank(this)">Альфа</div>
-        <div class="rank-chip stazher" data-rank="Стажер" onclick="toggleRank(this)">Стажер</div>
-        <div class="rank-chip method" data-rank="Метод" onclick="toggleRank(this)">Метод</div>
+    <div class="form-group">
+      <label>Ранги</label>
+      <div class="rank-selector">
+        <div class="rank-chip" data-rank="Бета" onclick="toggleRank(this)">Бета</div>
+        <div class="rank-chip" data-rank="Альфа" onclick="toggleRank(this)">Альфа</div>
+        <div class="rank-chip" data-rank="Стажер" onclick="toggleRank(this)">Стажер</div>
+        <div class="rank-chip" data-rank="Метод" onclick="toggleRank(this)">Метод</div>
       </div>
     </div>
-
-    <div class="field">
-      <label>Должность <span class="muted" style="font-weight:500;">(можно выбрать несколько)</span></label>
-      <div class="rank-grid" id="positionGrid">
-        <div class="rank-chip pos-gray" data-position="Обычный сотрудник" onclick="togglePosition(this)">Обычный сотрудник</div>
-        <div class="rank-chip pos-red" data-position="Руководитель Активной модерации" onclick="togglePosition(this)">Руководитель Активной модерации</div>
-        <div class="rank-chip pos-purple" data-position="Руководитель медиа" onclick="togglePosition(this)">Руководитель медиа</div>
-        <div class="rank-chip pos-blue" data-position="Руководитель репортов" onclick="togglePosition(this)">Руководитель репортов</div>
-        <div class="rank-chip pos-cyan" data-position="Заместитель репортов" onclick="togglePosition(this)">Заместитель репортов</div>
-        <div class="rank-chip pos-pink" data-position="Заместитель Активной модерации" onclick="togglePosition(this)">Заместитель Активной модерации</div>
-        <div class="rank-chip pos-amber" data-position="Руководитель ОМЧ" onclick="togglePosition(this)">Руководитель ОМЧ</div>
-        <div class="rank-chip pos-teal" data-position="Заместитель ОМЧ" onclick="togglePosition(this)">Заместитель ОМЧ</div>
+    <div class="form-group">
+      <label>Должности</label>
+      <div class="rank-selector">
+        <div class="rank-chip" data-position="Обычный сотрудник" onclick="togglePosition(this)">Обычный сотрудник</div>
+        <div class="rank-chip" data-position="Руководитель Активной модерации" onclick="togglePosition(this)">Руководитель Активной модерации</div>
+        <div class="rank-chip" data-position="Руководитель медиа" onclick="togglePosition(this)">Руководитель медиа</div>
+        <div class="rank-chip" data-position="Руководитель репортов" onclick="togglePosition(this)">Руководитель репортов</div>
+        <div class="rank-chip" data-position="Заместитель репортов" onclick="togglePosition(this)">Заместитель репортов</div>
+        <div class="rank-chip" data-position="Заместитель Активной модерации" onclick="togglePosition(this)">Заместитель Активной модерации</div>
+        <div class="rank-chip" data-position="Руководитель ОМЧ" onclick="togglePosition(this)">Руководитель ОМЧ</div>
+        <div class="rank-chip" data-position="Заместитель ОМЧ" onclick="togglePosition(this)">Заместитель ОМЧ</div>
       </div>
     </div>
-
-    <div class="field">
-      <label>Ссылка VK</label>
-      <input id="empVk" type="text" placeholder="https://vk.com/username">
+    <div class="form-group">
+      <label>Ссылка VK (необязательно)</label>
+      <input type="text" class="form-input" id="empVk" placeholder="https://vk.com/id...">
     </div>
-
-    <div class="field">
-      <label>Аватар <span class="muted" style="font-weight:500;">(необязательно, загрузить вручную)</span></label>
-      <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
-        <img id="avatarPreview" alt="" style="width:44px;height:44px;border-radius:50%;object-fit:cover;background:var(--gray-soft);display:none;">
-        <span id="avatarPreviewPlaceholder" class="muted" style="font-size:12px;">Файл не выбран</span>
+    <div class="form-group">
+      <label>Аватарка (необязательно)</label>
+      <input type="file" id="empAvatarFile" accept="image/*" onchange="handleAvatarFile(event)" style="display:none;">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <button class="btn outline btn-sm" onclick="document.getElementById('empAvatarFile').click()">Выбрать файл</button>
+        <span id="avatarPreviewPlaceholder" style="font-size:12px;color:var(--ink-soft);">Файл не выбран</span>
+        <img id="avatarPreview" style="width:32px;height:32px;border-radius:50%;object-fit:cover;display:none;">
       </div>
-      <input id="empAvatarFile" type="file" accept="image/*" onchange="handleAvatarFile(event)">
     </div>
-
-    <div class="modal-actions">
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:20px;">
       <button class="btn outline" onclick="closeAddModal()">Отмена</button>
       <button class="btn dark" id="modalSubmitBtn" onclick="submitAddEmployee()">Добавить</button>
     </div>
@@ -260,13 +210,11 @@
 
 <script>
 const pages = {
-
   main: {
     title: "Главная",
-    sub: "Обзор FT Owner — здесь вы видите то же самое, что и на скриншоте (эта страница уже готова и не менялась).",
-    body: `<div class="card">Раздел «Главная» уже реализован в вашем интерфейсе — я не трогал его, как вы и просили. Все статьи, фильтры и статусы остаются как на исходном макете.</div>`
+    sub: "Обзор FT Owner",
+    body: `<div class="card">Раздел «Главная» уже реализован в вашем интерфейсе — все статьи, фильтры и статусы остаются как на исходном макете.</div>`
   },
-
   staff: {
     title: "Сотрудники",
     sub: "Команда, которая работает для сервера FunTime.",
@@ -283,133 +231,71 @@ const pages = {
         <thead>
           <tr><th>Сотрудник</th><th>Ранг</th><th>Должность</th><th>VK</th><th></th></tr>
         </thead>
-        <tbody id="staffTableBody">
-          <tr data-ranks="Метод" data-positions="" data-owner="1">
-            <td class="name-cell"><span class="avatar">SP</span>SniperPUBG</td>
-            <td><div class="rank-cell"><span class="badge green">Метод</span></div></td>
-            <td><div class="rank-cell"><span class="muted">Владелец</span></div></td>
-            <td><span class="muted">—</span></td>
-            <td class="row-actions">
-              <button class="btn outline btn-sm" onclick="openEditModal(this)">Изменить</button>
-              <span class="muted" style="font-size:12px;">это вы</span>
-            </td>
-          </tr>
-          <tr data-ranks="Альфа" data-positions="Руководитель медиа" data-vk="https://vk.com/id_anya_kovaleva">
-            <td class="name-cell"><img class="avatar" src="https://api.dicebear.com/7.x/avataaars/svg?seed=Anya%20Kovaleva" alt="Аня Ковалёва">Аня Ковалёва</td>
-            <td><div class="rank-cell"><span class="badge orange">Альфа</span></div></td>
-            <td><div class="rank-cell"><span class="badge purple">Руководитель медиа</span></div></td>
-            <td><a class="btn outline btn-sm" href="https://vk.com/id_anya_kovaleva" target="_blank" rel="noopener noreferrer">Открыть</a></td>
-            <td class="row-actions">
-              <button class="btn outline btn-sm" onclick="openEditModal(this)">Изменить</button>
-              <button class="btn danger btn-sm" onclick="deleteEmployee(this)">Удалить</button>
-            </td>
-          </tr>
-          <tr data-ranks="Стажер" data-positions="Обычный сотрудник" data-vk="https://vk.com/id_dmitry_markov">
-            <td class="name-cell"><img class="avatar" src="https://api.dicebear.com/7.x/avataaars/svg?seed=Dmitry%20Markov" alt="Дмитрий Марков">Дмитрий Марков</td>
-            <td><div class="rank-cell"><span class="badge blue">Стажер</span></div></td>
-            <td><div class="rank-cell"><span class="badge gray">Обычный сотрудник</span></div></td>
-            <td><a class="btn outline btn-sm" href="https://vk.com/id_dmitry_markov" target="_blank" rel="noopener noreferrer">Открыть</a></td>
-            <td class="row-actions">
-              <button class="btn outline btn-sm" onclick="openEditModal(this)">Изменить</button>
-              <button class="btn danger btn-sm" onclick="deleteEmployee(this)">Удалить</button>
-            </td>
-          </tr>
-          <tr data-ranks="Бета" data-positions="Руководитель Активной модерации" data-vk="https://vk.com/id_ilya_lisitsyn">
-            <td class="name-cell"><img class="avatar" src="https://api.dicebear.com/7.x/avataaars/svg?seed=Ilya%20Lisitsyn" alt="Илья Лисицын">Илья Лисицын</td>
-            <td><div class="rank-cell"><span class="badge mint">Бета</span></div></td>
-            <td><div class="rank-cell"><span class="badge red">Руководитель Активной модерации</span></div></td>
-            <td><a class="btn outline btn-sm" href="https://vk.com/id_ilya_lisitsyn" target="_blank" rel="noopener noreferrer">Открыть</a></td>
-            <td class="row-actions">
-              <button class="btn outline btn-sm" onclick="openEditModal(this)">Изменить</button>
-              <button class="btn danger btn-sm" onclick="deleteEmployee(this)">Удалить</button>
-            </td>
-          </tr>
-        </tbody>
+        <tbody id="staffTableBody"></tbody>
         </table>
       </div>
       <div style="margin-top:14px;"><button class="btn dark" onclick="openAddModal()">+ Добавить сотрудника</button></div>
     `
   },
-
   hides: {
     title: "Хайды",
-    sub: "Черновые заготовки и быстрые идеи для статей — короткие брифы, которые ещё не стали полноценным материалом.",
+    sub: "Черновые заготовки и быстрые идеи для статей.",
     body: `
       <div class="grid grid-2">
         <div class="card">
           <span class="badge purple">Идея</span>
           <div style="font-weight:700;margin-top:8px;">Обзор нового сезона Battlegrounds Mobile</div>
-          <div class="muted" style="font-size:13px;margin-top:4px;">Заметка: собрать скины боевого пропуска, сравнить с прошлым сезоном.</div>
+          <div class="muted" style="font-size:13px;margin-top:4px;">Заметка: собрать скины боевого пропуска.</div>
         </div>
         <div class="card">
           <span class="badge blue">В работе</span>
           <div style="font-weight:700;margin-top:8px;">Топ-10 редких эмоций в PUBG Mobile</div>
-          <div class="muted" style="font-size:13px;margin-top:4px;">Черновик у Дмитрия, ожидает скриншотов.</div>
-        </div>
-        <div class="card">
-          <span class="badge purple">Идея</span>
-          <div style="font-weight:700;margin-top:8px;">Гайд по новой карте — первый взгляд</div>
-          <div class="muted" style="font-size:13px;margin-top:4px;">Ждём официальный анонс карты для точных деталей.</div>
-        </div>
-        <div class="card">
-          <span class="badge gray">Отложено</span>
-          <div style="font-weight:700;margin-top:8px;">Сравнение M416 и AKM после патча</div>
-          <div class="muted" style="font-size:13px;margin-top:4px;">Нужны новые тестовые данные по урону.</div>
+          <div class="muted" style="font-size:13px;margin-top:4px;">Черновик у Дмитрия.</div>
         </div>
       </div>
-      <div style="margin-top:14px;"><button class="btn dark">+ Добавить идею</button></div>
-      <div class="empty-hint">Из этого раздела бриф можно превратить в полноценную статью на странице «Главная».</div>
     `
   },
-
   access: {
     title: "Доступ",
-    sub: "Права сотрудников, роли и ссылки-приглашения для входа в панель.",
+    sub: "Права сотрудников и роли.",
     body: `
       <div class="card">
-        <div style="font-weight:700;margin-bottom:10px;">Роли и права</div>
+        <div style="font-weight:700;margin-bottom:10px;">Ваши данные для входа[cite: 1]</div>
         <table>
-          <tr><th>Роль</th><th>Создание статей</th><th>Публикация</th><th>Управление доступом</th></tr>
-          <tr><td>Владелец</td><td><span class="badge green">Да</span></td><td><span class="badge green">Да</span></td><td><span class="badge green">Да</span></td></tr>
-          <tr><td>Редактор</td><td><span class="badge green">Да</span></td><td><span class="badge green">Да</span></td><td><span class="badge red">Нет</span></td></tr>
-          <tr><td>Автор</td><td><span class="badge green">Да</span></td><td><span class="badge red">Нет</span></td><td><span class="badge red">Нет</span></td></tr>
-          <tr><td>Модератор</td><td><span class="badge red">Нет</span></td><td><span class="badge red">Нет</span></td><td><span class="badge red">Нет</span></td></tr>
+          <tr><td style="width:140px;color:var(--ink-soft);">Логин</td><td style="font-weight:700;">Sniper_PUBGMS</td></tr>[cite: 1]
+          <tr><td style="color:var(--ink-soft);">Пароль</td><td style="font-weight:700;">$wN7sII$nuGvVT</td></tr>[cite: 1]
         </table>
-      </div>
-      <div class="card">
-        <div style="font-weight:700;margin-bottom:10px;">Ваши данные для входа</div>
-        <table>
-          <tr><td style="width:140px;color:var(--ink-soft);">Логин</td><td style="font-weight:700;">Sniper_PUBGMS</td></tr>
-          <tr><td style="color:var(--ink-soft);">Пароль</td><td style="font-weight:700;">$wN7sII$nuGvVT</td></tr>
-        </table>
-        <div class="empty-hint">Пароль сгенерирован случайно. Сохраните его в надёжном месте и смените после первого входа.</div>
       </div>
     `
   },
-
   payouts: {
     title: "Мои выплаты",
-    sub: "История начислений за опубликованные статьи.",
+    sub: "История начислений.",
     body: `
       <div class="grid grid-3" style="margin-bottom:16px;">
         <div class="card"><div class="stat-num">48 200 ₽</div><div class="stat-label">Выплачено всего</div></div>
         <div class="card"><div class="stat-num">6 400 ₽</div><div class="stat-label">Ожидает выплаты</div></div>
         <div class="card"><div class="stat-num">15 авг</div><div class="stat-label">Следующая выплата</div></div>
       </div>
-      <div class="card" style="padding:0;">
-        <table>
-          <tr><th>Дата</th><th>Статья</th><th>Сумма</th><th>Статус</th></tr>
-          <tr><td>01.08.2026</td><td>Обновление 4.5: коллаборация с «Наруто»</td><td>1 800 ₽</td><td><span class="badge green">Выплачено</span></td></tr>
-          <tr><td>20.07.2026</td><td>Все скины события Uzumaki Naruto</td><td>2 100 ₽</td><td><span class="badge green">Выплачено</span></td></tr>
-          <tr><td>30.07.2026</td><td>Топ-15 скинов на UZI</td><td>1 700 ₽</td><td><span class="badge green">Выплачено</span></td></tr>
-          <tr><td>22.08.2026</td><td>Weekly Deal Pack: гайд по наборам</td><td>1 900 ₽</td><td><span class="badge blue">В обработке</span></td></tr>
-          <tr><td>19.08.2026</td><td>Костюм-Х «Друвазн»</td><td>1 600 ₽</td><td><span class="badge blue">В обработке</span></td></tr>
-        </table>
-      </div>
-      <div class="empty-hint">Выплаты формируются автоматически по опубликованным и принятым статьям.</div>
     `
   }
 };
+
+const DEFAULT_STAFF = [
+  { id: "owner", nick: "SniperPUBG", ranks: ["Метод"], positions: [], vk: "", isOwner: true },
+  { id: "1", nick: "Аня Ковалёва", ranks: ["Альфа"], positions: ["Руководитель медиа"], vk: "https://vk.com/id_anya_kovaleva" },
+  { id: "2", nick: "Дмитрий Марков", ranks: ["Стажер"], positions: ["Обычный сотрудник"], vk: "https://vk.com/id_dmitry_markov" },
+  { id: "3", nick: "Илья Лисицын", ranks: ["Бета"], positions: ["Руководитель Активной модерации"], vk: "https://vk.com/id_ilya_lisitsyn" }
+];
+
+function getStaffData() {
+  const data = localStorage.getItem('ft_owner_staff');
+  return data ? JSON.parse(data) : DEFAULT_STAFF;
+}
+
+function saveStaffData(data) {
+  localStorage.setItem('ft_owner_staff', JSON.stringify(data));
+}
 
 function renderPage(key){
   const p = pages[key];
@@ -418,15 +304,63 @@ function renderPage(key){
   document.querySelectorAll('.nav-item').forEach(el=>{
     el.classList.toggle('active', el.dataset.page===key);
   });
+  if(key === 'staff') renderStaffTable();
+}
+
+function renderStaffTable() {
+  const tbody = document.getElementById('staffTableBody');
+  if(!tbody) return;
+  const staff = getStaffData();
+  const rankBadgeClass = { 'Бета':'mint', 'Альфа':'orange', 'Стажер':'blue', 'Метод':'green' };
+  const posBadgeClass = {
+    'Обычный сотрудник':'gray',
+    'Руководитель Активной модерации':'red',
+    'Руководитель медиа':'purple',
+    'Руководитель репортов':'blue',
+    'Заместитель репортов':'cyan',
+    'Заместитель Активной модерации':'pink',
+    'Руководитель ОМЧ':'amber',
+    'Заместитель ОМЧ':'teal'
+  };
+
+  tbody.innerHTML = staff.map(emp => {
+    const rankHtml = emp.ranks.length
+      ? emp.ranks.map(r => `<span class="badge ${rankBadgeClass[r] || 'gray'}">${r}</span>`).join('')
+      : '<span class="muted">—</span>';
+
+    const posHtml = emp.positions.length
+      ? emp.positions.map(p => `<span class="badge ${posBadgeClass[p] || 'gray'}">${p}</span>`).join('')
+      : (emp.isOwner ? '<span class="muted">Владелец</span>' : '<span class="muted">—</span>');
+
+    const vkHtml = emp.vk
+      ? `<a class="btn outline btn-sm" href="${emp.vk}" target="_blank" rel="noopener noreferrer">Открыть</a>`
+      : '<span class="muted">—</span>';
+
+    const actionsHtml = emp.isOwner
+      ? `<button class="btn outline btn-sm" onclick="openEditModal('${emp.id}')">Изменить</button> <span class="muted" style="font-size:12px;">это вы</span>`
+      : `<button class="btn outline btn-sm" onclick="openEditModal('${emp.id}')">Изменить</button> <button class="btn danger btn-sm" onclick="deleteEmployee('${emp.id}', this)">Удалить</button>`;
+
+    return `
+      <tr data-id="${emp.id}" data-ranks="${emp.ranks.join(',')}">
+        <td class="name-cell">${avatarHtml(emp.nick, emp.vk, emp.avatar)}${emp.nick}</td>
+        <td><div class="rank-cell">${rankHtml}</div></td>
+        <td><div class="rank-cell">${posHtml}</div></td>
+        <td>${vkHtml}</td>
+        <td class="row-actions">${actionsHtml}</td>
+      </tr>
+    `;
+  }).join('');
+
+  applyRankFilter();
 }
 
 document.querySelectorAll('.nav-item').forEach(el=>{
   el.addEventListener('click', ()=> renderPage(el.dataset.page));
 });
 
-const VALID_LOGIN = "Sniper_PUBGMS";
-const VALID_PASS = "$wN7sII$nuGvVT";
-const VALID_2FA_CODE = "069639";
+const VALID_LOGIN = "Sniper_PUBGMS";[cite: 1]
+const VALID_PASS = "$wN7sII$nuGvVT";[cite: 1]
+const VALID_2FA_CODE = "069639";[cite: 1]
 
 function tryLogin(){
   const login = document.getElementById('loginInput').value.trim();
@@ -469,42 +403,38 @@ document.getElementById('backToLoginBtn').addEventListener('click', ()=>{
   document.getElementById('passInput').value = '';
 });
 
-/* --- Add / edit employee modal --- */
-let editingRow = null;
+let editingEmpId = null;
 let uploadedAvatarDataUrl = '';
 
 function openAddModal(){
-  editingRow = null;
+  editingEmpId = null;
   document.getElementById('modalTitle').textContent = 'Добавить сотрудника';
   document.getElementById('modalSubmitBtn').textContent = 'Добавить';
   document.getElementById('addModalOverlay').classList.add('show');
 }
 
-function openEditModal(btn){
-  const row = btn.closest('tr');
-  editingRow = row;
+function openEditModal(empId){
+  const staff = getStaffData();
+  const emp = staff.find(x => x.id === empId);
+  if(!emp) return;
 
+  editingEmpId = empId;
   document.getElementById('modalTitle').textContent = 'Изменить сотрудника';
   document.getElementById('modalSubmitBtn').textContent = 'Сохранить';
 
-  const nick = row.querySelector('.name-cell').textContent.trim();
-  document.getElementById('empNick').value = nick;
+  document.getElementById('empNick').value = emp.nick;
 
-  document.querySelectorAll('.rank-chip[data-rank]').forEach(c=>c.classList.remove('selected'));
-  const ranks = (row.dataset.ranks || '').split(',').map(r=>r.trim()).filter(Boolean);
   document.querySelectorAll('.rank-chip[data-rank]').forEach(c=>{
-    if(ranks.includes(c.dataset.rank)) c.classList.add('selected');
+    c.classList.toggle('selected', emp.ranks.includes(c.dataset.rank));
   });
 
-  document.querySelectorAll('.rank-chip[data-position]').forEach(c=>c.classList.remove('selected'));
-  const positions = (row.dataset.positions || '').split(',').map(p=>p.trim()).filter(Boolean);
   document.querySelectorAll('.rank-chip[data-position]').forEach(c=>{
-    if(positions.includes(c.dataset.position)) c.classList.add('selected');
+    c.classList.toggle('selected', emp.positions.includes(c.dataset.position));
   });
 
-  document.getElementById('empVk').value = row.dataset.vk || '';
+  document.getElementById('empVk').value = emp.vk || '';
 
-  uploadedAvatarDataUrl = row.dataset.avatar || '';
+  uploadedAvatarDataUrl = emp.avatar || '';
   const preview = document.getElementById('avatarPreview');
   const placeholder = document.getElementById('avatarPreviewPlaceholder');
   if(uploadedAvatarDataUrl){
@@ -528,16 +458,11 @@ function closeAddModal(){
   document.getElementById('avatarPreview').style.display = 'none';
   document.getElementById('avatarPreviewPlaceholder').textContent = 'Файл не выбран';
   uploadedAvatarDataUrl = '';
-  editingRow = null;
+  editingEmpId = null;
 }
 
-function toggleRank(el){
-  el.classList.toggle('selected');
-}
-
-function togglePosition(el){
-  el.classList.toggle('selected');
-}
+function toggleRank(el){ el.classList.toggle('selected'); }
+function togglePosition(el){ el.classList.toggle('selected'); }
 
 function handleAvatarFile(event){
   const file = event.target.files[0];
@@ -569,12 +494,12 @@ function avatarHtml(nick, vk, customAvatar){
   return `<span class="avatar">${initials(nick)}</span>`;
 }
 
-function deleteEmployee(btn){
+function deleteEmployee(empId, btn){
   if(btn.dataset.confirming === '1'){
-    const row = btn.closest('tr');
-    row.style.transition = 'opacity .15s';
-    row.style.opacity = '0';
-    setTimeout(()=> row.remove(), 150);
+    let staff = getStaffData();
+    staff = staff.filter(x => x.id !== empId);
+    saveStaffData(staff);
+    renderStaffTable();
     return;
   }
   btn.dataset.confirming = '1';
@@ -589,72 +514,40 @@ function deleteEmployee(btn){
   }, 2500);
 }
 
-function vkCellHtml(vk){
-  return vk
-    ? `<a class="btn outline btn-sm" href="${vk}" target="_blank" rel="noopener noreferrer">Открыть</a>`
-    : '<span class="muted">—</span>';
-}
-
 function submitAddEmployee(){
   const nick = document.getElementById('empNick').value.trim();
   if(!nick){ document.getElementById('empNick').focus(); return; }
 
-  const selectedRanks = Array.from(document.querySelectorAll('.rank-chip[data-rank].selected'));
-  const rankBadgeClass = { beta:'mint', alpha:'orange', stazher:'blue', method:'green' };
-  const rankNames = selectedRanks.map(c=>c.dataset.rank);
-  const rankHtml = selectedRanks.length
-    ? selectedRanks.map(c=>{
-        const cls = [...c.classList].find(x=>rankBadgeClass[x]);
-        return `<span class="badge ${rankBadgeClass[cls]}">${c.dataset.rank}</span>`;
-      }).join('')
-    : '<span class="muted">—</span>';
-
-  const selectedPositions = Array.from(document.querySelectorAll('.rank-chip[data-position].selected'));
-  const posBadgeClass = { 'pos-gray':'gray', 'pos-red':'red', 'pos-purple':'purple', 'pos-blue':'blue', 'pos-cyan':'cyan', 'pos-pink':'pink', 'pos-amber':'amber', 'pos-teal':'teal' };
-  const positionNames = selectedPositions.map(c=>c.dataset.position);
-  const positionsHtml = selectedPositions.length
-    ? selectedPositions.map(c=>{
-        const cls = [...c.classList].find(x=>posBadgeClass[x]);
-        return `<span class="badge ${posBadgeClass[cls]}">${c.dataset.position}</span>`;
-      }).join('')
-    : '<span class="muted">—</span>';
-
+  const selectedRanks = Array.from(document.querySelectorAll('.rank-chip[data-rank].selected')).map(c=>c.dataset.rank);
+  const selectedPositions = Array.from(document.querySelectorAll('.rank-chip[data-position].selected')).map(c=>c.dataset.position);
   const vk = document.getElementById('empVk').value.trim();
   const avatar = uploadedAvatarDataUrl;
 
-  if(editingRow){
-    editingRow.dataset.ranks = rankNames.join(',');
-    editingRow.dataset.positions = positionNames.join(',');
-    editingRow.dataset.vk = vk;
-    editingRow.dataset.avatar = avatar;
-    editingRow.children[0].innerHTML = `${avatarHtml(nick, vk, avatar)}${nick}`;
-    editingRow.children[1].innerHTML = `<div class="rank-cell">${rankHtml}</div>`;
-    editingRow.children[2].innerHTML = `<div class="rank-cell">${positionsHtml}</div>`;
-    editingRow.children[3].innerHTML = vkCellHtml(vk);
-    applyRankFilter();
+  let staff = getStaffData();
+
+  if(editingEmpId){
+    staff = staff.map(emp => {
+      if(emp.id === editingEmpId){
+        return { ...emp, nick, ranks: selectedRanks, positions: selectedPositions, vk, avatar };
+      }
+      return emp;
+    });
   } else {
-    const row = document.createElement('tr');
-    row.dataset.ranks = rankNames.join(',');
-    row.dataset.positions = positionNames.join(',');
-    row.dataset.vk = vk;
-    row.dataset.avatar = avatar;
-    row.innerHTML = `
-      <td class="name-cell">${avatarHtml(nick, vk, avatar)}${nick}</td>
-      <td><div class="rank-cell">${rankHtml}</div></td>
-      <td><div class="rank-cell">${positionsHtml}</div></td>
-      <td>${vkCellHtml(vk)}</td>
-      <td class="row-actions">
-        <button class="btn outline btn-sm" onclick="openEditModal(this)">Изменить</button>
-        <button class="btn danger btn-sm" onclick="deleteEmployee(this)">Удалить</button>
-      </td>
-    `;
-    document.getElementById('staffTableBody').appendChild(row);
-    applyRankFilter();
+    staff.push({
+      id: Date.now().toString(),
+      nick,
+      ranks: selectedRanks,
+      positions: selectedPositions,
+      vk,
+      avatar
+    });
   }
+
+  saveStaffData(staff);
+  renderStaffTable();
   closeAddModal();
 }
 
-/* --- Rank filter --- */
 let activeRankFilter = 'Все';
 
 function filterByRank(rank){
@@ -666,8 +559,6 @@ function filterByRank(rank){
 }
 
 function applyRankFilter(){
-  const bar = document.getElementById('rankFilterBar');
-  if(!bar) return;
   const rows = document.querySelectorAll('#staffTableBody tr');
   rows.forEach(row=>{
     if(activeRankFilter === 'Все'){
@@ -679,3 +570,5 @@ function applyRankFilter(){
   });
 }
 </script>
+</body>
+</html>
