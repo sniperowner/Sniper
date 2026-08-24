@@ -77,7 +77,7 @@
     .tabs { display: flex; gap: 8px; flex-wrap: wrap; }
     .tab { padding: .4rem .85rem; border-radius: 999px; border: 1px solid var(--border); background: var(--surface); font-size: .82rem; font-weight: 600; color: var(--text-dim); cursor: pointer; }
     .tab.active { background: var(--text); color: #fff; border-color: var(--text); }
-    
+
     .search-box { position: relative; min-width: 220px; }
     .search-box input { width: 100%; padding: 0.45rem 0.85rem 0.45rem 2.1rem; border-radius: 999px; border: 1px solid var(--border); background-color: var(--surface); color: var(--text); font-size: 0.85rem; outline: none; }
     .search-box input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
@@ -614,3 +614,342 @@
     });
 
     function updateTopbar(pageKey) {
+      const info = pageTitles[pageKey] || pageTitles["home"];
+      document.getElementById("pageTitle").textContent = info.title;
+      document.getElementById("pageSub").textContent = info.sub;
+    }
+
+    async function loadServerData() {
+      try {
+        const res = await fetch(`${WORKER_URL}/api/data`);
+        const data = await res.json();
+        staffData = data.staff || [];
+        coauthorsData = data.coauthors || [];
+        renderStaff();
+        renderCoauthors();
+      } catch (err) {}
+    }
+
+    function renderStaff() {
+      const list = document.getElementById("staffList");
+      list.innerHTML = "";
+
+      const searchQuery = (document.getElementById("staffSearchInput")?.value || "").toLowerCase().trim();
+
+      const filtered = staffData.filter(s => {
+        const matchFilter = currentFilter === "Все" || (s.ranks && s.ranks.includes(currentFilter));
+        const matchSearch = !searchQuery || (s.nick && s.nick.toLowerCase().includes(searchQuery));
+        return matchFilter && matchSearch;
+      });
+
+      const role = localStorage.getItem("ft_role") || "admin";
+      let permissions = JSON.parse(localStorage.getItem("ft_permissions") || "[]");
+      const canActions = role === "admin" || permissions.includes("staff_actions");
+      const canAdd = role === "admin" || permissions.includes("staff_add");
+
+      document.getElementById("staffActionsHeader").style.display = canActions ? "" : "none";
+      document.getElementById("staffFooterCard").style.display = canAdd ? "flex" : "none";
+
+      if (filtered.length === 0) {
+        list.innerHTML = `<tr><td colspan="5" style="text-align:center; color:var(--text-dim); padding: 30px;">Сотрудники не найдены</td></tr>`;
+        return;
+      }
+
+      filtered.forEach((s) => {
+        const originalIndex = staffData.indexOf(s);
+        const tr = document.createElement("tr");
+
+        let ranksHtml = "";
+        if (s.ranks && Array.isArray(s.ranks)) {
+          ranksHtml = s.ranks.map(r => `<span class="badge ${rankClass[r] || 'r-default'}">${r}</span>`).join(" ");
+        } else if (s.rank) {
+          ranksHtml = `<span class="badge ${rankClass[s.rank] || 'r-default'}">${s.rank}</span>`;
+        }
+
+        let rolesHtml = "";
+        if (s.roles && Array.isArray(s.roles)) {
+          rolesHtml = s.roles.map(roleName => `<span class="role-badge role-chip" data-value="${roleName}" style="display:inline-block">${roleName}</span>`).join(" ");
+        } else if (s.role) {
+          rolesHtml = `<span class="role-badge role-chip" data-value="${s.role}" style="display:inline-block">${s.role}</span>`;
+        }
+
+        const avatarSrc = s.avatar || "https://via.placeholder.com/32";
+
+        let actionsHtml = "";
+        if (canActions) {
+          actionsHtml = `
+            <div class="row-actions">
+              <button class="icon-btn warn" onclick="openEditStaff(${originalIndex})">Изм.</button>
+              <button class="icon-btn del" onclick="deleteStaff(${originalIndex})">Уд.</button>
+            </div>
+          `;
+        }
+
+        tr.innerHTML = `
+          <td>
+            <div class="player-cell">
+              <img src="${avatarSrc}" class="avatar" alt="">
+              <span class="player-name">${s.nick || ''}</span>
+            </div>
+          </td>
+          <td>${ranksHtml}</td>
+          <td>${rolesHtml}</td>
+          <td><a href="${s.vk || '#'}" target="_blank" class="vk-link">VK профиль</a></td>
+          <td style="display: ${canActions ? '' : 'none'};">${actionsHtml}</td>
+        `;
+        list.appendChild(tr);
+      });
+    }
+
+    document.querySelectorAll(".tab").forEach(tab => {
+      tab.addEventListener("click", () => {
+        document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+        tab.classList.add("active");
+        currentFilter = tab.dataset.filter;
+        renderStaff();
+      });
+    });
+
+    document.getElementById("staffSearchInput")?.addEventListener("input", () => {
+      renderStaff();
+    });
+
+    function renderCoauthors() {
+      const list = document.getElementById("coauthorsList");
+      list.innerHTML = "";
+
+      if (coauthorsData.length === 0) {
+        list.innerHTML = `<tr><td colspan="5" style="text-align:center; color:var(--text-dim); padding: 30px;">Нет соавторов</td></tr>`;
+        return;
+      }
+
+      coauthorsData.forEach((c, idx) => {
+        const tr = document.createElement("tr");
+        const statusClass = c.status === "blocked" ? "blocked" : "active";
+        const statusText = c.status === "blocked" ? "Заблокирован" : "Активен";
+
+        let perms = c.permissions || [];
+        let permsHtml = perms.map(p => `<code style="margin-right:4px;">${p}</code>`).join("");
+
+        tr.innerHTML = `
+          <td><b>${c.login}</b></td>
+          <td><span class="status-pill ${statusClass}">● ${statusText}</span></td>
+          <td>${permsHtml}</td>
+          <td><code>${c.password || '••••••'}</code></td>
+          <td>
+            <div class="row-actions">
+              <button class="icon-btn warn" onclick="openEditCoauthor(${idx})">Изменить</button>
+              <button class="icon-btn del" onclick="toggleBlockCoauthor(${idx})">${c.status === 'blocked' ? 'Разб.' : 'Блок'}</button>
+            </div>
+          </td>
+        `;
+        list.appendChild(tr);
+      });
+    }
+
+    document.getElementById("openAddModal").addEventListener("click", () => {
+      editIndex = null;
+      document.getElementById("modalTitle").textContent = "Добавить сотрудника";
+      document.getElementById("staffNick").value = "";
+      document.getElementById("staffVk").value = "";
+      document.getElementById("fileNameLabel").textContent = "Файл не выбран";
+      pendingAvatar = null;
+      document.querySelectorAll("#rankTags .tag-chip, #roleTags .tag-chip").forEach(el => el.classList.remove("active"));
+      document.getElementById("staffModalOverlay").classList.add("open");
+    });
+
+    document.getElementById("cancelModalBtn").addEventListener("click", closeModal);
+    document.getElementById("cancelModalBtn2").addEventListener("click", closeModal);
+
+    function closeModal() {
+      document.getElementById("staffModalOverlay").classList.remove("open");
+    }
+
+    function toggleTag(btn) {
+      btn.classList.toggle("active");
+    }
+
+    document.getElementById("staffAvatarFile").addEventListener("change", (e) => {
+      const file = e.target.files[0];
+      if (file) {
+        document.getElementById("fileNameLabel").textContent = file.name;
+        const reader = new FileReader();
+        reader.onload = function(uploadEvent) {
+          pendingAvatar = uploadEvent.target.result;
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+
+    document.getElementById("saveStaffBtn").addEventListener("click", async () => {
+      const nick = document.getElementById("staffNick").value.trim();
+      const vk = document.getElementById("staffVk").value.trim();
+
+      const ranks = [];
+      document.querySelectorAll("#rankTags .tag-chip.active").forEach(el => ranks.push(el.dataset.value));
+
+      const roles = [];
+      document.querySelectorAll("#roleTags .role-chip.active").forEach(el => roles.push(el.dataset.value));
+
+      if (!nick) {
+        alert("Введите ник сотрудника!");
+        return;
+      }
+
+      let avatar = pendingAvatar;
+      if (editIndex !== null && !avatar) {
+        avatar = staffData[editIndex].avatar;
+      }
+
+      const staffObj = { nick, ranks, roles, vk, avatar };
+
+      if (editIndex === null) {
+        staffData.push(staffObj);
+      } else {
+        staffData[editIndex] = staffObj;
+      }
+
+      await saveAllDataToBackend();
+      closeModal();
+      renderStaff();
+    });
+
+    function openEditStaff(idx) {
+      editIndex = idx;
+      const s = staffData[idx];
+      document.getElementById("modalTitle").textContent = "Изменить сотрудника";
+      document.getElementById("staffNick").value = s.nick || "";
+      document.getElementById("staffVk").value = s.vk || "";
+      document.getElementById("fileNameLabel").textContent = "Файл не выбран";
+      pendingAvatar = s.avatar || null;
+
+      document.querySelectorAll("#rankTags .tag-chip").forEach(el => {
+        if (s.ranks && s.ranks.includes(el.dataset.value)) {
+          el.classList.add("active");
+        } else {
+          el.classList.remove("active");
+        }
+      });
+
+      document.querySelectorAll("#roleTags .tag-chip").forEach(el => {
+        if (s.roles && s.roles.includes(el.dataset.value)) {
+          el.classList.add("active");
+        } else {
+          el.classList.remove("active");
+        }
+      });
+
+      document.getElementById("staffModalOverlay").classList.add("open");
+    }
+
+    async function deleteStaff(idx) {
+      if (confirm("Удалить сотрудника?")) {
+        staffData.splice(idx, 1);
+        await saveAllDataToBackend();
+        renderStaff();
+      }
+    }
+
+    document.getElementById("openAddCoauthorModal").addEventListener("click", () => {
+      document.getElementById("coauthorNick").value = "";
+      document.querySelectorAll("#accessChips .chip").forEach(c => c.classList.remove("selected"));
+      document.getElementById("newCredsResult").style.display = "none";
+      document.getElementById("coauthorModalOverlay").classList.add("open");
+    });
+
+    document.getElementById("cancelCoauthorBtn").addEventListener("click", () => {
+      document.getElementById("coauthorModalOverlay").classList.remove("open");
+    });
+
+    document.getElementById("saveCoauthorBtn").addEventListener("click", async () => {
+      const login = document.getElementById("coauthorNick").value.trim();
+      if (!login) {
+        alert("Введите логин соавтора!");
+        return;
+      }
+
+      const permissions = [];
+      document.querySelectorAll("#accessChips .chip.selected").forEach(c => permissions.push(c.dataset.value));
+
+      const password = Math.random().toString(36.slice(-8));
+
+      coauthorsData.push({ login, password, permissions, status: "active" });
+      await saveAllDataToBackend();
+
+      const resBox = document.getElementById("newCredsResult");
+      resBox.style.display = "block";
+      resBox.className = "creds-box";
+      resBox.innerHTML = `Соавтор создан!<br>Логин: <code>${login}</code><br>Пароль: <code>${password}</code>`;
+      renderCoauthors();
+    });
+
+    function openEditCoauthor(idx) {
+      editCoauthorIdx = idx;
+      const c = coauthorsData[idx];
+      document.getElementById("editCoauthorNick").value = c.login;
+      document.getElementById("editCoauthorPassword").value = "";
+
+      document.querySelectorAll("#editAccessChips .chip").forEach(chip => {
+        if (c.permissions && c.permissions.includes(chip.dataset.value)) {
+          chip.classList.add("selected");
+        } else {
+          chip.classList.remove("selected");
+        }
+      });
+
+      document.getElementById("editCoauthorModalOverlay").classList.add("open");
+    }
+
+    function toggleEditChip(chip) {
+      chip.classList.toggle("selected");
+      saveEditCoauthorPermissionsInstant();
+    }
+
+    async function saveEditCoauthorPermissionsInstant() {
+      if (editCoauthorIdx === null) return;
+      const permissions = [];
+      document.querySelectorAll("#editAccessChips .chip.selected").forEach(c => permissions.push(c.dataset.value));
+      coauthorsData[editCoauthorIdx].permissions = permissions;
+      await saveAllDataToBackend();
+    }
+
+    document.getElementById("cancelEditCoauthorBtn").addEventListener("click", () => {
+      document.getElementById("editCoauthorModalOverlay").classList.remove("open");
+    });
+
+    document.getElementById("saveEditCoauthorBtn").addEventListener("click", async () => {
+      if (editCoauthorIdx === null) return;
+      const login = document.getElementById("editCoauthorNick").value.trim();
+      const pwd = document.getElementById("editCoauthorPassword").value.trim();
+
+      if (login) coauthorsData[editCoauthorIdx].login = login;
+      if (pwd) coauthorsData[editCoauthorIdx].password = pwd;
+
+      const permissions = [];
+      document.querySelectorAll("#editAccessChips .chip.selected").forEach(c => permissions.push(c.dataset.value));
+      coauthorsData[editCoauthorIdx].permissions = permissions;
+
+      await saveAllDataToBackend();
+      document.getElementById("editCoauthorModalOverlay").classList.remove("open");
+      renderCoauthors();
+    });
+
+    async function toggleBlockCoauthor(idx) {
+      const c = coauthorsData[idx];
+      c.status = c.status === "blocked" ? "active" : "blocked";
+      await saveAllDataToBackend();
+      renderCoauthors();
+    }
+
+    async function saveAllDataToBackend() {
+      try {
+        await fetch(`${WORKER_URL}/api/update`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ staff: staffData, coauthors: coauthorsData })
+        });
+      } catch (e) {}
+    }
+  </script>
+</body>
+</html>
