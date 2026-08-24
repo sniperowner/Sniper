@@ -431,17 +431,17 @@
           <input type="text" id="editCoauthorPassword" placeholder="Оставьте пустым для сохранения старого">
         </div>
         <div class="form-group">
-          <label>Доступные разделы</label>
+          <label>Доступные разделы (изменяются мгновенно)</label>
           <div class="chip-group" id="editAccessChips">
-            <div class="chip" data-value="staff">Сотрудники</div>
-            <div class="chip" data-value="hydes">Хайды</div>
-            <div class="chip" data-value="access">Доступ</div>
-            <div class="chip" data-value="payments">Мои выплаты</div>
+            <div class="chip" data-value="staff" onclick="toggleEditChip(this)">Сотрудники</div>
+            <div class="chip" data-value="hydes" onclick="toggleEditChip(this)">Хайды</div>
+            <div class="chip" data-value="access" onclick="toggleEditChip(this)">Доступ</div>
+            <div class="chip" data-value="payments" onclick="toggleEditChip(this)">Мои выплаты</div>
           </div>
         </div>
       </div>
       <div class="modal-foot">
-        <button class="btn" style="background:var(--surface);color:var(--text);border:1px solid var(--border);" id="cancelEditCoauthorBtn">Отмена</button>
+        <button class="btn" style="background:var(--surface);color:var(--text);border:1px solid var(--border);" id="cancelEditCoauthorBtn">Закрыть</button>
         <button class="btn" id="saveEditCoauthorBtn">Сохранить изменения</button>
       </div>
     </div>
@@ -646,7 +646,6 @@
 
         const ranksHtml = ranks.map(r => `<span class="badge ${rankClass[r] || 'r-default'}">${r}</span>`).join(' ');
         
-        // Рендерим должности в виде цветных бейджей с применением тех же стилей/цветов
         const positionsHtml = positions.length > 0 
           ? positions.map(p => `<span class="role-badge role-chip" data-value="${p}">${p}</span>`).join(' ') 
           : '—';
@@ -741,7 +740,6 @@
       });
     }
     bindChips(document.getElementById("accessChips"));
-    bindChips(document.getElementById("editAccessChips"));
 
     function setSelected(container, values) {
       container.querySelectorAll(".chip").forEach(c => c.classList.toggle("selected", values.includes(c.dataset.value)));
@@ -861,11 +859,20 @@
       editCoauthorModal.classList.add("open");
     };
 
+    // Мгновенное обновление прав при клике на чип в модалке редактирования
+    window.toggleEditChip = async function(chip) {
+      chip.classList.toggle("selected");
+      if (editCoauthorIdx !== null && coauthorsData[editCoauthorIdx]) {
+        const newPerms = getSelected(document.getElementById("editAccessChips"));
+        coauthorsData[editCoauthorIdx].permissions = newPerms;
+        await saveServerData();
+      }
+    };
+
     document.getElementById("saveEditCoauthorBtn").addEventListener("click", async () => {
       if (editCoauthorIdx === null) return;
       const newLogin = document.getElementById("editCoauthorNick").value.trim();
       const newPass = document.getElementById("editCoauthorPassword").value.trim();
-      const newPerms = getSelected(document.getElementById("editAccessChips"));
 
       if (!newLogin) return alert("Логин не может быть пустым");
 
@@ -873,7 +880,7 @@
       if (newPass) {
         coauthorsData[editCoauthorIdx].password = newPass;
       }
-      coauthorsData[editCoauthorIdx].permissions = newPerms;
+      coauthorsData[editCoauthorIdx].permissions = getSelected(document.getElementById("editAccessChips"));
 
       await saveServerData();
       editCoauthorModal.classList.remove("open");
