@@ -20,6 +20,8 @@
       --accent-soft: #EEF0FF;
       --danger: #DC2626;
       --danger-soft: #FEF2F2;
+      --warning: #D97706;
+      --warning-soft: #FFFBEB;
       --radius: 10px;
       --shadow-sm: 0 1px 2px rgba(16, 24, 40, .04);
       --shadow-md: 0 12px 30px rgba(16, 24, 40, .10);
@@ -90,9 +92,16 @@
     .r-stazher { background: #EFF6FF; color: #2563EB; }
     .r-metod { background: #F3E8FF; color: #7C3AED; }
     .r-default { background: #F3F4F6; color: #6B7280; }
+    
+    .badge-status { display: inline-block; padding: .2rem .5rem; border-radius: 5px; font-size: .72rem; font-weight: 700; margin-left: 6px; }
+    .status-active { background: #ECFDF5; color: #059669; }
+    .status-archived { background: var(--warning-soft); color: var(--warning); }
+    .status-deleted { background: var(--danger-soft); color: var(--danger); }
+
     .vk-link { color: var(--accent); text-decoration: none; font-weight: 600; }
     .row-actions { display: flex; gap: 6px; }
     .icon-btn { padding: .4rem .7rem; font-size: .78rem; font-weight: 600; border-radius: 7px; border: 1px solid var(--border); background: var(--surface); cursor: pointer; }
+    .icon-btn.warn { color: var(--warning); border-color: #FDE68A; }
     .icon-btn.del { color: var(--danger); border-color: #FBD5D5; }
     .card-footer { padding: 16px 20px; background: var(--bg); display: flex; justify-content: space-between; align-items: center; }
     .add-btn { display: inline-flex; align-items: center; gap: 6px; padding: .6rem 1rem; background: var(--text); color: #fff; border: none; border-radius: 8px; font-size: .86rem; font-weight: 700; cursor: pointer; }
@@ -265,7 +274,7 @@
     </div>
   </div>
 
-  <!-- Модалка: Добавление/Редактирование сотрудника (исходный дизайн полей) -->
+  <!-- Модалка: Добавление/Редактирование сотрудника -->
   <div class="modal-overlay" id="staffModalOverlay">
     <div class="modal">
       <div class="modal-head">
@@ -596,7 +605,7 @@
 
       const password = Math.random().toString(36).slice(-6) + Math.floor(Math.random() * 899 + 100);
 
-      coauthorsData.push({ login: nick, password, permissions });
+      coauthorsData.push({ login: nick, password, permissions, status: "active" });
       await saveServerData();
 
       document.getElementById("newCredsResult").innerHTML = `
@@ -610,9 +619,16 @@
       document.getElementById("newCredsResult").style.display = "block";
     });
 
+    window.archiveCoauthor = (idx) => {
+      if (confirm("Отправить соавтора в архив? Аккаунт будет заблокирован.")) {
+        coauthorsData[idx].status = "archived";
+        saveServerData();
+      }
+    };
+
     window.deleteCoauthor = (idx) => {
-      if (confirm("Удалить соавтора?")) {
-        coauthorsData.splice(idx, 1);
+      if (confirm("Удалить соавтора? Человек больше не сможет войти.")) {
+        coauthorsData[idx].status = "deleted";
         saveServerData();
       }
     };
@@ -665,18 +681,30 @@
         "payments": "Мои выплаты"
       };
 
-      list.innerHTML = coauthorsData.map((item, idx) => `
-        <tr>
-          <td><strong>${item.login}</strong></td>
-          <td>${(item.permissions || []).map(p => permLabels[p] || p).join(", ") || "<span style='color:var(--text-faint)'>Нет доступа</span>"}</td>
-          <td><code>••••••••</code></td>
-          <td>
-            <div class="row-actions">
-              <button class="icon-btn del" onclick="deleteCoauthor(${idx})">Удалить</button>
-            </div>
-          </td>
-        </tr>
-      `).join("");
+      list.innerHTML = coauthorsData.map((item, idx) => {
+        let statusBadge = "";
+        if (item.status === "archived") {
+          statusBadge = `<span class="badge-status status-archived">В архиве</span>`;
+        } else if (item.status === "deleted") {
+          statusBadge = `<span class="badge-status status-deleted">Удален</span>`;
+        } else {
+          statusBadge = `<span class="badge-status status-active">Активен</span>`;
+        }
+
+        return `
+          <tr>
+            <td><strong>${item.login}</strong> ${statusBadge}</td>
+            <td>${(item.permissions || []).map(p => permLabels[p] || p).join(", ") || "<span style='color:var(--text-faint)'>Нет доступа</span>"}</td>
+            <td><code>••••••••</code></td>
+            <td>
+              <div class="row-actions">
+                ${item.status !== 'archived' ? `<button class="icon-btn warn" onclick="archiveCoauthor(${idx})">Архив</button>` : ''}
+                ${item.status !== 'deleted' ? `<button class="icon-btn del" onclick="deleteCoauthor(${idx})">Удалить</button>` : ''}
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join("");
     }
 
     // Переключение табов фильтра сотрудников
