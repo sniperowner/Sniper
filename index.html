@@ -349,12 +349,46 @@
     </div>
   </div>
 
+  <!-- Модалка: Редактирование соавтора -->
+  <div class="modal-overlay" id="editCoauthorModalOverlay">
+    <div class="modal">
+      <div class="modal-head">
+        <h3>Изменить соавтора</h3>
+        <p>Обновите логин, пароль или доступы соавтора.</p>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label>Логин / Ник соавтора</label>
+          <input type="text" id="editCoauthorNick">
+        </div>
+        <div class="form-group">
+          <label>Новый пароль (оставьте пустым, если не нужно менять)</label>
+          <input type="text" id="editCoauthorPassword" placeholder="Оставьте пустым для сохранения старого">
+        </div>
+        <div class="form-group">
+          <label>Доступные разделы</label>
+          <div class="chip-group" id="editAccessChips">
+            <div class="chip" data-value="staff">Сотрудники</div>
+            <div class="chip" data-value="hydes">Хайды</div>
+            <div class="chip" data-value="access">Доступ</div>
+            <div class="chip" data-value="payments">Мои выплаты</div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-foot">
+        <button class="btn" style="background:var(--surface);color:var(--text);border:1px solid var(--border);" id="cancelEditCoauthorBtn">Отмена</button>
+        <button class="btn" id="saveEditCoauthorBtn">Сохранить изменения</button>
+      </div>
+    </div>
+  </div>
+
   <script>
     const WORKER_URL = "https://shy-wood-231f.potapovsasko.workers.dev";
     let staffData = [];
     let coauthorsData = [];
     let currentFilter = "Все";
     let editIndex = null;
+    let editCoauthorIdx = null;
     let pendingAvatar = null;
 
     const rankClass = {
@@ -521,6 +555,7 @@
       });
     }
     bindChips(document.getElementById("accessChips"));
+    bindChips(document.getElementById("editAccessChips"));
 
     function setSelected(container, values) {
       container.querySelectorAll(".chip").forEach(c => c.classList.toggle("selected", values.includes(c.dataset.value)));
@@ -619,6 +654,36 @@
       document.getElementById("newCredsResult").style.display = "block";
     });
 
+    // Обработчики модального окна редактирования соавтора
+    const editCoauthorModal = document.getElementById("editCoauthorModalOverlay");
+    document.getElementById("cancelEditCoauthorBtn").addEventListener("click", () => editCoauthorModal.classList.remove("open"));
+
+    window.editCoauthor = (idx) => {
+      editCoauthorIdx = idx;
+      const item = coauthorsData[idx];
+      document.getElementById("editCoauthorNick").value = item.login;
+      document.getElementById("editCoauthorPassword").value = "";
+      setSelected(document.getElementById("editAccessChips"), item.permissions || []);
+      editCoauthorModal.classList.add("open");
+    };
+
+    document.getElementById("saveEditCoauthorBtn").addEventListener("click", () => {
+      const newLogin = document.getElementById("editCoauthorNick").value.trim();
+      const newPassword = document.getElementById("editCoauthorPassword").value.trim();
+      const newPermissions = getSelected(document.getElementById("editAccessChips"));
+
+      if (!newLogin) return alert("Логин не может быть пустым");
+
+      coauthorsData[editCoauthorIdx].login = newLogin;
+      if (newPassword) {
+        coauthorsData[editCoauthorIdx].password = newPassword;
+      }
+      coauthorsData[editCoauthorIdx].permissions = newPermissions;
+
+      saveServerData();
+      editCoauthorModal.classList.remove("open");
+    });
+
     window.archiveCoauthor = (idx) => {
       if (confirm("Отправить соавтора в архив? Аккаунт будет заблокирован.")) {
         coauthorsData[idx].status = "archived";
@@ -698,6 +763,7 @@
             <td><code>••••••••</code></td>
             <td>
               <div class="row-actions">
+                <button class="icon-btn" onclick="editCoauthor(${idx})">Изменить</button>
                 ${item.status !== 'archived' ? `<button class="icon-btn warn" onclick="archiveCoauthor(${idx})">Архив</button>` : ''}
                 ${item.status !== 'deleted' ? `<button class="icon-btn del" onclick="deleteCoauthor(${idx})">Удалить</button>` : ''}
               </div>
