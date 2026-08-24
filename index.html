@@ -1,549 +1,389 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>FT Owner</title>
-<style>
-:root {
-  --bg: #f6f7f9;
-  --panel: #ffffff;
-  --border: #e6e7eb;
-  --ink: #16181d;
-  --ink-soft: #6b7280;
-  --blue: #2f6fed;
-  --blue-soft: #eaf1ff;
-  --green: #16a34a;
-  --green-soft: #e9f9ee;
-  --red: #dc2626;
-  --red-soft: #fdecec;
-  --purple: #7c3aed;
-  --purple-soft: #f2ebfe;
-  --gray-soft: #f0f1f3;
-  --radius: 10px;
-  --font-display: 'Manrope', 'Segoe UI', sans-serif;
-  --font-body: 'Inter', 'Segoe UI', sans-serif;
-}
-*{box-sizing:border-box;}
-body{margin:0;font-family:var(--font-body);background:var(--bg);color:var(--ink);}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FT Owner — Управление составом</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
 
-.screen{display:none;width:100vw;height:100vh;align-items:center;justify-content:center;background:var(--bg);}
-.screen.active{display:flex;}
+        body {
+            background-color: #0f172a;
+            color: #f8fafc;
+            min-height: 100vh;
+        }
 
-.auth-card{background:var(--panel);border:1px solid var(--border);border-radius:16px;padding:32px;width:100%;max-width:380px;box-shadow:0 10px 25px rgba(0,0,0,0.04);text-align:center;}
-.auth-title{font-family:var(--font-display);font-size:22px;font-weight:800;margin-bottom:6px;}
-.auth-sub{font-size:13px;color:var(--ink-soft);margin-bottom:20px;}
-.error-msg{color:var(--red);font-size:12px;margin-top:12px;display:none;}
-.error-msg.show{display:block;}
+        /* --- Авторизация --- */
+        #authSection {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
 
-.app-container{display:none;width:100vw;height:100vh;overflow:hidden;}
-.app-container.active{display:flex;}
+        .login-card {
+            background: #1e293b;
+            padding: 2.5rem;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+            width: 100%;
+            max-width: 400px;
+            border: 1px solid #334155;
+        }
 
-.sidebar{width:230px;flex-shrink:0;background:var(--panel);border-right:1px solid var(--border);padding:18px 14px;display:flex;flex-direction:column;}
-.brand{display:flex;align-items:center;gap:8px;padding:4px 6px 18px 6px;font-family:var(--font-display);font-weight:800;font-size:16px;}
-.brand .dot{width:20px;height:20px;border-radius:6px;background:var(--blue);display:inline-block;}
-.nav-label{font-size:11px;letter-spacing:.06em;color:#a7abb4;font-weight:700;margin:10px 8px 6px;text-transform:uppercase;}
-.nav-item{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:8px;font-size:14px;font-weight:600;color:#4b4f58;cursor:pointer;margin-bottom:2px;transition:.12s;}
-.nav-item:hover{background:var(--gray-soft);}
-.nav-item.active{background:var(--blue-soft);color:var(--blue);}
+        .login-card h2 {
+            margin-bottom: 1.5rem;
+            text-align: center;
+            color: #38bdf8;
+        }
 
-.main-content{flex:1;overflow-y:auto;padding:28px 36px;}
-.page-title{font-family:var(--font-display);font-size:24px;font-weight:800;margin-bottom:4px;}
-.page-sub{font-size:13px;color:var(--ink-soft);margin-bottom:20px;}
+        .form-group {
+            margin-bottom: 1.2rem;
+        }
 
-.card{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:18px;margin-bottom:16px;}
-.grid{display:grid;gap:16px;}
-.grid-2{grid-template-columns:1fr 1fr;}
-.grid-3{grid-template-columns:1fr 1fr 1fr;}
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+            color: #94a3b8;
+        }
 
-table{width:100%;border-collapse:collapse;font-size:13px;}
-th,td{padding:10px 12px;text-align:left;border-bottom:1px solid var(--border);}
-th{font-weight:700;color:var(--ink-soft);font-size:11px;text-transform:uppercase;letter-spacing:.04em;background:#fafafa;}
-tr:last-child td{border-bottom:none;}
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 0.75rem;
+            border-radius: 6px;
+            border: 1px solid #334155;
+            background-color: #0f172a;
+            color: #fff;
+            font-size: 1rem;
+            outline: none;
+        }
 
-.badge{display:inline-flex;align-items:center;padding:3px 8px;border-radius:6px;font-size:11px;font-weight:700;}
-.badge.green{background:var(--green-soft);color:var(--green);}
-.badge.blue{background:var(--blue-soft);color:var(--blue);}
-.badge.purple{background:var(--purple-soft);color:var(--purple);}
-.badge.red{background:var(--red-soft);color:var(--red);}
-.badge.gray{background:var(--gray-soft);color:var(--ink-soft);}
-.badge.orange{background:#fff3e0;color:#e65100;}
-.badge.mint{background:#e0f2f1;color:#00695c;}
-.badge.cyan{background:#e0f7fa;color:#00838f;}
-.badge.pink{background:#fce4ec;color:#c2185b;}
-.badge.amber{background:#fff8e1;color:#ff8f00;}
-.badge.teal{background:#e0f2f1;color:#004d40;}
+        .form-group input:focus, .form-group select:focus {
+            border-color: #38bdf8;
+        }
 
-.btn{display:inline-flex;align-items:center;justify-content:center;padding:8px 14px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;border:none;outline:none;transition:.12s;gap:6px;}
-.btn.dark{background:var(--ink);color:#fff;}
-.btn.dark:hover{background:#2d3139;}
-.btn.outline{background:transparent;border:1px solid var(--border);color:var(--ink);}
-.btn.outline:hover{background:var(--gray-soft);}
-.btn.danger{background:var(--red-soft);color:var(--red);}
-.btn.danger:hover{background:#f8d7d7;}
-.btn.danger.confirming{background:var(--red);color:#fff;}
-.btn-sm{padding:4px 8px;font-size:11px;border-radius:6px;}
+        .btn {
+            width: 100%;
+            padding: 0.75rem;
+            background-color: #0284c7;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
 
-.rank-filter-bar{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;}
-.rank-filter-chip{padding:5px 12px;border-radius:20px;font-size:12px;font-weight:600;background:var(--panel);border:1px solid var(--border);cursor:pointer;transition:.12s;}
-.rank-filter-chip.selected{background:var(--ink);color:#fff;border-color:var(--ink);}
+        .btn:hover { background-color: #0369a1; }
+        .btn:disabled { background-color: #475569; cursor: not-allowed; }
+        .btn-danger { background-color: #ef4444; }
+        .btn-danger:hover { background-color: #dc2626; }
 
-.avatar{width:28px;height:28px;border-radius:50%;object-fit:cover;display:inline-block;vertical-align:middle;background:var(--blue-soft);color:var(--blue);font-weight:700;font-size:11px;line-height:28px;text-align:center;}
-.name-cell{display:flex;align-items:center;gap:10px;font-weight:600;}
-.rank-cell{display:flex;gap:4px;flex-wrap:wrap;}
-.row-actions{text-align:right;white-space:nowrap;}
+        .status-msg {
+            margin-top: 1rem;
+            text-align: center;
+            font-size: 0.9rem;
+            min-height: 1.2em;
+        }
+        .status-msg.error { color: #f87171; }
+        .status-msg.success { color: #4ade80; }
+        .status-msg.info { color: #38bdf8; }
 
-.modal-overlay{display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.4);align-items:center;justify-content:center;z-index:1000;}
-.modal-overlay.show{display:flex;}
-.modal{background:var(--panel);border-radius:14px;padding:24px;width:100%;max-width:440px;box-shadow:0 20px 40px rgba(0,0,0,0.15);}
-.modal-title{font-family:var(--font-display);font-size:18px;font-weight:800;margin-bottom:16px;}
-.rank-selector{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;}
-.rank-chip{padding:6px 10px;border-radius:6px;font-size:12px;font-weight:600;border:1px solid var(--border);background:var(--bg);cursor:pointer;}
-.rank-chip.selected{background:var(--blue);color:#fff;border-color:var(--blue);}
-.stat-num{font-family:var(--font-display);font-size:22px;font-weight:800;color:var(--ink);}
-.stat-label{font-size:12px;color:var(--ink-soft);margin-top:2px;}
-.form-group{margin-bottom:16px;text-align:left;}
-.form-group label{display:block;font-size:12px;font-weight:700;color:var(--ink-soft);margin-bottom:6px;text-transform:uppercase;letter-spacing:.03em;}
-.form-input{width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:8px;font-size:14px;outline:none;transition:.15s;}
-.form-input:focus{border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-soft);}
-</style>
+        /* --- Дашборд --- */
+        #dashboardSection {
+            display: none;
+            padding: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #334155;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 2rem;
+        }
+
+        .panel {
+            background: #1e293b;
+            padding: 1.5rem;
+            border-radius: 8px;
+            border: 1px solid #334155;
+            height: fit-content;
+        }
+
+        .panel h3 {
+            margin-bottom: 1rem;
+            color: #38bdf8;
+        }
+
+        .staff-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+
+        .staff-table th, .staff-table td {
+            padding: 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid #334155;
+        }
+
+        .staff-table th {
+            background-color: #0f172a;
+            color: #94a3b8;
+        }
+
+        .avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 4px;
+            vertical-align: middle;
+            margin-right: 8px;
+        }
+
+        .badge {
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+
+        .badge-admin { background: #7c3aed; color: #fff; }
+        .badge-mod { background: #059669; color: #fff; }
+        .badge-intern { background: #d97706; color: #fff; }
+    </style>
 </head>
 <body>
 
-<div class="screen active" id="loginScreen">
-  <div class="auth-card">
-    <div class="auth-title">Вход в панель</div>
-    <div class="auth-sub">Авторизуйтесь для доступа к FT Owner</div>
-    
-    <button type="button" class="btn dark" style="width:100%;padding:12px 16px;margin-bottom:16px;font-size:14px;" onclick="directLogin()">
-      Быстрый вход (Снупер)
-    </button>
-
-    <div style="font-size:12px;color:var(--ink-soft);margin-bottom:12px;">или через Telegram Widget:</div>
-
-    <script async src="https://telegram.org/js/telegram-widget.js?22&v=5" 
-            data-telegram-login="owner_funtime_bot" 
-            data-size="large" 
-            data-onauth="onTelegramAuth(user)" 
-            data-request-access="write"></script>
-
-    <div class="error-msg" id="loginError">Доступ запрещён: ваш Telegram ID не найден в белом списке</div>
-  </div>
-</div>
-
-<div class="app-container" id="appScreen">
-  <div class="sidebar">
-    <div class="brand">
-      <span class="dot"></span>
-      <span>FT Owner</span>
+    <!-- СЕКЦИЯ АВТОРИЗАЦИИ -->
+    <div id="authSection">
+        <div class="login-card">
+            <h2>FT Owner Admin</h2>
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="username">Логин</label>
+                    <input type="text" id="username" required autocomplete="off">
+                </div>
+                <div class="form-group">
+                    <label for="password">Пароль</label>
+                    <input type="password" id="password" required>
+                </div>
+                <button type="submit" id="submitBtn" class="btn">Войти</button>
+            </form>
+            <div id="statusMsg" class="status-msg"></div>
+        </div>
     </div>
-    <div class="nav-label">Разделы</div>
-    <div class="nav-item active" data-page="main">Главная</div>
-    <div class="nav-item" data-page="staff">Сотрудники</div>
-    <div class="nav-item" data-page="hides">Хайды</div>
-    <div class="nav-item" data-page="access">Доступ</div>
-    <div class="nav-item" data-page="payouts">Мои выплаты</div>
-    <div style="margin-top:auto;padding-top:10px;">
-      <button type="button" class="btn outline" style="width:100%;" id="logoutBtn">Выйти</button>
+
+    <!-- СЕКЦИЯ ДАШБОРДА -->
+    <div id="dashboardSection">
+        <header>
+            <h1>FT Owner — Управление составом</h1>
+            <button id="logoutBtn" class="btn btn-danger" style="width: auto; padding: 0.5rem 1rem;">Выйти</button>
+        </header>
+
+        <div class="dashboard-grid">
+            <!-- Панель добавления сотрудников -->
+            <div class="panel">
+                <h3>Добавить сотрудника</h3>
+                <form id="addStaffForm">
+                    <div class="form-group">
+                        <label>Никнейм Minecraft</label>
+                        <input type="text" id="staffNick" required placeholder="Player">
+                    </div>
+                    <div class="form-group">
+                        <label>Должность</label>
+                        <select id="staffRank">
+                            <option value="Стажёр">Стажёр</option>
+                            <option value="Модератор">Модератор</option>
+                            <option value="Администратор">Администратор</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Telegram ID / Юзернейм</label>
+                        <input type="text" id="staffTg" placeholder="@username">
+                    </div>
+                    <button type="submit" class="btn">Добавить</button>
+                </form>
+            </div>
+
+            <!-- Список сотрудников -->
+            <div class="panel">
+                <h3>Состав персонала</h3>
+                <table class="staff-table">
+                    <thead>
+                        <tr>
+                            <th>Игрок</th>
+                            <th>Должность</th>
+                            <th>Telegram</th>
+                            <th>Действие</th>
+                        </tr>
+                    </thead>
+                    <tbody id="staffList">
+                        <!-- Список рендерится через JS -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
-  </div>
-  <div class="main-content" id="content"></div>
-</div>
 
-<div class="modal-overlay" id="addModalOverlay">
-  <div class="modal">
-    <div class="modal-title" id="modalTitle">Добавить сотрудника</div>
-    <div class="form-group">
-      <label>Имя / Никнейм</label>
-      <input type="text" class="form-input" id="empNick" placeholder="Например: Иван Иванов">
-    </div>
-    <div class="form-group">
-      <label>Ранги</label>
-      <div class="rank-selector">
-        <div class="rank-chip" data-rank="Бета" onclick="toggleRank(this)">Бета</div>
-        <div class="rank-chip" data-rank="Альфа" onclick="toggleRank(this)">Альфа</div>
-        <div class="rank-chip" data-rank="Стажер" onclick="toggleRank(this)">Стажер</div>
-        <div class="rank-chip" data-rank="Метод" onclick="toggleRank(this)">Метод</div>
-      </div>
-    </div>
-    <div class="form-group">
-      <label>Должности</label>
-      <div class="rank-selector">
-        <div class="rank-chip" data-position="Обычный сотрудник" onclick="togglePosition(this)">Обычный сотрудник</div>
-        <div class="rank-chip" data-position="Руководитель Активной модерации" onclick="togglePosition(this)">Руководитель Активной модерации</div>
-        <div class="rank-chip" data-position="Руководитель медиа" onclick="togglePosition(this)">Руководитель медиа</div>
-        <div class="rank-chip" data-position="Руководитель репортов" onclick="togglePosition(this)">Руководитель репортов</div>
-        <div class="rank-chip" data-position="Заместитель репортов" onclick="togglePosition(this)">Заместитель репортов</div>
-        <div class="rank-chip" data-position="Заместитель Активной модерации" onclick="togglePosition(this)">Заместитель Активной модерации</div>
-        <div class="rank-chip" data-position="Руководитель ОМЧ" onclick="togglePosition(this)">Руководитель ОМЧ</div>
-        <div class="rank-chip" data-position="Заместитель ОМЧ" onclick="togglePosition(this)">Заместитель ОМЧ</div>
-      </div>
-    </div>
-    <div class="form-group">
-      <label>Ссылка VK (необязательно)</label>
-      <input type="text" class="form-input" id="empVk" placeholder="https://vk.com/id...">
-    </div>
-    <div class="form-group">
-      <label>Аватарка (необязательно)</label>
-      <input type="file" id="empAvatarFile" accept="image/*" onchange="handleAvatarFile(event)" style="display:none;">
-      <div style="display:flex;align-items:center;gap:10px;">
-        <button type="button" class="btn outline btn-sm" onclick="document.getElementById('empAvatarFile').click()">Выбрать файл</button>
-        <span id="avatarPreviewPlaceholder" style="font-size:12px;color:var(--ink-soft);">Файл не выбран</span>
-        <img id="avatarPreview" alt="Preview" style="width:32px;height:32px;border-radius:50%;object-fit:cover;display:none;">
-      </div>
-    </div>
-    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:20px;">
-      <button type="button" class="btn outline" onclick="closeAddModal()">Отмена</button>
-      <button type="button" class="btn dark" id="modalSubmitBtn" onclick="submitAddEmployee()">Добавить</button>
-    </div>
-  </div>
-</div>
+    <script>
+        const WORKER_URL = "https://shy-wood-231f.potapovsasko.workers.dev";
 
-<script>
-const ALLOWED_TELEGRAM_IDS = [1118299071];
+        const authSection = document.getElementById("authSection");
+        const dashboardSection = document.getElementById("dashboardSection");
+        const loginForm = document.getElementById("loginForm");
+        const submitBtn = document.getElementById("submitBtn");
+        const statusMsg = document.getElementById("statusMsg");
+        const logoutBtn = document.getElementById("logoutBtn");
 
-function directLogin() {
-  const adminUser = { id: 1118299071, first_name: "Снупер", username: "SNYPER_UA" };
-  localStorage.setItem('ft_owner_tg_user', JSON.stringify(adminUser));
-  showAppScreen();
-}
+        const addStaffForm = document.getElementById("addStaffForm");
+        const staffList = document.getElementById("staffList");
 
-window.onTelegramAuth = function(user) {
-  const err = document.getElementById('loginError');
-  if (user && ALLOWED_TELEGRAM_IDS.includes(Number(user.id))) {
-    err.classList.remove('show');
-    localStorage.setItem('ft_owner_tg_user', JSON.stringify(user));
-    showAppScreen();
-  } else {
-    err.classList.add('show');
-  }
-};
+        let staffData = JSON.parse(localStorage.getItem("ft_staff_data")) || [
+            { nick: "snyper", rank: "Администратор", tg: "@snyper" }
+        ];
 
-function escapeHtml(str) {
-  if (!str) return '';
-  return String(str).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
-}
+        // Проверка авторизации при загрузке
+        if (localStorage.getItem("ft_authenticated") === "true") {
+            showDashboard();
+        }
 
-function checkTgSession() {
-  const storedUser = localStorage.getItem('ft_owner_tg_user');
-  if (storedUser) {
-    try {
-      const user = JSON.parse(storedUser);
-      if (ALLOWED_TELEGRAM_IDS.includes(Number(user.id))) {
-        showAppScreen();
-        return;
-      }
-    } catch {}
-  }
-  document.getElementById('appScreen').style.display = 'none';
-  document.getElementById('loginScreen').style.display = 'flex';
-}
+        // Авторизация
+        loginForm.addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const login = document.getElementById("username").value.trim();
+            const password = document.getElementById("password").value.trim();
 
-function showAppScreen() {
-  document.getElementById('loginScreen').style.display = 'none';
-  document.getElementById('appScreen').style.display = 'flex';
-  renderPage('main');
-}
+            setStatus("Проверка данных...", "info");
+            submitBtn.disabled = true;
 
-function logout() {
-  localStorage.removeItem('ft_owner_tg_user');
-  document.getElementById('appScreen').style.display = 'none';
-  document.getElementById('loginScreen').style.display = 'flex';
-}
+            try {
+                const res = await fetch(`${WORKER_URL}/api/login`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ login, password })
+                });
 
-const pages = {
-  main: {
-    title: "Главная",
-    sub: "Обзор FT Owner",
-    body: `<div class="card">Раздел «Главная» — обзор состояния панели и активности сотрудников.</div>`
-  },
-  staff: {
-    title: "Сотрудники",
-    sub: "Команда, которая работает для сервера FunTime.",
-    body: `
-      <div class="rank-filter-bar" id="rankFilterBar">
-        <div class="rank-filter-chip all selected" data-filter="Все" onclick="filterByRank('Все')">Все</div>
-        <div class="rank-filter-chip beta" data-filter="Бета" onclick="filterByRank('Бета')">Бета</div>
-        <div class="rank-filter-chip alpha" data-filter="Альфа" onclick="filterByRank('Альфа')">Альфа</div>
-        <div class="rank-filter-chip stazher" data-filter="Стажер" onclick="filterByRank('Стажер')">Стажер</div>
-        <div class="rank-filter-chip method" data-filter="Метод" onclick="filterByRank('Метод')">Метод</div>
-      </div>
-      <div class="card" style="padding:0;">
-        <table>
-        <thead>
-          <tr><th>Сотрудник</th><th>Ранг</th><th>Должность</th><th>VK</th><th></th></tr>
-        </thead>
-        <tbody id="staffTableBody"></tbody>
-        </table>
-      </div>
-      <div style="margin-top:14px;"><button type="button" class="btn dark" onclick="openAddModal()">+ Добавить сотрудника</button></div>
-    `
-  },
-  hides: {
-    title: "Хайды",
-    sub: "Черновые заготовки и быстрые идеи для статей.",
-    body: `<div class="grid grid-2"><div class="card"><span class="badge purple">Идея</span><div style="font-weight:700;margin-top:8px;">Обзор нового сезона</div></div></div>`
-  },
-  access: {
-    title: "Доступ",
-    sub: "Права сотрудников и роли.",
-    body: `<div class="card"><div style="font-weight:700;margin-bottom:10px;">Безопасность</div><div style="font-size:13px;color:var(--ink-soft);">Авторизация выполняется через официальный Telegram Login Widget.</div></div>`
-  },
-  payouts: {
-    title: "Мои выплаты",
-    sub: "История начислений.",
-    body: `<div class="grid grid-3" style="margin-bottom:16px;"><div class="card"><div class="stat-num">48 200 ₽</div><div class="stat-label">Выплачено всего</div></div></div>`
-  }
-};
+                const data = await res.json();
 
-const DEFAULT_STAFF = [
-  { id: "owner", nick: "SniperPUBG", ranks: ["Метод"], positions: [], vk: "", isOwner: true }
-];
+                if (!data.success) {
+                    setStatus(data.error || "Ошибка входа", "error");
+                    submitBtn.disabled = false;
+                    return;
+                }
 
-function getStaffData() {
-  const data = localStorage.getItem('ft_owner_staff');
-  return data ? JSON.parse(data) : DEFAULT_STAFF;
-}
+                setStatus("Подтвердите вход в Telegram...", "info");
+                startPolling(data.sessionId);
 
-function saveStaffData(data) {
-  localStorage.setItem('ft_owner_staff', JSON.stringify(data));
-}
+            } catch (err) {
+                setStatus("Ошибка соединения", "error");
+                submitBtn.disabled = false;
+            }
+        });
 
-function renderPage(key){
-  const p = pages[key];
-  document.getElementById('content').innerHTML =
-    `<div class="page-title">${p.title}</div><div class="page-sub">${p.sub}</div>${p.body}`;
-  document.querySelectorAll('.nav-item').forEach(el=>{
-    el.classList.toggle('active', el.dataset.page===key);
-  });
-  if(key === 'staff') renderStaffTable();
-}
+        function startPolling(sessionId) {
+            const pollInterval = setInterval(async () => {
+                try {
+                    const res = await fetch(`${WORKER_URL}/api/check-status?sessionId=${sessionId}`);
+                    const data = await res.json();
 
-function renderStaffTable() {
-  const tbody = document.getElementById('staffTableBody');
-  if(!tbody) return;
-  const staff = getStaffData();
-  const rankBadgeClass = { 'Бета':'mint', 'Альфа':'orange', 'Стажер':'blue', 'Метод':'green' };
-  const posBadgeClass = {
-    'Обычный сотрудник':'gray',
-    'Руководитель Активной модерации':'red',
-    'Руководитель медиа':'purple',
-    'Руководитель репортов':'blue',
-    'Заместитель репортов':'cyan',
-    'Заместитель Активной модерации':'pink',
-    'Руководитель ОМЧ':'amber',
-    'Заместитель ОМЧ':'teal'
-  };
+                    if (data.status === "approved") {
+                        clearInterval(pollInterval);
+                        localStorage.setItem("ft_authenticated", "true");
+                        showDashboard();
+                    } else if (data.status === "denied") {
+                        clearInterval(pollInterval);
+                        setStatus("Вход отклонён!", "error");
+                        submitBtn.disabled = false;
+                    } else if (data.status === "expired") {
+                        clearInterval(pollInterval);
+                        setStatus("Время ожидания истекло", "error");
+                        submitBtn.disabled = false;
+                    }
+                } catch (err) {
+                    console.error("Ошибка опроса:", err);
+                }
+            }, 2000);
+        }
 
-  tbody.innerHTML = staff.map(emp => {
-    const safeNick = escapeHtml(emp.nick);
-    const safeVk = escapeHtml(emp.vk);
+        function setStatus(text, type) {
+            statusMsg.textContent = text;
+            statusMsg.className = `status-msg ${type}`;
+        }
 
-    const rankHtml = emp.ranks.length
-      ? emp.ranks.map(r => `<span class="badge ${rankBadgeClass[r] || 'gray'}">${escapeHtml(r)}</span>`).join('')
-      : '<span class="muted">—</span>';
+        function showDashboard() {
+            authSection.style.display = "none";
+            dashboardSection.style.display = "block";
+            renderStaff();
+        }
 
-    const posHtml = emp.positions.length
-      ? emp.positions.map(p => `<span class="badge ${posBadgeClass[p] || 'gray'}">${escapeHtml(p)}</span>`).join('')
-      : (emp.isOwner ? '<span class="muted">Владелец</span>' : '<span class="muted">—</span>');
+        // Выход
+        logoutBtn.addEventListener("click", () => {
+            localStorage.removeItem("ft_authenticated");
+            location.reload();
+        });
 
-    const vkHtml = safeVk
-      ? `<a class="btn outline btn-sm" href="${safeVk}" target="_blank" rel="noopener noreferrer">Открыть</a>`
-      : '<span class="muted">—</span>';
+        // Работа с персоналом
+        addStaffForm.addEventListener("submit", (e) => {
+            e.preventDefault();
+            const nick = document.getElementById("staffNick").value.trim();
+            const rank = document.getElementById("staffRank").value;
+            const tg = document.getElementById("staffTg").value.trim() || "-";
 
-    const actionsHtml = emp.isOwner
-      ? `<button type="button" class="btn outline btn-sm" onclick="openEditModal('${emp.id}')">Изменить</button> <span class="muted" style="font-size:12px;">это вы</span>`
-      : `<button type="button" class="btn outline btn-sm" onclick="openEditModal('${emp.id}')">Изменить</button> <button type="button" class="btn danger btn-sm" onclick="deleteEmployee('${emp.id}', this)">Удалить</button>`;
+            staffData.push({ nick, rank, tg });
+            saveAndRender();
+            addStaffForm.reset();
+        });
 
-    return `
-      <tr data-id="${emp.id}" data-ranks="${escapeHtml(emp.ranks.join(','))}">
-        <td class="name-cell">${avatarHtml(safeNick, safeVk, emp.avatar)}${safeNick}</td>
-        <td><div class="rank-cell">${rankHtml}</div></td>
-        <td><div class="rank-cell">${posHtml}</div></td>
-        <td>${vkHtml}</td>
-        <td class="row-actions">${actionsHtml}</td>
-      </tr>
-    `;
-  }).join('');
+        function deleteStaff(index) {
+            staffData.splice(index, 1);
+            saveAndRender();
+        }
 
-  applyRankFilter();
-}
+        function saveAndRender() {
+            localStorage.setItem("ft_staff_data", JSON.stringify(staffData));
+            renderStaff();
+        }
 
-document.querySelectorAll('.nav-item').forEach(el=>{
-  el.addEventListener('click', ()=> renderPage(el.dataset.page));
-});
+        function renderStaff() {
+            staffList.innerHTML = "";
+            staffData.forEach((item, index) => {
+                const tr = document.createElement("tr");
 
-document.getElementById('logoutBtn').addEventListener('click', logout);
+                let badgeClass = "badge-intern";
+                if (item.rank === "Администратор") badgeClass = "badge-admin";
+                if (item.rank === "Модератор") badgeClass = "badge-mod";
 
-let editingEmpId = null;
-let uploadedAvatarDataUrl = '';
-
-function closeAddModal(){
-  document.getElementById('addModalOverlay').classList.remove('show');
-  document.getElementById('empNick').value = '';
-  document.getElementById('empVk').value = '';
-  document.getElementById('empAvatarFile').value = '';
-  document.querySelectorAll('.rank-chip').forEach(c=>c.classList.remove('selected'));
-  document.getElementById('avatarPreview').style.display = 'none';
-  document.getElementById('avatarPreviewPlaceholder').textContent = 'Файл не выбран';
-  uploadedAvatarDataUrl = '';
-  editingEmpId = null;
-}
-
-function openAddModal(){
-  closeAddModal();
-  document.getElementById('modalTitle').textContent = 'Добавить сотрудника';
-  document.getElementById('modalSubmitBtn').textContent = 'Добавить';
-  document.getElementById('addModalOverlay').classList.add('show');
-}
-
-function openEditModal(empId){
-  closeAddModal();
-  const staff = getStaffData();
-  const emp = staff.find(x => x.id === empId);
-  if(!emp) return;
-
-  editingEmpId = empId;
-  document.getElementById('modalTitle').textContent = 'Изменить сотрудника';
-  document.getElementById('modalSubmitBtn').textContent = 'Сохранить';
-
-  document.getElementById('empNick').value = emp.nick;
-
-  document.querySelectorAll('.rank-chip[data-rank]').forEach(c=>{
-    c.classList.toggle('selected', emp.ranks.includes(c.dataset.rank));
-  });
-
-  document.querySelectorAll('.rank-chip[data-position]').forEach(c=>{
-    c.classList.toggle('selected', emp.positions.includes(c.dataset.position));
-  });
-
-  document.getElementById('empVk').value = emp.vk || '';
-
-  uploadedAvatarDataUrl = emp.avatar || '';
-  const preview = document.getElementById('avatarPreview');
-  const placeholder = document.getElementById('avatarPreviewPlaceholder');
-  if(uploadedAvatarDataUrl){
-    preview.src = uploadedAvatarDataUrl;
-    preview.style.display = 'inline-block';
-    placeholder.textContent = 'Файл выбран';
-  } else {
-    preview.style.display = 'none';
-    placeholder.textContent = 'Файл не выбран';
-  }
-
-  document.getElementById('addModalOverlay').classList.add('show');
-}
-
-function toggleRank(el){ el.classList.toggle('selected'); }
-function togglePosition(el){ el.classList.toggle('selected'); }
-
-function handleAvatarFile(event){
-  const file = event.target.files[0];
-  if(!file) return;
-  const reader = new FileReader();
-  reader.onload = () => {
-    uploadedAvatarDataUrl = reader.result;
-    const preview = document.getElementById('avatarPreview');
-    preview.src = uploadedAvatarDataUrl;
-    preview.style.display = 'inline-block';
-    document.getElementById('avatarPreviewPlaceholder').textContent = file.name;
-  };
-  reader.readAsDataURL(file);
-}
-
-function initials(name){
-  const parts = name.trim().split(/\s+/);
-  return (parts[0][0] + (parts[1] ? parts[1][0] : parts[0][1] || '')).toUpperCase();
-}
-
-function avatarHtml(nick, vk, customAvatar){
-  if(customAvatar){
-    return `<img class="avatar" src="${customAvatar}" alt="${nick}">`;
-  }
-  if(vk){
-    const seed = encodeURIComponent(nick);
-    return `<img class="avatar" src="https://api.dicebear.com/7.x/avataaars/svg?seed=${seed}" alt="${nick}">`;
-  }
-  return `<span class="avatar">${initials(nick)}</span>`;
-}
-
-function deleteEmployee(empId, btn){
-  if(btn.dataset.confirming === '1'){
-    let staff = getStaffData();
-    staff = staff.filter(x => x.id !== empId);
-    saveStaffData(staff);
-    renderStaffTable();
-    return;
-  }
-  btn.dataset.confirming = '1';
-  btn.classList.add('confirming');
-  const original = btn.textContent;
-  btn.textContent = 'Точно?';
-  clearTimeout(btn._resetTimer);
-  btn._resetTimer = setTimeout(()=>{
-    btn.textContent = original;
-    btn.dataset.confirming = '0';
-    btn.classList.remove('confirming');
-  }, 2500);
-}
-
-function submitAddEmployee(){
-  const nick = document.getElementById('empNick').value.trim();
-  if(!nick){ document.getElementById('empNick').focus(); return; }
-
-  const selectedRanks = Array.from(document.querySelectorAll('.rank-chip[data-rank].selected')).map(c=>c.dataset.rank);
-  const selectedPositions = Array.from(document.querySelectorAll('.rank-chip[data-position].selected')).map(c=>c.dataset.position);
-  const vk = document.getElementById('empVk').value.trim();
-  const avatar = uploadedAvatarDataUrl;
-
-  let staff = getStaffData();
-
-  if(editingEmpId){
-    staff = staff.map(emp => {
-      if(emp.id === editingEmpId){
-        return { ...emp, nick, ranks: selectedRanks, positions: selectedPositions, vk, avatar };
-      }
-      return emp;
-    });
-  } else {
-    staff.push({
-      id: Date.now().toString(),
-      nick,
-      ranks: selectedRanks,
-      positions: selectedPositions,
-      vk,
-      avatar
-    });
-  }
-
-  saveStaffData(staff);
-  renderStaffTable();
-  closeAddModal();
-}
-
-let activeRankFilter = 'Все';
-
-function filterByRank(rank){
-  activeRankFilter = rank;
-  document.querySelectorAll('.rank-filter-chip').forEach(c=>{
-    c.classList.toggle('selected', c.dataset.filter === rank);
-  });
-  applyRankFilter();
-}
-
-function applyRankFilter(){
-  const rows = document.querySelectorAll('#staffTableBody tr');
-  rows.forEach(row=>{
-    if(activeRankFilter === 'Все'){
-      row.style.display = '';
-    } else {
-      const ranks = (row.dataset.ranks || '').split(',').map(r=>r.trim());
-      row.style.display = ranks.includes(activeRankFilter) ? '' : 'none';
-    }
-  });
-}
-
-checkTgSession();
-</script>
+                tr.innerHTML = `
+                    <td>
+                        <img class="avatar" src="https://mc-heads.net/avatar/${item.nick}/32" alt="skin">
+                        <strong>${item.nick}</strong>
+                    </td>
+                    <td><span class="badge ${badgeClass}">${item.rank}</span></td>
+                    <td>${item.tg}</td>
+                    <td>
+                        <button class="btn btn-danger" style="padding: 0.25rem 0.5rem; font-size: 0.8rem; width: auto;" onclick="deleteStaff(${index})">Удалить</button>
+                    </td>
+                `;
+                staffList.appendChild(tr);
+            });
+        }
+    </script>
 </body>
 </html>
