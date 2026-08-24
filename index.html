@@ -1,282 +1,3081 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FT Owner — Управление составом</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg: #F7F8FB;
+      --surface: #FFFFFF;
+      --border: #E7E9EE;
+      --text: #12141C;
+      --text-dim: #6B7280;
+      --text-faint: #9CA3AF;
+      --accent: #4F46E5;
+      --accent-dark: #3F37C9;
+      --accent-soft: #EEF0FF;
+      --danger: #DC2626;
+      --danger-soft: #FEF2F2;
+      --warning: #D97706;
+      --warning-soft: #FFFBEB;
+      --radius: 10px;
+      --shadow-sm: 0 1px 2px rgba(16, 24, 40, .04);
+      --shadow-md: 0 12px 30px rgba(16, 24, 40, .10);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Inter', sans-serif;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    /* =========================
+       АВТОРИЗАЦИЯ
+       ========================= */
+
+    #authSection {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 24px;
+    }
+
+    .login-card {
+      background: #fff;
+      padding: 2.25rem 2rem;
+      border-radius: 16px;
+      box-shadow: var(--shadow-md);
+      width: 100%;
+      max-width: 400px;
+      border: 1px solid var(--border);
+    }
+
+    .login-card h2 {
+      margin-bottom: .4rem;
+      color: var(--text);
+      font-size: 1.35rem;
+      font-weight: 800;
+    }
+
+    .login-card .sub {
+      color: var(--text-dim);
+      font-size: .88rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .form-group {
+      margin-bottom: 1.1rem;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: .4rem;
+      font-size: .72rem;
+      font-weight: 700;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      color: var(--text-faint);
+    }
+
+    .form-group input,
+    .form-group select {
+      width: 100%;
+      padding: .7rem .85rem;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background-color: var(--bg);
+      color: var(--text);
+      font-size: .95rem;
+      outline: none;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-soft);
+      background-color: #fff;
+    }
+
+    .btn {
+      width: 100%;
+      padding: .75rem;
+      background-color: var(--text);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: .95rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background .2s;
+    }
+
+    .btn:hover {
+      background-color: #000;
+    }
+
+    .btn:disabled {
+      background-color: #C7CAD1;
+      cursor: not-allowed;
+    }
+
+    .status-msg {
+      margin-top: 1rem;
+      text-align: center;
+      font-size: .85rem;
+      font-weight: 500;
+    }
+
+    .status-msg.error {
+      color: var(--danger);
+    }
+
+    .status-msg.success {
+      color: #16A34A;
+    }
+
+    .status-msg.info {
+      color: var(--accent);
+    }
+
+    /* =========================
+       DASHBOARD
+       ========================= */
+
+    #dashboardSection {
+      display: none;
+      min-height: 100vh;
+    }
+
+    .shell {
+      display: grid;
+      grid-template-columns: 230px 1fr;
+      min-height: 100vh;
+    }
+
+    .sidebar {
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      padding: 20px 14px;
+      display: flex;
+      flex-direction: column;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 6px 8px 22px;
+    }
+
+    .brand .dot {
+      width: 22px;
+      height: 22px;
+      border-radius: 6px;
+      background: linear-gradient(135deg, var(--accent), var(--accent-dark));
+    }
+
+    .brand span {
+      font-weight: 800;
+      font-size: 1.02rem;
+    }
+
+    .nav-label {
+      font-size: .68rem;
+      font-weight: 700;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: var(--text-faint);
+      padding: 14px 10px 6px;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: .55rem .65rem;
+      border-radius: 8px;
+      color: var(--text-dim);
+      font-size: .9rem;
+      font-weight: 500;
+      text-decoration: none;
+      cursor: pointer;
+      user-select: none;
+      transition: all .15s;
+    }
+
+    .nav-item .ic {
+      width: 18px;
+      text-align: center;
+    }
+
+    .nav-item:hover {
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    .nav-item.active {
+      background: var(--accent-soft);
+      color: var(--accent);
+      font-weight: 600;
+    }
+
+    .sidebar-footer {
+      margin-top: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      padding-top: 14px;
+      border-top: 1px solid var(--border);
+    }
+
+    .sidebar-footer .nav-item.danger {
+      color: var(--danger);
+    }
+
+    .dev-tag {
+      padding: .5rem .65rem;
+      font-size: .78rem;
+      color: var(--text-faint);
+      font-family: monospace;
+    }
+
+    .main {
+      padding: 28px 36px 60px;
+      max-width: 1160px;
+      width: 100%;
+    }
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 28px;
+    }
+
+    .topbar h1 {
+      font-size: 1.5rem;
+      font-weight: 800;
+    }
+
+    .topbar .sub {
+      color: var(--text-dim);
+      font-size: .92rem;
+      margin-top: 4px;
+    }
+
+    .user-pill {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: .45rem .8rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      font-size: .86rem;
+      font-weight: 600;
+    }
+
+    .user-pill .uic {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: var(--accent-soft);
+      color: var(--accent);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: .72rem;
+      font-weight: 800;
+    }
+
+    .page-view {
+      display: none;
+    }
+
+    .page-view.active-page {
+      display: block;
+    }
+
+    /* =========================
+       ТАБЫ
+       ========================= */
+
+    .tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+
+    .tab {
+      padding: .4rem .85rem;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      font-size: .82rem;
+      font-weight: 600;
+      color: var(--text-dim);
+      cursor: pointer;
+    }
+
+    .tab.active {
+      background: var(--text);
+      color: #fff;
+      border-color: var(--text);
+    }
+
+    /* =========================
+       КАРТОЧКИ
+       ========================= */
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      box-shadow: var(--shadow-sm);
+      overflow: hidden;
+      margin-bottom: 20px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    thead th {
+      text-align: left;
+      font-size: .7rem;
+      font-weight: 700;
+      letter-spacing: .07em;
+      text-transform: uppercase;
+      color: var(--text-faint);
+      padding: 14px 20px;
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+    }
+
+    tbody td {
+      padding: 14px 20px;
+      border-bottom: 1px solid var(--border);
+      font-size: .9rem;
+      vertical-align: middle;
+    }
+
+    tbody tr:last-child td {
+      border-bottom: none;
+    }
+
+    .player-cell {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      object-fit: cover;
+      background: var(--bg);
+    }
+
+    .player-name {
+      font-weight: 700;
+    }
+
+    /* =========================
+       БЕЙДЖИ
+       ========================= */
+
+    .badge {
+      display: inline-block;
+      padding: .24rem .55rem;
+      border-radius: 6px;
+      font-size: .75rem;
+      font-weight: 700;
+      margin-right: 4px;
+      margin-bottom: 2px;
+    }
+
+    .r-beta {
+      background: #ECFDF5;
+      color: #059669;
+    }
+
+    .r-alpha {
+      background: #FFF7ED;
+      color: #EA580C;
+    }
+
+    .r-stazher {
+      background: #EFF6FF;
+      color: #2563EB;
+    }
+
+    .r-metod {
+      background: #F3E8FF;
+      color: #7C3AED;
+    }
+
+    .r-default {
+      background: #F3F4F6;
+      color: #6B7280;
+    }
+
+    .role-badge {
+      display: inline-block;
+      padding: .24rem .55rem;
+      border-radius: 6px;
+      font-size: .75rem;
+      font-weight: 700;
+      margin-right: 4px;
+      margin-bottom: 2px;
+      background: #F3F4F6;
+      color: #4B5563;
+    }
+
+    .vk-link {
+      color: var(--accent);
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    .row-actions {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .icon-btn {
+      padding: .4rem .7rem;
+      font-size: .78rem;
+      font-weight: 600;
+      border-radius: 7px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      cursor: pointer;
+    }
+
+    .icon-btn.warn {
+      color: var(--warning);
+      border-color: #FDE68A;
+    }
+
+    .icon-btn.del {
+      color: var(--danger);
+      border-color: #FBD5D5;
+    }
+
+    .icon-btn.success {
+      color: #16A34A;
+      border-color: #BBF7D0;
+    }
+
+    .card-footer {
+      padding: 16px 20px;
+      background: var(--bg);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .add-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: .6rem 1rem;
+      background: var(--text);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: .86rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    /* =========================
+       ПОИСК
+       ========================= */
+
+    .search-box {
+      margin-bottom: 16px;
+    }
+
+    .search-box input {
+      width: 100%;
+      padding: 12px 14px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: var(--surface);
+      color: var(--text);
+      font-size: .9rem;
+      outline: none;
+    }
+
+    .search-box input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-soft);
+    }
+
+    /* =========================
+       СТАТУСЫ
+       ========================= */
+
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: .2rem .6rem;
+      border-radius: 99px;
+      font-size: .75rem;
+      font-weight: 700;
+    }
+
+    .status-pill.active {
+      background: #ECFDF5;
+      color: #059669;
+    }
+
+    .status-pill.blocked {
+      background: #FEF2F2;
+      color: #DC2626;
+    }
+
+    /* =========================
+       МОДАЛЬНЫЕ ОКНА
+       ========================= */
+
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 17, 26, .45);
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      padding: 20px;
+      backdrop-filter: blur(2px);
+    }
+
+    .modal-overlay.open {
+      display: flex;
+    }
+
+    .modal {
+      background: var(--surface);
+      width: 100%;
+      max-width: 480px;
+      border-radius: 16px;
+      box-shadow: var(--shadow-md);
+      max-height: 90vh;
+      overflow-y: auto;
+      color: var(--text);
+    }
+
+    .modal-head {
+      padding: 22px 24px 4px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+    }
+
+    .modal-head h3 {
+      font-size: 1.15rem;
+      font-weight: 800;
+    }
+
+    .modal-head p {
+      color: var(--text-dim);
+      font-size: .85rem;
+      margin-top: 4px;
+    }
+
+    .modal-body {
+      padding: 16px 24px 4px;
+    }
+
+    .modal-foot {
+      padding: 18px 24px 24px;
+      display: flex;
+      gap: 10px;
+    }
+
+    .modal-foot .btn {
+      flex: 1;
+    }
+
+    .label-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 6px;
+    }
+
+    .label-row label {
+      margin-bottom: 0 !important;
+    }
+
+    .hint {
+      font-size: 11px;
+      color: var(--text-faint);
+      font-weight: 500;
+      text-transform: none !important;
+      letter-spacing: normal !important;
+    }
+
+    /* =========================
+       TAGS
+       ========================= */
+
+    .tags-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .tag-chip {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      color: var(--text-dim);
+      transition: all .2s;
+      user-select: none;
+    }
+
+    .tag-chip[data-value="Бета"] {
+      background: #ecfdf5;
+      color: #047857;
+      border-color: #a7f3d0;
+    }
+
+    .tag-chip[data-value="Альфа"] {
+      background: #fff7ed;
+      color: #c2410c;
+      border-color: #fed7aa;
+    }
+
+    .tag-chip[data-value="Стажёр"] {
+      background: #eff6ff;
+      color: #1d4ed8;
+      border-color: #bfdbfe;
+    }
+
+    .tag-chip[data-value="Метод"] {
+      background: #f0fdf4;
+      color: #15803d;
+      border-color: #bbf7d0;
+    }
+
+    .tag-chip.active {
+      box-shadow: inset 0 0 0 2px currentColor;
+      font-weight: 600;
+      filter: brightness(.95);
+    }
+
+    /* =========================
+       ФАЙЛ
+       ========================= */
+
+    .file-input-wrapper {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      border: 1px solid var(--border);
+      padding: 6px 10px;
+      border-radius: 8px;
+      background: var(--bg);
+    }
+
+    .file-btn {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      color: var(--text);
+    }
+
+    .file-name {
+      font-size: 12px;
+      color: var(--text-dim);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    /* =========================
+       ДОСТУП
+       ========================= */
+
+    .chip-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+      margin-top: 6px;
+    }
+
+    .chip {
+      padding: .4rem .75rem;
+      border-radius: 999px;
+      border: 1.5px solid var(--border);
+      background: var(--surface);
+      font-size: .8rem;
+      font-weight: 600;
+      color: var(--text-dim);
+      cursor: pointer;
+      user-select: none;
+      transition: all .2s;
+    }
+
+    .chip.selected {
+      border-color: var(--accent);
+      background: var(--accent-soft);
+      color: var(--accent);
+    }
+
+    /* =========================
+       ХАЙДЫ
+       ========================= */
+
+    .article-item {
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 18px;
+      margin-bottom: 12px;
+      background: var(--surface);
+      transition: .15s;
+    }
+
+    .article-item:hover {
+      border-color: #D5D8E0;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .article-title {
+      font-size: 1rem;
+      font-weight: 800;
+      color: var(--text);
+    }
+
+    .article-description {
+      color: var(--text-dim);
+      font-size: .84rem;
+      margin-top: 5px;
+      line-height: 1.5;
+    }
+
+    .article-meta {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      flex-wrap: wrap;
+      margin-top: 12px;
+    }
+
+    .article-status {
+      display: inline-flex;
+      padding: 4px 8px;
+      border-radius: 6px;
+      font-size: .7rem;
+      font-weight: 700;
+    }
+
+    .article-status.published {
+      background: #ECFDF5;
+      color: #047857;
+    }
+
+    .article-status.draft {
+      background: #FFF7ED;
+      color: #C2410C;
+    }
+
+    .article-open-btn {
+      padding: 7px 11px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      border-radius: 7px;
+      cursor: pointer;
+      font-size: .78rem;
+      font-weight: 700;
+    }
+
+    .article-open-btn:hover {
+      background: var(--bg);
+    }
+
+    .article-content {
+      line-height: 1.7;
+      font-size: .95rem;
+      word-break: break-word;
+    }
+
+    .article-content img {
+      max-width: 100%;
+      border-radius: 8px;
+    }
+
+    .article-content .copy-button {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 13px;
+      margin: 6px 4px;
+      border: 0;
+      border-radius: 8px;
+      background: var(--accent);
+      color: white;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .article-content .copy-button:hover {
+      background: var(--accent-dark);
+    }
+
+    .article-content .link-button {
+      display: inline-flex;
+      padding: 8px 13px;
+      margin: 6px 4px;
+      border-radius: 8px;
+      background: var(--text);
+      color: white;
+      text-decoration: none;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .article-content .link-button:hover {
+      opacity: .9;
+    }
+
+    .article-reader {
+      max-width: 900px !important;
+    }
+
+    .article-reader-body {
+      padding: 20px 24px;
+    }
+
+    /* =========================
+       РЕДАКТОР
+       ========================= */
+
+    #articleEditor {
+      min-height: 420px;
+      max-height: 55vh;
+      overflow-y: auto;
+      padding: 18px;
+      border: 1px solid var(--border);
+      border-top: none;
+      border-radius: 0 0 10px 10px;
+      background: #fff;
+      color: var(--text);
+      font-size: .95rem;
+      line-height: 1.7;
+      outline: none;
+    }
+
+    #articleEditor:focus {
+      box-shadow: inset 0 0 0 1px var(--accent);
+    }
+
+    .editor-toolbar {
+      display: flex;
+      gap: 7px;
+      flex-wrap: wrap;
+      padding: 10px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 10px 10px 0 0;
+    }
+
+    /* =========================
+       ОГРАНИЧЕНИЕ
+       ========================= */
+
+    .access-denied {
+      text-align: center;
+      padding: 60px 20px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+    }
+
+    .access-denied h2 {
+      font-size: 1.4rem;
+      color: var(--danger);
+      margin-bottom: 10px;
+      font-weight: 800;
+    }
+
+    .access-denied p {
+      color: var(--text-dim);
+      font-size: .95rem;
+    }
+
+    .creds-box {
+      background: var(--accent-soft);
+      padding: 14px;
+      border-radius: 10px;
+      margin-top: 14px;
+      font-size: .88rem;
+      border: 1px dashed var(--accent);
+      color: var(--text);
+    }
+
+    .creds-box code {
+      background: rgba(79, 70, 229, .15);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-weight: 700;
+      color: var(--accent-dark);
+    }
+
+    code {
+      font-family: monospace;
+      background: var(--bg);
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+
+    textarea {
+      font-family: 'Inter', sans-serif;
+    }
+
+    /* =========================
+       МОБИЛЬНАЯ ВЕРСИЯ
+       ========================= */
+
+    @media (max-width: 800px) {
+
+      .shell {
+        grid-template-columns: 1fr;
+      }
+
+      .sidebar {
+        position: relative;
+        height: auto;
+        min-height: auto;
+        border-right: none;
+        border-bottom: 1px solid var(--border);
+      }
+
+      .main {
+        padding: 20px;
+      }
+
+      .topbar {
+        gap: 15px;
+        flex-direction: column;
+      }
+
+      .card {
+        overflow-x: auto;
+      }
+
+      table {
+        min-width: 800px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+<!-- =========================================================
+     АВТОРИЗАЦИЯ
+     ========================================================= -->
+
+<div id="authSection">
+
+  <div class="login-card">
+
+    <h2>FT Owner Admin</h2>
+
+    <p class="sub">
+      Введите ваши учётные данные для входа
+    </p>
+
+    <form id="loginForm">
+
+      <div class="form-group">
+        <label for="username">Логин</label>
+
+        <input
+          type="text"
+          id="username"
+          required
+          autocomplete="off">
+      </div>
+
+      <div class="form-group">
+
+        <label for="password">
+          Пароль
+        </label>
+
+        <input
+          type="password"
+          id="password"
+          required>
+      </div>
+
+      <button
+        type="submit"
+        id="submitBtn"
+        class="btn">
+        Войти
+      </button>
+
+    </form>
+
+    <div
+      id="statusMsg"
+      class="status-msg">
+    </div>
+
+  </div>
+
+</div>
+
+
+<!-- =========================================================
+     DASHBOARD
+     ========================================================= -->
+
+<div id="dashboardSection">
+
+  <div class="shell">
+
+    <!-- SIDEBAR -->
+
+    <aside class="sidebar">
+
+      <div class="brand">
+
+        <div class="dot"></div>
+
+        <span>
+          FT Owner
+        </span>
+
+      </div>
+
+      <div class="nav-label">
+        Главное
+      </div>
+
+      <a
+        class="nav-item active"
+        data-page="home"
+        id="nav-home">
+
+        <span class="ic">🏠</span>
+
+        Главная
+
+      </a>
+
+      <a
+        class="nav-item"
+        data-page="staff"
+        id="nav-staff">
+
+        <span class="ic">👥</span>
+
+        Сотрудники
+
+      </a>
+
+      <a
+        class="nav-item"
+        data-page="hydes"
+        id="nav-hydes">
+
+        <span class="ic">📄</span>
+
+        Хайды
+
+      </a>
+
+      <a
+        class="nav-item"
+        data-page="access"
+        id="nav-access">
+
+        <span class="ic">🔑</span>
+
+        Доступ
+
+      </a>
+
+      <div class="nav-label">
+        Профиль
+      </div>
+
+      <a
+        class="nav-item"
+        data-page="payments"
+        id="nav-payments">
+
+        <span class="ic">💳</span>
+
+        Мои выплаты
+
+      </a>
+
+      <div class="sidebar-footer">
+
+        <a
+          class="nav-item danger"
+          id="logoutBtn">
+
+          <span class="ic">↺</span>
+
+          Выйти
+
+        </a>
+
+        <div class="dev-tag">
+          &lt;/&gt; Developer
+        </div>
+
+      </div>
+
+    </aside>
+
+
+    <!-- MAIN -->
+
+    <main class="main">
+
+      <div class="topbar">
+
+        <div>
+
+          <h1 id="pageTitle">
+            Главная
+          </h1>
+
+          <p
+            class="sub"
+            id="pageSub">
+
+            Общая информация и панель управления.
+
+          </p>
+
+        </div>
+
+        <div class="user-pill">
+
+          <span
+            class="uic"
+            id="userInitial">
+
+            S
+
+          </span>
+
+          <span id="userNameLabel">
+            —
+          </span>
+
+        </div>
+
+      </div>
+
+
+      <!-- =================================================
+           ГЛАВНАЯ
+           ================================================= -->
+
+      <div
+        class="page-view active-page"
+        id="view-home">
+
+        <div
+          class="card"
+          style="padding:40px;text-align:center;">
+
+          <h2>
+            Главная панель
+          </h2>
+
+          <p
+            style="
+              color:var(--text-dim);
+              margin-top:8px;
+            ">
+
+            Добро пожаловать в систему
+            управления FT Owner.
+
+          </p>
+
+        </div>
+
+      </div>
+
+
+      <!-- =================================================
+           СОТРУДНИКИ
+           ================================================= -->
+
+      <div
+        class="page-view"
+        id="view-staff">
+
+        <div class="search-box">
+
+          <input
+            type="text"
+            id="staffSearch"
+            placeholder="🔎 Поиск сотрудника по нику..."
+            autocomplete="off">
+
+        </div>
+
+        <div
+          class="tabs"
+          id="tabs">
+
+          <button
+            class="tab active"
+            data-filter="Все">
+
+            Все
+
+          </button>
+
+          <button
+            class="tab"
+            data-filter="Бета">
+
+            Бета
+
+          </button>
+
+          <button
+            class="tab"
+            data-filter="Альфа">
+
+            Альфа
+
+          </button>
+
+          <button
+            class="tab"
+            data-filter="Стажёр">
+
+            Стажёр
+
+          </button>
+
+          <button
+            class="tab"
+            data-filter="Метод">
+
+            Метод
+
+          </button>
+
+        </div>
+
+
+        <div class="card">
+
+          <table>
+
+            <thead>
+
+              <tr>
+
+                <th>
+                  Сотрудник
+                </th>
+
+                <th>
+                  Ранг
+                </th>
+
+                <th>
+                  Должность
+                </th>
+
+                <th>
+                  VK
+                </th>
+
+                <th id="staffActionsHeader">
+                </th>
+
+              </tr>
+
+            </thead>
+
+            <tbody id="staffList">
+            </tbody>
+
+          </table>
+
+
+          <div
+            class="card-footer"
+            id="staffFooterCard">
+
+            <button
+              class="add-btn"
+              id="openAddModal">
+
+              + Добавить сотрудника
+
+            </button>
+
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <!-- =================================================
+           ДОСТУП
+           ================================================= -->
+
+      <div
+        class="page-view"
+        id="view-access">
+
+        <div class="card">
+
+          <table>
+
+            <thead>
+
+              <tr>
+
+                <th>
+                  Соавтор (Логин)
+                </th>
+
+                <th>
+                  Статус
+                </th>
+
+                <th>
+                  Доступные разделы и разрешения
+                </th>
+
+                <th>
+                  Пароль
+                </th>
+
+                <th></th>
+
+              </tr>
+
+            </thead>
+
+            <tbody id="coauthorsList">
+            </tbody>
+
+          </table>
+
+          <div class="card-footer">
+
+            <button
+              class="add-btn"
+              id="openAddCoauthorModal">
+
+              + Добавить соавтора
+
+            </button>
+
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <!-- =================================================
+           ХАЙДЫ
+           ================================================= -->
+
+      <div
+        class="page-view"
+        id="view-hydes">
+
+        <div class="card">
+
+          <div
+            style="
+              padding:20px;
+              display:flex;
+              justify-content:space-between;
+              align-items:center;
+              gap:15px;
+              border-bottom:1px solid var(--border);
+            ">
+
+            <div>
+
+              <h2
+                style="
+                  font-size:1.15rem;
+                  font-weight:800;
+                ">
+
+                Хайды
+
+              </h2>
+
+              <p
+                style="
+                  color:var(--text-dim);
+                  font-size:.84rem;
+                  margin-top:4px;
+                ">
+
+                Внутренние инструкции
+                и руководства состава.
+
+              </p>
+
+            </div>
+
+
+            <button
+              class="add-btn"
+              id="addArticleBtn"
+              style="display:none;">
+
+              + Добавить статью
+
+            </button>
+
+          </div>
+
+
+          <div
+            id="articlesList"
+            style="padding:20px;">
+
+            <div
+              style="
+                text-align:center;
+                color:var(--text-faint);
+                padding:30px;
+              ">
+
+              Загрузка статей...
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <!-- =================================================
+           ВЫПЛАТЫ
+           ================================================= -->
+
+      <div
+        class="page-view"
+        id="view-payments">
+
+        <div
+          class="card"
+          style="
+            padding:40px;
+            text-align:center;
+          ">
+
+          <h2>
+            Выплаты
+          </h2>
+
+          <p
+            style="
+              color:var(--text-dim);
+              margin-top:8px;
+            ">
+
+            Информация по вашим
+            персональным выплатам.
+
+          </p>
+
+        </div>
+
+      </div>
+
+
+      <!-- =================================================
+           ОГРАНИЧЕНИЕ ДОСТУПА
+           ================================================= -->
+
+      <div
+        class="page-view"
+        id="view-forbidden">
+
+        <div class="access-denied">
+
+          <h2>
+            Доступ ограничен
+          </h2>
+
+          <p>
+            Вам не был предоставлен доступ
+            к данной странице.
+          </p>
+
+        </div>
+
+      </div>
+
+    </main>
+
+  </div>
+
+</div>
+
+
+<!-- =========================================================
+     МОДАЛКА СОТРУДНИКА
+     ========================================================= -->
+
+<div
+  class="modal-overlay"
+  id="staffModalOverlay">
+
+  <div class="modal">
+
+    <div class="modal-head">
+
+      <div>
+
+        <h3 id="modalTitle">
+          Добавить сотрудника
+        </h3>
+
+        <p>
+          Заполните данные участника команды.
+        </p>
+
+      </div>
+
+      <button
+        class="icon-btn del"
+        id="cancelModalBtn"
+        style="
+          padding:4px 8px;
+          border:none;
+          background:none;
+          font-size:16px;
+        ">
+
+        ✕
+
+      </button>
+
+    </div>
+
+
+    <div class="modal-body">
+
+      <div class="form-group">
+
+        <label>
+          Ник
+        </label>
+
+        <input
+          type="text"
+          id="staffNick"
+          placeholder="Например, KillerFrost">
+
+      </div>
+
+
+      <div class="form-group">
+
+        <div class="label-row">
+
+          <label>
+            Ранг
+          </label>
+
+          <span class="hint">
+            (можно выбрать несколько)
+          </span>
+
+        </div>
+
+        <div
+          class="tags-container"
+          id="rankTags">
+
+          <button
+            type="button"
+            class="tag-chip"
+            data-value="Бета"
+            onclick="toggleTag(this)">
+
+            Бета
+
+          </button>
+
+          <button
+            type="button"
+            class="tag-chip"
+            data-value="Альфа"
+            onclick="toggleTag(this)">
+
+            Альфа
+
+          </button>
+
+          <button
+            type="button"
+            class="tag-chip"
+            data-value="Стажёр"
+            onclick="toggleTag(this)">
+
+            Стажёр
+
+          </button>
+
+          <button
+            type="button"
+            class="tag-chip"
+            data-value="Метод"
+            onclick="toggleTag(this)">
+
+            Метод
+
+          </button>
+
+        </div>
+
+      </div>
+
+
+      <div class="form-group">
+
+        <div class="label-row">
+
+          <label>
+            Должность
+          </label>
+
+          <span class="hint">
+            (можно выбрать несколько)
+          </span>
+
+        </div>
+
+        <div
+          class="tags-container"
+          id="roleTags">
+
+          <button
+            type="button"
+            class="tag-chip"
+            data-value="Обычный сотрудник"
+            onclick="toggleTag(this)">
+
+            Обычный сотрудник
+
+          </button>
+
+          <button
+            type="button"
+            class="tag-chip"
+            data-value="Руководитель Активной модерации"
+            onclick="toggleTag(this)">
+
+            Руководитель Активной модерации
+
+          </button>
+
+          <button
+            type="button"
+            class="tag-chip"
+            data-value="Руководитель медиа"
+            onclick="toggleTag(this)">
+
+            Руководитель медиа
+
+          </button>
+
+          <button
+            type="button"
+            class="tag-chip"
+            data-value="Руководитель репортов"
+            onclick="toggleTag(this)">
+
+            Руководитель репортов
+
+          </button>
+
+          <button
+            type="button"
+            class="tag-chip"
+            data-value="Заместитель репортов"
+            onclick="toggleTag(this)">
+
+            Заместитель репортов
+
+          </button>
+
+          <button
+            type="button"
+            class="tag-chip"
+            data-value="Заместитель Активной модерации"
+            onclick="toggleTag(this)">
+
+            Заместитель Активной модерации
+
+          </button>
+
+          <button
+            type="button"
+            class="tag-chip"
+            data-value="Руководитель ОМЧ"
+            onclick="toggleTag(this)">
+
+            Руководитель ОМЧ
+
+          </button>
+
+          <button
+            type="button"
+            class="tag-chip"
+            data-value="Заместитель ОМЧ"
+            onclick="toggleTag(this)">
+
+            Заместитель ОМЧ
+
+          </button>
+
+        </div>
+
+      </div>
+
+
+      <div class="form-group">
+
+        <label>
+          Ссылка ВК
+        </label>
+
+        <input
+          type="text"
+          id="staffVk"
+          placeholder="https://vk.com/username">
+
+      </div>
+
+
+      <div class="form-group">
+
+        <div class="label-row">
+
+          <label>
+            Аватар
+          </label>
+
+          <span class="hint">
+            (необязательно)
+          </span>
+
+        </div>
+
+        <div class="file-input-wrapper">
+
+          <label
+            class="file-btn"
+            for="staffAvatarFile">
+
+            Выберите файл
+
+          </label>
+
+          <span
+            id="fileNameLabel"
+            class="file-name">
+
+            Файл не выбран
+
+          </span>
+
+          <input
+            type="file"
+            id="staffAvatarFile"
+            accept="image/*"
+            style="display:none;">
+
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <div class="modal-foot">
+
+      <button
+        class="btn"
+        style="
+          background:var(--surface);
+          color:var(--text);
+          border:1px solid var(--border);
+        "
+        id="cancelModalBtn2">
+
+        Отмена
+
+      </button>
+
+      <button
+        class="btn"
+        id="saveStaffBtn">
+
+        Сохранить
+
+      </button>
+
+    </div>
+
+  </div>
+
+</div>
+
+
+<!-- =========================================================
+     СОАВТОР
+     ========================================================= -->
+
+<div
+  class="modal-overlay"
+  id="coauthorModalOverlay">
+
+  <div class="modal">
+
+    <div class="modal-head">
+
+      <div>
+
+        <h3>
+          Добавить соавтора
+        </h3>
+
+        <p>
+          Укажите ник и выберите страницы.
+        </p>
+
+      </div>
+
+      <button
+        class="icon-btn del"
+        onclick="
+          document
+            .getElementById('coauthorModalOverlay')
+            .classList.remove('open')
+        "
+        style="
+          border:none;
+          background:none;
+          font-size:16px;
+        ">
+
+        ✕
+
+      </button>
+
+    </div>
+
+
+    <div class="modal-body">
+
+      <div class="form-group">
+
+        <label>
+          Логин / Ник соавтора
+        </label>
+
+        <input
+          type="text"
+          id="coauthorNick"
+          placeholder="Например: helper_alex">
+
+      </div>
+
+
+      <div class="form-group">
+
+        <label>
+          Доступные разделы и разрешения
+        </label>
+
+        <div
+          class="chip-group"
+          id="accessChips">
+
+          <div
+            class="chip"
+            data-value="staff"
+            onclick="
+              this.classList.toggle('selected')
+            ">
+
+            Сотрудники
+
+          </div>
+
+          <div
+            class="chip"
+            data-value="staff_add"
+            onclick="
+              this.classList.toggle('selected')
+            ">
+
+            Добавить сотрудника
+
+          </div>
+
+          <div
+            class="chip"
+            data-value="staff_actions"
+            onclick="
+              this.classList.toggle('selected')
+            ">
+
+            Действия с сотрудниками
+
+          </div>
+
+          <div
+            class="chip"
+            data-value="hydes"
+            onclick="
+              this.classList.toggle('selected')
+            ">
+
+            Хайды
+
+          </div>
+
+          <div
+            class="chip"
+            data-value="access"
+            onclick="
+              this.classList.toggle('selected')
+            ">
+
+            Доступ
+
+          </div>
+
+          <div
+            class="chip"
+            data-value="payments"
+            onclick="
+              this.classList.toggle('selected')
+            ">
+
+            Мои выплаты
+
+          </div>
+
+        </div>
+
+      </div>
+
+      <div
+        id="newCredsResult"
+        style="display:none;">
+      </div>
+
+    </div>
+
+
+    <div class="modal-foot">
+
+      <button
+        class="btn"
+        style="
+          background:var(--surface);
+          color:var(--text);
+          border:1px solid var(--border);
+        "
+        id="cancelCoauthorBtn">
+
+        Закрыть
+
+      </button>
+
+      <button
+        class="btn"
+        id="saveCoauthorBtn">
+
+        Создать соавтора
+
+      </button>
+
+    </div>
+
+  </div>
+
+</div>
+
+
+<!-- =========================================================
+     РЕДАКТИРОВАНИЕ СОАВТОРА
+     ========================================================= -->
+
+<div
+  class="modal-overlay"
+  id="editCoauthorModalOverlay">
+
+  <div class="modal">
+
+    <div class="modal-head">
+
+      <div>
+
+        <h3>
+          Изменить соавтора
+        </h3>
+
+        <p>
+          Обновите логин, пароль или доступы.
+        </p>
+
+      </div>
+
+      <button
+        class="icon-btn del"
+        onclick="
+          document
+            .getElementById('editCoauthorModalOverlay')
+            .classList.remove('open')
+        "
+        style="
+          border:none;
+          background:none;
+          font-size:16px;
+        ">
+
+        ✕
+
+      </button>
+
+    </div>
+
+
+    <div class="modal-body">
+
+      <div class="form-group">
+
+        <label>
+          Логин / Ник соавтора
+        </label>
+
+        <input
+          type="text"
+          id="editCoauthorNick">
+
+      </div>
+
+
+      <div class="form-group">
+
+        <label>
+          Новый пароль
+        </label>
+
+        <input
+          type="text"
+          id="editCoauthorPassword"
+          placeholder="Оставьте пустым">
+
+      </div>
+
+
+      <div class="form-group">
+
+        <label>
+          Доступные разделы
+        </label>
+
+        <div
+          class="chip-group"
+          id="editAccessChips">
+
+          <div
+            class="chip"
+            data-value="staff"
+            onclick="toggleEditChip(this)">
+
+            Сотрудники
+
+          </div>
+
+          <div
+            class="chip"
+            data-value="staff_add"
+            onclick="toggleEditChip(this)">
+
+            Добавить сотрудника
+
+          </div>
+
+          <div
+            class="chip"
+            data-value="staff_actions"
+            onclick="toggleEditChip(this)">
+
+            Действия с сотрудниками
+
+          </div>
+
+          <div
+            class="chip"
+            data-value="hydes"
+            onclick="toggleEditChip(this)">
+
+            Хайды
+
+          </div>
+
+          <div
+            class="chip"
+            data-value="access"
+            onclick="toggleEditChip(this)">
+
+            Доступ
+
+          </div>
+
+          <div
+            class="chip"
+            data-value="payments"
+            onclick="toggleEditChip(this)">
+
+            Мои выплаты
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <div class="modal-foot">
+
+      <button
+        class="btn"
+        style="
+          background:var(--surface);
+          color:var(--text);
+          border:1px solid var(--border);
+        "
+        id="cancelEditCoauthorBtn">
+
+        Закрыть
+
+      </button>
+
+      <button
+        class="btn"
+        id="saveEditCoauthorBtn">
+
+        Сохранить изменения
+
+      </button>
+
+    </div>
+
+  </div>
+
+</div>
+
+
+<!-- =========================================================
+     СОЗДАНИЕ СТАТЬИ
+     ========================================================= -->
+
+<div
+  class="modal-overlay"
+  id="articleCreateModal">
+
+  <div class="modal">
+
+    <div class="modal-head">
+
+      <div>
+
+        <h3>
+          Добавить статью
+        </h3>
+
+        <p>
+          Создайте заголовок и описание статьи.
+        </p>
+
+      </div>
+
+      <button
+        class="icon-btn del"
+        id="closeArticleCreate"
+        style="
+          border:none;
+          background:none;
+          font-size:16px;
+        ">
+
+        ✕
+
+      </button>
+
+    </div>
+
+
+    <div class="modal-body">
+
+      <div class="form-group">
+
+        <label>
+          Заголовок
+        </label>
+
+        <input
+          type="text"
+          id="articleTitle"
+          placeholder="Например: Правила выдачи наказаний"
+          maxlength="150">
+
+      </div>
+
+
+      <div class="form-group">
+
+        <label>
+
+          Описание
+
+          <span
+            style="
+              color:var(--text-faint);
+              font-size:11px;
+              text-transform:none;
+              letter-spacing:normal;
+            ">
+
+            (необязательно)
+
+          </span>
+
+        </label>
+
+        <textarea
+          id="articleDescription"
+          placeholder="Краткое описание статьи..."
+          maxlength="500"
+          style="
+            width:100%;
+            min-height:90px;
+            resize:vertical;
+            padding:12px;
+            border:1px solid var(--border);
+            border-radius:8px;
+            background:var(--bg);
+            color:var(--text);
+            font-size:.9rem;
+            outline:none;
+          "
+        ></textarea>
+
+      </div>
+
+    </div>
+
+
+    <div class="modal-foot">
+
+      <button
+        class="btn"
+        id="cancelArticleCreate"
+        style="
+          background:var(--surface);
+          color:var(--text);
+          border:1px solid var(--border);
+        ">
+
+        Отмена
+
+      </button>
+
+      <button
+        class="btn"
+        id="continueArticleCreate">
+
+        Далее
+
+      </button>
+
+    </div>
+
+  </div>
+
+</div>
+
+
+<!-- =========================================================
+     РЕДАКТОР
+     ========================================================= -->
+
+<div
+  class="modal-overlay"
+  id="articleEditorModal">
+
+  <div
+    class="modal"
+    style="
+      max-width:900px;
+      max-height:94vh;
+    ">
+
+    <div class="modal-head">
+
+      <div>
+
+        <h3 id="articleEditorTitle">
+          Редактор статьи
+        </h3>
+
+        <p id="articleEditorDescription">
+        </p>
+
+      </div>
+
+      <button
+        class="icon-btn del"
+        id="closeArticleEditor"
+        style="
+          border:none;
+          background:none;
+          font-size:16px;
+        ">
+
+        ✕
+
+      </button>
+
+    </div>
+
+
+    <div class="modal-body">
+
+      <div class="editor-toolbar">
+
+        <button
+          type="button"
+          class="icon-btn"
+          onclick="formatArticle('bold')">
+
+          <b>B</b>
+
+        </button>
+
+        <button
+          type="button"
+          class="icon-btn"
+          onclick="formatArticle('italic')">
+
+          <i>I</i>
+
+        </button>
+
+        <button
+          type="button"
+          class="icon-btn"
+          onclick="formatArticle('underline')">
+
+          <u>U</u>
+
+        </button>
+
+        <button
+          type="button"
+          class="icon-btn"
+          onclick="formatArticle('insertUnorderedList')">
+
+          • Список
+
+        </button>
+
+        <button
+          type="button"
+          class="icon-btn"
+          onclick="formatArticle('insertOrderedList')">
+
+          1. Список
+
+        </button>
+
+        <button
+          type="button"
+          class="icon-btn"
+          onclick="insertArticleButton()">
+
+          🔗 Добавить кнопку
+
+        </button>
+
+      </div>
+
+
+      <div
+        id="articleEditor"
+        contenteditable="true"
+        spellcheck="true">
+      </div>
+
+
+      <div
+        style="
+          margin-top:12px;
+          padding:12px;
+          border-radius:8px;
+          background:var(--accent-soft);
+          color:var(--text-dim);
+          font-size:.78rem;
+        ">
+
+        💡 Кнопка может содержать ссылку.
+        При нажатии также будет копироваться
+        заданный тобой текст.
+
+      </div>
+
+    </div>
+
+
+    <div class="modal-foot">
+
+      <button
+        class="btn"
+        id="saveArticleDraft"
+        style="
+          background:var(--surface);
+          color:var(--text);
+          border:1px solid var(--border);
+        ">
+
+        💾 Сохранить черновик
+
+      </button>
+
+      <button
+        class="btn"
+        id="publishArticleBtn">
+
+        🚀 Опубликовать
+
+      </button>
+
+    </div>
+
+  </div>
+
+</div>
+
+
+<!-- =========================================================
+     ДОБАВЛЕНИЕ КНОПКИ
+     ========================================================= -->
+
+<div
+  class="modal-overlay"
+  id="articleButtonModal">
+
+  <div
+    class="modal"
+    style="max-width:500px;">
+
+    <div class="modal-head">
+
+      <div>
+
+        <h3>
+          Добавить кнопку
+        </h3>
+
+        <p>
+          Настройте кнопку статьи.
+        </p>
+
+      </div>
+
+      <button
+        class="icon-btn del"
+        id="closeArticleButton"
+        style="
+          border:none;
+          background:none;
+          font-size:16px;
+        ">
+
+        ✕
+
+      </button>
+
+    </div>
+
+
+    <div class="modal-body">
+
+      <div class="form-group">
+
+        <label>
+          Текст кнопки
+        </label>
+
+        <input
+          type="text"
+          id="articleButtonText"
+          placeholder="Скопировать"
+          maxlength="100">
+
+      </div>
+
+
+      <div class="form-group">
+
+        <label>
+          Ссылка
+        </label>
+
+        <input
+          type="url"
+          id="articleButtonUrl"
+          placeholder="https://example.com">
+
+      </div>
+
+
+      <div class="form-group">
+
+        <label>
+          Текст для копирования
+        </label>
+
+        <textarea
+          id="articleButtonCopyText"
+          placeholder="Этот текст будет скопирован при нажатии"
+          style="
+            width:100%;
+            min-height:100px;
+            resize:vertical;
+            padding:12px;
+            border:1px solid var(--border);
+            border-radius:8px;
+            background:var(--bg);
+            color:var(--text);
+            font-size:.9rem;
+            outline:none;
+          "
+        ></textarea>
+
+      </div>
+
+    </div>
+
+
+    <div class="modal-foot">
+
+      <button
+        class="btn"
+        id="cancelArticleButton"
+        style="
+          background:var(--surface);
+          color:var(--text);
+          border:1px solid var(--border);
+        ">
+
+        Отмена
+
+      </button>
+
+      <button
+        class="btn"
+        id="insertArticleButtonConfirm">
+
+        Добавить
+
+      </button>
+
+    </div>
+
+  </div>
+
+</div>
+
+
 <script>
+
 /* =========================================================
-   FT OWNER — ГОТОВЫЙ SCRIPT
+   НАСТРОЙКИ
    ========================================================= */
 
-const WORKER_URL = "https://shy-wood-231f.potapovsasko.workers.dev";
+const WORKER_URL =
+  "https://shy-wood-231f.potapovsasko.workers.dev";
+
+
+/* =========================================================
+   ДАННЫЕ
+   ========================================================= */
 
 let staffData = [];
 let coauthorsData = [];
 let articlesData = [];
 
 let currentFilter = "Все";
-let currentStaffSearch = "";
+
 let editIndex = null;
 let editCoauthorIdx = null;
-let pendingAvatar = null;
 
-let editingArticleId = null;
-let articleButtons = [];
+let pendingAvatar = null;
+let currentArticle = null;
+
+
+/* =========================================================
+   КЛАССЫ РАНГОВ
+   ========================================================= */
 
 const rankClass = {
+
   "Бета": "r-beta",
+
   "Беta": "r-beta",
+
   "Альфа": "r-alpha",
+
   "Стажёр": "r-stazher",
+
   "Метод": "r-metod"
+
 };
 
+
+/* =========================================================
+   НАЗВАНИЯ СТРАНИЦ
+   ========================================================= */
+
 const pageTitles = {
+
   home: {
     title: "Главная",
     sub: "Общая информация и панель управления."
   },
+
   staff: {
     title: "Сотрудники",
     sub: "Команда, которая работает для сервера FunTime."
   },
+
   hydes: {
     title: "Хайды",
     sub: "Закрытые инструкции и руководства."
   },
+
   access: {
     title: "Доступ",
     sub: "Управление соавторами и правами доступа."
   },
+
   payments: {
     title: "Мои выплаты",
     sub: "История выплат и баланс."
   },
+
   forbidden: {
     title: "Ошибка доступа",
     sub: "Недостаточно прав."
   }
+
 };
 
+
 /* =========================================================
-   УТИЛИТЫ
+   БЕЗОПАСНЫЙ HTML
    ========================================================= */
 
-function getRole() {
-  return localStorage.getItem("ft_role") || "admin";
-}
-
-function getUsername() {
-  return localStorage.getItem("ft_username") || "";
-}
-
-function getPermissions() {
-  try {
-    return JSON.parse(localStorage.getItem("ft_permissions") || "[]");
-  } catch {
-    return [];
-  }
-}
-
-function isAdmin() {
-  return getRole() === "admin";
-}
-
-function hasPermission(permission) {
-  return isAdmin() || getPermissions().includes(permission);
-}
-
 function escapeHtml(value) {
-  if (value === null || value === undefined) return "";
 
-  return String(value)
+  return String(value ?? "")
+
     .replace(/&/g, "&amp;")
+
     .replace(/</g, "&lt;")
+
     .replace(/>/g, "&gt;")
+
     .replace(/"/g, "&quot;")
+
     .replace(/'/g, "&#039;");
 }
 
-function generateId() {
+
+/* =========================================================
+   ПРОВЕРКА РОЛИ
+   ========================================================= */
+
+function isAdmin() {
+
   return (
-    Date.now().toString(36) +
-    Math.random().toString(36).substring(2, 10)
+    localStorage.getItem("ft_role") === "admin"
   );
+
 }
 
-function formatDate(date) {
-  if (!date) return "";
-
-  try {
-    return new Date(date).toLocaleString("ru-RU", {
-      day: "2-digit",
-      month: "2-digit",
-      year: "numeric",
-      hour: "2-digit",
-      minute: "2-digit"
-    });
-  } catch {
-    return "";
-  }
-}
 
 /* =========================================================
    АВТОРИЗАЦИЯ
    ========================================================= */
 
-if (localStorage.getItem("ft_authenticated") === "true") {
+if (
+  localStorage.getItem("ft_authenticated") === "true"
+) {
+
   showDashboard();
+
 }
 
-document.getElementById("loginForm").addEventListener("submit", async (e) => {
-  e.preventDefault();
 
-  const login = document.getElementById("username").value.trim();
-  const password = document.getElementById("password").value.trim();
+document
+  .getElementById("loginForm")
+  .addEventListener(
+    "submit",
+    async e => {
 
-  const statusMsg = document.getElementById("statusMsg");
-  const submitBtn = document.getElementById("submitBtn");
+      e.preventDefault();
 
-  statusMsg.textContent = "Проверка данных...";
-  statusMsg.className = "status-msg info";
+      const login =
+        document
+          .getElementById("username")
+          .value
+          .trim();
 
-  submitBtn.disabled = true;
+      const password =
+        document
+          .getElementById("password")
+          .value
+          .trim();
 
-  try {
-    const res = await fetch(`${WORKER_URL}/api/login`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        login,
-        password
-      })
-    });
+      const statusMsg =
+        document.getElementById("statusMsg");
 
-    const data = await res.json();
+      const submitBtn =
+        document.getElementById("submitBtn");
 
-    if (!data.success) {
-      statusMsg.textContent = data.error || "Ошибка входа";
-      statusMsg.className = "status-msg error";
-      submitBtn.disabled = false;
-      return;
-    }
 
-    if (
-      data.status === "deleted" ||
-      data.status === "blocked"
-    ) {
       statusMsg.textContent =
-        "Ошибка: аккаунт заблокирован или удалён.";
-      statusMsg.className = "status-msg error";
-      submitBtn.disabled = false;
-      return;
-    }
+        "Проверка данных...";
 
-    localStorage.setItem("ft_username", login);
-    localStorage.setItem(
-      "ft_role",
-      data.role || "admin"
-    );
+      statusMsg.className =
+        "status-msg info";
 
-    localStorage.setItem(
-      "ft_permissions",
-      JSON.stringify(
-        data.permissions || [
-          "staff",
-          "staff_add",
-          "staff_actions",
-          "hydes",
-          "access",
-          "payments",
-          "home",
-          "create_articles"
-        ]
-      )
-    );
+      submitBtn.disabled = true;
 
-    statusMsg.textContent =
-      "Подтвердите вход в Telegram...";
-    statusMsg.className = "status-msg info";
 
-    startPolling(data.sessionId);
+      try {
 
-  } catch (err) {
-    console.error(err);
+        const res =
+          await fetch(
+            `${WORKER_URL}/api/login`,
+            {
+              method: "POST",
 
-    statusMsg.textContent =
-      "Ошибка соединения с сервером.";
-    statusMsg.className = "status-msg error";
+              headers: {
+                "Content-Type":
+                  "application/json"
+              },
 
-    submitBtn.disabled = false;
-  }
-});
+              body: JSON.stringify({
+                login,
+                password
+              })
+            }
+          );
 
-function startPolling(sessionId) {
-  const pollInterval = setInterval(async () => {
-    try {
-      const res = await fetch(
-        `${WORKER_URL}/api/check-status?sessionId=${encodeURIComponent(sessionId)}`
-      );
 
-      const data = await res.json();
+        const data =
+          await res.json();
 
-      if (data.status === "approved") {
-        clearInterval(pollInterval);
+
+        if (!data.success) {
+
+          statusMsg.textContent =
+            data.error ||
+            "Ошибка входа";
+
+          statusMsg.className =
+            "status-msg error";
+
+          submitBtn.disabled = false;
+
+          return;
+        }
+
+
+        if (
+          data.status === "deleted" ||
+          data.status === "blocked"
+        ) {
+
+          statusMsg.textContent =
+            "Ошибка: аккаунт заблокирован или удалён.";
+
+          statusMsg.className =
+            "status-msg error";
+
+          submitBtn.disabled = false;
+
+          return;
+        }
+
 
         localStorage.setItem(
-          "ft_authenticated",
-          "true"
+          "ft_username",
+          login
         );
 
-        showDashboard();
 
-      } else if (
-        data.status === "denied" ||
-        data.status === "expired"
-      ) {
-        clearInterval(pollInterval);
+        localStorage.setItem(
+          "ft_role",
+          data.role || "admin"
+        );
 
-        document.getElementById("statusMsg").textContent =
-          "Вход отклонён или время истекло.";
 
-        document.getElementById("statusMsg").className =
+        localStorage.setItem(
+          "ft_permissions",
+          JSON.stringify(
+            data.permissions ||
+            [
+              "staff",
+              "staff_add",
+              "staff_actions",
+              "hydes",
+              "access",
+              "payments",
+              "home"
+            ]
+          )
+        );
+
+
+        statusMsg.textContent =
+          "Подтвердите вход в Telegram...";
+
+
+        startPolling(data.sessionId);
+
+
+      } catch (err) {
+
+        console.error(err);
+
+        statusMsg.textContent =
+          "Ошибка соединения";
+
+        statusMsg.className =
           "status-msg error";
 
-        document.getElementById("submitBtn").disabled =
-          false;
+        submitBtn.disabled = false;
+
       }
 
-    } catch (e) {
-      console.error(e);
     }
-  }, 2000);
+  );
+
+
+/* =========================================================
+   TELEGRAM POLLING
+   ========================================================= */
+
+function startPolling(sessionId) {
+
+  const pollInterval =
+    setInterval(
+      async () => {
+
+        try {
+
+          const res =
+            await fetch(
+              `${WORKER_URL}/api/check-status?sessionId=${encodeURIComponent(sessionId)}`
+            );
+
+
+          const data =
+            await res.json();
+
+
+          if (
+            data.status === "approved"
+          ) {
+
+            clearInterval(
+              pollInterval
+            );
+
+
+            localStorage.setItem(
+              "ft_authenticated",
+              "true"
+            );
+
+
+            showDashboard();
+
+          }
+
+
+          else if (
+            data.status === "denied" ||
+            data.status === "expired"
+          ) {
+
+            clearInterval(
+              pollInterval
+            );
+
+
+            document
+              .getElementById("statusMsg")
+              .textContent =
+              "Вход отклонён или время истекло";
+
+
+            document
+              .getElementById("statusMsg")
+              .className =
+              "status-msg error";
+
+
+            document
+              .getElementById("submitBtn")
+              .disabled = false;
+
+          }
+
+
+        } catch (e) {
+
+          console.error(e);
+
+        }
+
+      },
+      2000
+    );
+
 }
+
 
 /* =========================================================
    DASHBOARD
    ========================================================= */
 
 async function showDashboard() {
-  document.getElementById("authSection").style.display = "none";
-  document.getElementById("dashboardSection").style.display = "block";
 
-  const name = getUsername() || "Пользователь";
+  document
+    .getElementById("authSection")
+    .style.display = "none";
 
-  document.getElementById("userNameLabel").textContent =
-    name;
 
-  document.getElementById("userInitial").textContent =
+  document
+    .getElementById("dashboardSection")
+    .style.display = "block";
+
+
+  const name =
+    localStorage.getItem("ft_username") ||
+    "Пользователь";
+
+
+  document
+    .getElementById("userNameLabel")
+    .textContent = name;
+
+
+  document
+    .getElementById("userInitial")
+    .textContent =
     name.charAt(0).toUpperCase();
 
-  addStaffSearch();
-  buildHydesInterface();
-  addCreateArticlesPermissionToAccess();
 
   await loadServerData();
 
   applySidebarVisibility();
+
+  renderArticles();
+
 }
 
+
+/* =========================================================
+   SIDEBAR
+   ========================================================= */
+
 function applySidebarVisibility() {
-  const role = getRole();
-  const permissions = getPermissions();
+
+  const role =
+    localStorage.getItem("ft_role") ||
+    "admin";
+
+
+  let permissions =
+    JSON.parse(
+      localStorage.getItem(
+        "ft_permissions"
+      ) || "[]"
+    );
+
 
   const pages = [
     "staff",
@@ -285,327 +3084,212 @@ function applySidebarVisibility() {
     "payments"
   ];
 
+
   pages.forEach(page => {
+
     const item =
-      document.getElementById(`nav-${page}`);
+      document.getElementById(
+        `nav-${page}`
+      );
+
 
     if (!item) return;
+
 
     if (
       role === "admin" ||
       permissions.includes(page)
     ) {
+
       item.style.display = "flex";
+
     } else {
+
       item.style.display = "none";
+
     }
+
   });
+
+
+  const addArticleBtn =
+    document.getElementById(
+      "addArticleBtn"
+    );
+
+
+  if (addArticleBtn) {
+
+    addArticleBtn.style.display =
+      role === "admin"
+        ? "inline-flex"
+        : "none";
+
+  }
+
 }
+
 
 /* =========================================================
    ВЫХОД
    ========================================================= */
 
-document.getElementById("logoutBtn")
-  .addEventListener("click", () => {
-    localStorage.clear();
-    location.reload();
-  });
+document
+  .getElementById("logoutBtn")
+  .addEventListener(
+    "click",
+    () => {
+
+      localStorage.clear();
+
+      location.reload();
+
+    }
+  );
+
 
 /* =========================================================
    НАВИГАЦИЯ
    ========================================================= */
 
 document
-  .querySelectorAll(".sidebar .nav-item[data-page]")
+  .querySelectorAll(
+    ".sidebar .nav-item[data-page]"
+  )
   .forEach(item => {
 
-    item.addEventListener("click", e => {
-      e.preventDefault();
+    item.addEventListener(
+      "click",
+      e => {
 
-      const page = item.dataset.page;
+        e.preventDefault();
 
-      document
-        .querySelectorAll(".sidebar .nav-item")
-        .forEach(el =>
-          el.classList.remove("active")
-        );
+        const page =
+          item.dataset.page;
 
-      item.classList.add("active");
-
-      document
-        .querySelectorAll(".page-view")
-        .forEach(v =>
-          v.classList.remove("active-page")
-        );
-
-      const role = getRole();
-      const permissions = getPermissions();
-
-      if (
-        role === "admin" ||
-        permissions.includes(page) ||
-        page === "home"
-      ) {
-
-        const target =
-          document.getElementById(`view-${page}`);
-
-        if (target) {
-          target.classList.add("active-page");
-        }
-
-        updateTopbar(page);
-
-        if (page === "hydes") {
-          renderArticles();
-        }
-
-      } else {
 
         document
-          .getElementById("view-forbidden")
-          .classList.add("active-page");
+          .querySelectorAll(
+            ".sidebar .nav-item"
+          )
+          .forEach(el =>
+            el.classList.remove(
+              "active"
+            )
+          );
 
-        updateTopbar("forbidden");
+
+        item.classList.add("active");
+
+
+        document
+          .querySelectorAll(
+            ".page-view"
+          )
+          .forEach(view =>
+            view.classList.remove(
+              "active-page"
+            )
+          );
+
+
+        const role =
+          localStorage.getItem(
+            "ft_role"
+          ) || "admin";
+
+
+        const permissions =
+          JSON.parse(
+            localStorage.getItem(
+              "ft_permissions"
+            ) || "[]"
+          );
+
+
+        if (
+          role === "admin" ||
+          permissions.includes(page) ||
+          page === "home"
+        ) {
+
+          const target =
+            document.getElementById(
+              `view-${page}`
+            );
+
+
+          if (target) {
+
+            target.classList.add(
+              "active-page"
+            );
+
+          }
+
+
+          updateTopbar(page);
+
+
+          if (page === "hydes") {
+
+            renderArticles();
+
+          }
+
+        } else {
+
+          document
+            .getElementById(
+              "view-forbidden"
+            )
+            .classList.add(
+              "active-page"
+            );
+
+
+          updateTopbar(
+            "forbidden"
+          );
+
+        }
+
       }
-    });
+    );
+
   });
 
+
 function updateTopbar(pageKey) {
+
   const info =
-    pageTitles[pageKey] || {
+    pageTitles[pageKey] ||
+    {
       title: "Раздел",
       sub: ""
     };
 
-  document.getElementById("pageTitle")
-    .textContent = info.title;
-
-  document.getElementById("pageSub")
-    .textContent = info.sub;
-}
-
-/* =========================================================
-   ЗАГРУЗКА ДАННЫХ
-   ========================================================= */
-
-async function loadServerData() {
-
-  try {
-
-    const res =
-      await fetch(`${WORKER_URL}/api/data`);
-
-    const data =
-      await res.json();
-
-    if (data.success) {
-
-      staffData =
-        Array.isArray(data.staff)
-          ? data.staff
-          : [];
-
-      coauthorsData =
-        Array.isArray(data.coauthors)
-          ? data.coauthors
-          : [];
-
-      articlesData =
-        Array.isArray(data.articles)
-          ? data.articles
-          : [];
-    }
-
-  } catch (e) {
-
-    console.error(
-      "Ошибка загрузки данных:",
-      e
-    );
-
-    staffData =
-      JSON.parse(
-        localStorage.getItem(
-          "ft_staff_data"
-        )
-      ) || [];
-
-    coauthorsData =
-      JSON.parse(
-        localStorage.getItem(
-          "ft_coauthors_data"
-        )
-      ) || [];
-
-    articlesData =
-      JSON.parse(
-        localStorage.getItem(
-          "ft_articles_data"
-        )
-      ) || [];
-  }
-
-  const currentLogin =
-    getUsername();
-
-  const role =
-    getRole();
-
-  if (
-    role !== "admin" &&
-    currentLogin
-  ) {
-
-    const me =
-      coauthorsData.find(
-        c =>
-          c.login === currentLogin
-      );
-
-    if (me) {
-
-      localStorage.setItem(
-        "ft_permissions",
-        JSON.stringify(
-          me.permissions || []
-        )
-      );
-
-      applySidebarVisibility();
-    }
-  }
-
-  renderStaff();
-  renderCoauthors();
-  renderArticles();
-}
-
-/* =========================================================
-   СОХРАНЕНИЕ ДАННЫХ
-   ========================================================= */
-
-async function saveServerData() {
-
-  localStorage.setItem(
-    "ft_staff_data",
-    JSON.stringify(staffData)
-  );
-
-  localStorage.setItem(
-    "ft_coauthors_data",
-    JSON.stringify(coauthorsData)
-  );
-
-  localStorage.setItem(
-    "ft_articles_data",
-    JSON.stringify(articlesData)
-  );
-
-  try {
-
-    await fetch(`${WORKER_URL}/api/data`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        staff: staffData,
-        coauthors: coauthorsData,
-        articles: articlesData
-      })
-    });
-
-  } catch (e) {
-    console.error(
-      "Ошибка сохранения:",
-      e
-    );
-  }
-
-  renderStaff();
-  renderCoauthors();
-  renderArticles();
-}
-
-/* =========================================================
-   ПОИСК СОТРУДНИКОВ
-   ========================================================= */
-
-function addStaffSearch() {
-
-  const staffView =
-    document.getElementById(
-      "view-staff"
-    );
-
-  if (!staffView) return;
-
-  if (
-    document.getElementById(
-      "staffSearch"
-    )
-  ) return;
-
-  const tabs =
-    document.getElementById("tabs");
-
-  if (!tabs) return;
-
-  const searchBox =
-    document.createElement("div");
-
-  searchBox.style.cssText = `
-    margin-bottom:15px;
-    display:flex;
-    width:100%;
-  `;
-
-  searchBox.innerHTML = `
-    <input
-      id="staffSearch"
-      type="text"
-      placeholder="🔎 Поиск сотрудника по нику..."
-      style="
-        width:100%;
-        padding:11px 14px;
-        border:1px solid var(--border);
-        border-radius:9px;
-        background:var(--surface);
-        color:var(--text);
-        outline:none;
-        font-size:.9rem;
-      "
-    >
-  `;
-
-  tabs.parentNode.insertBefore(
-    searchBox,
-    tabs
-  );
 
   document
-    .getElementById("staffSearch")
-    .addEventListener(
-      "input",
-      e => {
+    .getElementById("pageTitle")
+    .textContent =
+    info.title;
 
-        currentStaffSearch =
-          e.target.value
-            .trim()
-            .toLowerCase();
 
-        renderStaff();
-      }
-    );
+  document
+    .getElementById("pageSub")
+    .textContent =
+    info.sub;
+
 }
 
+
 /* =========================================================
-   СОТРУДНИКИ
+   ФИЛЬТРЫ СОТРУДНИКОВ
    ========================================================= */
 
-document.querySelectorAll(".tab")
+document
+  .querySelectorAll(".tab")
   .forEach(tab => {
 
     tab.addEventListener(
@@ -620,15 +3304,260 @@ document.querySelectorAll(".tab")
             )
           );
 
-        tab.classList.add("active");
+
+        tab.classList.add(
+          "active"
+        );
+
 
         currentFilter =
           tab.dataset.filter;
 
+
         renderStaff();
+
       }
     );
+
   });
+
+
+/* =========================================================
+   ПОИСК СОТРУДНИКОВ
+   ========================================================= */
+
+document
+  .getElementById("staffSearch")
+  .addEventListener(
+    "input",
+    () => {
+
+      renderStaff();
+
+    }
+  );
+
+
+/* =========================================================
+   ЗАГРУЗКА ДАННЫХ
+   ========================================================= */
+
+async function loadServerData() {
+
+  try {
+
+    const res =
+      await fetch(
+        `${WORKER_URL}/api/data`,
+        {
+          cache: "no-store"
+        }
+      );
+
+
+    const data =
+      await res.json();
+
+
+    if (data.success) {
+
+      staffData =
+        Array.isArray(data.staff)
+          ? data.staff
+          : [];
+
+
+      coauthorsData =
+        Array.isArray(data.coauthors)
+          ? data.coauthors
+          : [];
+
+
+      articlesData =
+        Array.isArray(data.articles)
+          ? data.articles
+          : [];
+
+    }
+
+
+  } catch (e) {
+
+    console.error(
+      "Ошибка загрузки:",
+      e
+    );
+
+
+    staffData =
+      JSON.parse(
+        localStorage.getItem(
+          "ft_staff_data"
+        ) || "[]"
+      );
+
+
+    coauthorsData =
+      JSON.parse(
+        localStorage.getItem(
+          "ft_coauthors_data"
+        ) || "[]"
+      );
+
+
+    articlesData =
+      JSON.parse(
+        localStorage.getItem(
+          "ft_articles_data"
+        ) || "[]"
+      );
+
+  }
+
+
+  const currentLogin =
+    localStorage.getItem(
+      "ft_username"
+    );
+
+
+  const role =
+    localStorage.getItem(
+      "ft_role"
+    );
+
+
+  if (
+    role !== "admin" &&
+    currentLogin
+  ) {
+
+    const me =
+      coauthorsData.find(
+        c =>
+          c.login ===
+          currentLogin
+      );
+
+
+    if (me) {
+
+      localStorage.setItem(
+        "ft_permissions",
+        JSON.stringify(
+          me.permissions || []
+        )
+      );
+
+
+      applySidebarVisibility();
+
+    }
+
+  }
+
+
+  renderStaff();
+
+  renderCoauthors();
+
+  renderArticles();
+
+}
+
+
+/* =========================================================
+   СОХРАНЕНИЕ ДАННЫХ
+   ========================================================= */
+
+async function saveServerData() {
+
+  localStorage.setItem(
+    "ft_staff_data",
+    JSON.stringify(
+      staffData
+    )
+  );
+
+
+  localStorage.setItem(
+    "ft_coauthors_data",
+    JSON.stringify(
+      coauthorsData
+    )
+  );
+
+
+  localStorage.setItem(
+    "ft_articles_data",
+    JSON.stringify(
+      articlesData
+    )
+  );
+
+
+  try {
+
+    const res =
+      await fetch(
+        `${WORKER_URL}/api/data`,
+        {
+          method: "POST",
+
+          headers: {
+            "Content-Type":
+              "application/json"
+          },
+
+          body: JSON.stringify({
+
+            staff:
+              staffData,
+
+            coauthors:
+              coauthorsData,
+
+            articles:
+              articlesData
+
+          })
+
+        }
+      );
+
+
+    if (!res.ok) {
+
+      console.error(
+        "Worker вернул ошибку:",
+        res.status
+      );
+
+    }
+
+
+  } catch (e) {
+
+    console.error(
+      "Ошибка сохранения:",
+      e
+    );
+
+  }
+
+
+  renderStaff();
+
+  renderCoauthors();
+
+  renderArticles();
+
+}
+
+
+/* =========================================================
+   СОТРУДНИКИ
+   ========================================================= */
 
 function renderStaff() {
 
@@ -637,43 +3566,69 @@ function renderStaff() {
       "staffList"
     );
 
-  if (!tbody) return;
 
-  let filtered =
-    staffData.filter(s => {
+  const search =
+    (
+      document.getElementById(
+        "staffSearch"
+      )?.value || ""
+    )
+      .trim()
+      .toLowerCase();
 
-      const ranks =
-        s.ranks ||
-        (s.rank ? [s.rank] : []);
 
-      if (
-        currentFilter !== "Все" &&
-        !ranks.includes(
-          currentFilter
-        )
-      ) {
-        return false;
-      }
+  const filtered =
+    staffData.filter(
+      staff => {
 
-      if (
-        currentStaffSearch &&
-        !String(
-          s.nick || ""
-        )
-          .toLowerCase()
-          .includes(
-            currentStaffSearch
+        const ranks =
+          staff.ranks ||
+          (
+            staff.rank
+              ? [staff.rank]
+              : []
+          );
+
+
+        const filterMatch =
+          currentFilter === "Все" ||
+          ranks.includes(
+            currentFilter
+          );
+
+
+        const searchMatch =
+          !search ||
+          (
+            staff.nick ||
+            ""
           )
-      ) {
-        return false;
+            .toLowerCase()
+            .includes(search);
+
+
+        return (
+          filterMatch &&
+          searchMatch
+        );
+
       }
+    );
 
-      return true;
-    });
 
-  const role = getRole();
+  const role =
+    localStorage.getItem(
+      "ft_role"
+    ) || "admin";
+
+
   const permissions =
-    getPermissions();
+    JSON.parse(
+      localStorage.getItem(
+        "ft_permissions"
+      ) || "[]"
+    );
+
 
   const canAdd =
     role === "admin" ||
@@ -681,504 +3636,246 @@ function renderStaff() {
       "staff_add"
     );
 
+
   const canActions =
     role === "admin" ||
     permissions.includes(
       "staff_actions"
     );
 
-  const footer =
-    document.getElementById(
+
+  document
+    .getElementById(
       "staffFooterCard"
-    );
+    )
+    .style.display =
+    canAdd
+      ? "flex"
+      : "none";
 
-  if (footer) {
-    footer.style.display =
-      canAdd
-        ? "flex"
-        : "none";
-  }
 
-  const actionsHeader =
-    document.getElementById(
+  document
+    .getElementById(
       "staffActionsHeader"
-    );
+    )
+    .style.display =
+    canActions
+      ? ""
+      : "none";
 
-  if (actionsHeader) {
-    actionsHeader.style.display =
-      canActions
-        ? ""
-        : "none";
-  }
 
-  if (!filtered.length) {
+  if (
+    filtered.length === 0
+  ) {
 
     tbody.innerHTML = `
       <tr>
-        <td colspan="5"
+        <td
+          colspan="5"
           style="
             text-align:center;
             color:var(--text-faint);
             padding:30px;
           ">
-          Сотрудники не найдены
+
+          ${
+            search
+              ? "Сотрудник с таким ником не найден"
+              : "Нет сотрудников для отображения"
+          }
+
         </td>
       </tr>
     `;
 
     return;
+
   }
+
 
   tbody.innerHTML =
-    filtered.map(s => {
+    filtered
+      .map(staff => {
 
-      const originalIndex =
-        staffData.indexOf(s);
-
-      const ranks =
-        s.ranks ||
-        (s.rank ? [s.rank] : []);
-
-      const positions =
-        s.positions ||
-        (s.position
-          ? [s.position]
-          : []);
-
-      const ranksHtml =
-        ranks.map(r => `
-          <span class="badge ${
-            rankClass[r] ||
-            "r-default"
-          }">
-            ${escapeHtml(r)}
-          </span>
-        `).join(" ");
-
-      const positionsHtml =
-        positions.length
-          ? positions.map(p => `
-              <span
-                class="role-badge role-chip"
-                data-value="${escapeHtml(p)}">
-                ${escapeHtml(p)}
-              </span>
-            `).join(" ")
-          : "—";
-
-      const avatarSrc =
-        s.avatar ||
-        "https://via.placeholder.com/32";
-
-      const vkHtml =
-        s.vk
-          ? `
-            <a
-              href="${escapeHtml(s.vk)}"
-              target="_blank"
-              rel="noopener"
-              class="vk-link">
-              Ссылка
-            </a>
-          `
-          : "—";
-
-      const actionsHtml =
-        canActions
-          ? `
-            <td>
-              <div class="row-actions">
-
-                <button
-                  class="icon-btn warn"
-                  onclick="editStaff(${originalIndex})">
-                  Изменить
-                </button>
-
-                <button
-                  class="icon-btn del"
-                  onclick="deleteStaff(${originalIndex})">
-                  Удалить
-                </button>
-
-              </div>
-            </td>
-          `
-          : "";
-
-      return `
-        <tr>
-
-          <td>
-            <div class="player-cell">
-
-              <img
-                src="${avatarSrc}"
-                class="avatar"
-                alt="">
-
-              <span class="player-name">
-                ${escapeHtml(s.nick)}
-              </span>
-
-            </div>
-          </td>
-
-          <td>
-            ${ranksHtml}
-          </td>
-
-          <td>
-            ${positionsHtml}
-          </td>
-
-          <td>
-            ${vkHtml}
-          </td>
-
-          ${actionsHtml}
-
-        </tr>
-      `;
-
-    }).join("");
-}
-
-/* =========================================================
-   СОТРУДНИК — ТЕГИ
-   ========================================================= */
-
-window.toggleTag = function(btn) {
-  btn.classList.toggle("active");
-};
-
-function setChipsActive(
-  containerId,
-  values
-) {
-
-  const container =
-    document.getElementById(
-      containerId
-    );
-
-  if (!container) return;
-
-  container
-    .querySelectorAll(".tag-chip")
-    .forEach(chip => {
-
-      if (
-        values.includes(
-          chip.dataset.value
-        )
-      ) {
-        chip.classList.add(
-          "active"
-        );
-      } else {
-        chip.classList.remove(
-          "active"
-        );
-      }
-
-    });
-}
-
-/* =========================================================
-   СОТРУДНИК — ДОБАВЛЕНИЕ
-   ========================================================= */
-
-const staffModal =
-  document.getElementById(
-    "staffModalOverlay"
-  );
-
-if (
-  document.getElementById(
-    "openAddModal"
-  )
-) {
-
-  document
-    .getElementById(
-      "openAddModal"
-    )
-    .addEventListener(
-      "click",
-      () => {
-
-        editIndex = null;
-
-        document.getElementById(
-          "modalTitle"
-        ).textContent =
-          "Добавить сотрудника";
-
-        document.getElementById(
-          "staffNick"
-        ).value = "";
-
-        document.getElementById(
-          "staffVk"
-        ).value = "";
-
-        document.getElementById(
-          "fileNameLabel"
-        ).textContent =
-          "Файл не выбран";
-
-        pendingAvatar = null;
-
-        document
-          .querySelectorAll(
-            "#rankTags .tag-chip, #roleTags .tag-chip"
-          )
-          .forEach(el =>
-            el.classList.remove(
-              "active"
-            )
+        const originalIndex =
+          staffData.indexOf(
+            staff
           );
 
-        staffModal.classList.add(
-          "open"
-        );
-      }
-    );
+
+        const ranks =
+          staff.ranks ||
+          (
+            staff.rank
+              ? [staff.rank]
+              : []
+          );
+
+
+        const positions =
+          staff.positions ||
+          (
+            staff.position
+              ? [staff.position]
+              : []
+          );
+
+
+        const ranksHtml =
+          ranks
+            .map(
+              rank =>
+                `
+                  <span
+                    class="badge ${
+                      rankClass[rank] ||
+                      "r-default"
+                    }">
+
+                    ${escapeHtml(rank)}
+
+                  </span>
+                `
+            )
+            .join(" ");
+
+
+        const positionsHtml =
+          positions.length
+
+            ? positions
+                .map(
+                  position =>
+                    `
+                      <span class="role-badge">
+
+                        ${escapeHtml(
+                          position
+                        )}
+
+                      </span>
+                    `
+                )
+                .join(" ")
+
+            : "—";
+
+
+        const avatar =
+          staff.avatar ||
+          "https://via.placeholder.com/32";
+
+
+        const vkHtml =
+          staff.vk
+
+            ? `
+              <a
+                href="${escapeHtml(
+                  staff.vk
+                )}"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="vk-link">
+
+                Ссылка
+
+              </a>
+            `
+
+            : "—";
+
+
+        const actions =
+          canActions
+
+            ? `
+              <td>
+
+                <div class="row-actions">
+
+                  <button
+                    class="icon-btn warn"
+                    onclick="
+                      editStaff(
+                        ${originalIndex}
+                      )
+                    ">
+
+                    Изменить
+
+                  </button>
+
+                  <button
+                    class="icon-btn del"
+                    onclick="
+                      deleteStaff(
+                        ${originalIndex}
+                      )
+                    ">
+
+                    Удалить
+
+                  </button>
+
+                </div>
+
+              </td>
+            `
+
+            : "";
+
+
+        return `
+          <tr>
+
+            <td>
+
+              <div class="player-cell">
+
+                <img
+                  src="${avatar}"
+                  class="avatar"
+                  alt="">
+
+                <span class="player-name">
+
+                  ${escapeHtml(
+                    staff.nick || ""
+                  )}
+
+                </span>
+
+              </div>
+
+            </td>
+
+            <td>
+              ${ranksHtml}
+            </td>
+
+            <td>
+              ${positionsHtml}
+            </td>
+
+            <td>
+              ${vkHtml}
+            </td>
+
+            ${actions}
+
+          </tr>
+        `;
+
+      })
+      .join("");
+
 }
 
-function closeStaffModal() {
-  if (staffModal) {
-    staffModal.classList.remove(
-      "open"
-    );
-  }
-}
-
-document
-  .getElementById(
-    "cancelModalBtn"
-  )
-  ?.addEventListener(
-    "click",
-    closeStaffModal
-  );
-
-document
-  .getElementById(
-    "cancelModalBtn2"
-  )
-  ?.addEventListener(
-    "click",
-    closeStaffModal
-  );
-
-document
-  .getElementById(
-    "staffAvatarFile"
-  )
-  ?.addEventListener(
-    "change",
-    e => {
-
-      const file =
-        e.target.files[0];
-
-      if (!file) return;
-
-      document.getElementById(
-        "fileNameLabel"
-      ).textContent =
-        file.name;
-
-      const reader =
-        new FileReader();
-
-      reader.onload = () => {
-        pendingAvatar =
-          reader.result;
-      };
-
-      reader.readAsDataURL(file);
-    }
-  );
-
-document
-  .getElementById(
-    "saveStaffBtn"
-  )
-  ?.addEventListener(
-    "click",
-    async () => {
-
-      const nick =
-        document.getElementById(
-          "staffNick"
-        ).value.trim();
-
-      if (!nick) {
-        alert(
-          "Введите ник сотрудника."
-        );
-        return;
-      }
-
-      const ranks =
-        [
-          ...document.querySelectorAll(
-            "#rankTags .tag-chip.active"
-          )
-        ].map(
-          c => c.dataset.value
-        );
-
-      const positions =
-        [
-          ...document.querySelectorAll(
-            "#roleTags .tag-chip.active"
-          )
-        ].map(
-          c => c.dataset.value
-        );
-
-      const vk =
-        document.getElementById(
-          "staffVk"
-        ).value.trim();
-
-      const record = {
-        nick,
-        ranks,
-        positions,
-        vk,
-        avatar: pendingAvatar
-      };
-
-      if (editIndex === null) {
-        staffData.push(record);
-      } else {
-        staffData[editIndex] =
-          record;
-      }
-
-      await saveServerData();
-
-      closeStaffModal();
-    }
-  );
-
-window.deleteStaff =
-  async function(idx) {
-
-    if (
-      !confirm(
-        "Удалить сотрудника?"
-      )
-    ) {
-      return;
-    }
-
-    staffData.splice(
-      idx,
-      1
-    );
-
-    await saveServerData();
-  };
-
-window.editStaff =
-  function(idx) {
-
-    editIndex = idx;
-
-    const item =
-      staffData[idx];
-
-    document.getElementById(
-      "modalTitle"
-    ).textContent =
-      "Изменить сотрудника";
-
-    document.getElementById(
-      "staffNick"
-    ).value =
-      item.nick || "";
-
-    document.getElementById(
-      "staffVk"
-    ).value =
-      item.vk || "";
-
-    pendingAvatar =
-      item.avatar || null;
-
-    document.getElementById(
-      "fileNameLabel"
-    ).textContent =
-      pendingAvatar
-        ? "Загружен аватар"
-        : "Файл не выбран";
-
-    setChipsActive(
-      "rankTags",
-      item.ranks ||
-      (item.rank
-        ? [item.rank]
-        : [])
-    );
-
-    setChipsActive(
-      "roleTags",
-      item.positions ||
-      (item.position
-        ? [item.position]
-        : [])
-    );
-
-    staffModal.classList.add(
-      "open"
-    );
-  };
 
 /* =========================================================
    СОАВТОРЫ
    ========================================================= */
-
-function setSelected(
-  container,
-  values
-) {
-
-  if (!container) return;
-
-  container
-    .querySelectorAll(".chip")
-    .forEach(c => {
-
-      c.classList.toggle(
-        "selected",
-        values.includes(
-          c.dataset.value
-        )
-      );
-
-    });
-}
-
-function getSelected(
-  container
-) {
-
-  if (!container) return [];
-
-  return [
-    ...container.querySelectorAll(
-      ".chip.selected"
-    )
-  ].map(
-    c => c.dataset.value
-  );
-}
 
 function renderCoauthors() {
 
@@ -1187,28 +3884,31 @@ function renderCoauthors() {
       "coauthorsList"
     );
 
-  if (!tbody) return;
 
   if (
     !coauthorsData ||
-    !coauthorsData.length
+    coauthorsData.length === 0
   ) {
 
     tbody.innerHTML = `
       <tr>
-        <td colspan="5"
+        <td
+          colspan="5"
           style="
             text-align:center;
             color:var(--text-faint);
-            padding:30px;
           ">
+
           Соавторы отсутствуют
+
         </td>
       </tr>
     `;
 
     return;
+
   }
+
 
   const permLabels = {
 
@@ -1224,165 +3924,617 @@ function renderCoauthors() {
     hydes:
       "Хайды",
 
-    create_articles:
-      "Создавать статьи",
-
     access:
       "Доступ",
 
     payments:
       "Мои выплаты"
+
   };
 
+
   tbody.innerHTML =
-    coauthorsData.map(
-      (c, idx) => {
+    coauthorsData
+      .map(
+        (coauthor, index) => {
 
-        const perms =
-          (c.permissions || [])
-            .map(
-              p =>
-                permLabels[p] || p
+          const permissions =
+            (
+              coauthor.permissions ||
+              []
             )
-            .join(", ") ||
-          "Нет доступов";
+              .map(
+                p =>
+                  permLabels[p] ||
+                  p
+              )
+              .join(", ") ||
+              "Нет доступов";
 
-        const isBlocked =
-          c.status === "blocked" ||
-          c.status === "deleted";
 
-        const statusHtml =
-          isBlocked
-            ? `
-              <span class="status-pill blocked">
-                Заблокирован
-              </span>
-            `
-            : `
-              <span class="status-pill active">
-                Активен
-              </span>
-            `;
+          const blocked =
+            coauthor.status ===
+              "blocked" ||
+            coauthor.status ===
+              "deleted";
 
-        const actionBtn =
-          isBlocked
-            ? `
-              <button
-                class="icon-btn success"
-                onclick="activateCoauthor(${idx})">
-                Активировать
-              </button>
-            `
-            : `
-              <button
-                class="icon-btn warn"
-                onclick="blockCoauthor(${idx})">
-                Блокировать
-              </button>
-            `;
 
-        return `
-          <tr>
+          const statusHtml =
+            blocked
 
-            <td>
-              <strong>
-                ${escapeHtml(c.login)}
-              </strong>
-            </td>
+              ? `
+                <span
+                  class="status-pill blocked">
 
-            <td>
-              ${statusHtml}
-            </td>
+                  Заблокирован
 
-            <td>
-              ${escapeHtml(perms)}
-            </td>
+                </span>
+              `
 
-            <td>
-              <code>
-                ${escapeHtml(
-                  c.password ||
-                  "******"
-                )}
-              </code>
-            </td>
+              : `
+                <span
+                  class="status-pill active">
 
-            <td>
-              <div class="row-actions">
+                  Активен
 
-                ${actionBtn}
+                </span>
+              `;
 
+
+          const action =
+            blocked
+
+              ? `
+                <button
+                  class="icon-btn success"
+                  onclick="
+                    activateCoauthor(
+                      ${index}
+                    )
+                  ">
+
+                  Активировать
+
+                </button>
+              `
+
+              : `
                 <button
                   class="icon-btn warn"
-                  onclick="openEditCoauthor(${idx})">
-                  Изменить
+                  onclick="
+                    blockCoauthor(
+                      ${index}
+                    )
+                  ">
+
+                  Блокировать
+
                 </button>
+              `;
 
-                <button
-                  class="icon-btn del"
-                  onclick="deleteCoauthor(${idx})">
-                  Удалить
-                </button>
 
-              </div>
-            </td>
+          return `
+            <tr>
 
-          </tr>
-        `;
-      }
-    ).join("");
+              <td>
+                <strong>
+                  ${escapeHtml(
+                    coauthor.login
+                  )}
+                </strong>
+              </td>
+
+              <td>
+                ${statusHtml}
+              </td>
+
+              <td>
+                ${escapeHtml(
+                  permissions
+                )}
+              </td>
+
+              <td>
+                <code>
+                  ${escapeHtml(
+                    coauthor.password ||
+                    "******"
+                  )}
+                </code>
+              </td>
+
+              <td>
+
+                <div class="row-actions">
+
+                  ${action}
+
+                  <button
+                    class="icon-btn warn"
+                    onclick="
+                      openEditCoauthor(
+                        ${index}
+                      )
+                    ">
+
+                    Изменить
+
+                  </button>
+
+                  <button
+                    class="icon-btn del"
+                    onclick="
+                      deleteCoauthor(
+                        ${index}
+                      )
+                    ">
+
+                    Удалить
+
+                  </button>
+
+                </div>
+
+              </td>
+
+            </tr>
+          `;
+
+        }
+      )
+      .join("");
+
 }
 
+
 /* =========================================================
-   ДОСТУП — ДОБАВЛЯЕМ "СОЗДАВАТЬ СТАТЬИ"
+   TAGS
    ========================================================= */
 
-function addCreateArticlesPermissionToAccess() {
+window.toggleTag =
+  function(button) {
 
-  const containers = [
+    button.classList.toggle(
+      "active"
+    );
+
+  };
+
+
+function setChipsActive(
+  containerId,
+  values
+) {
+
+  const container =
     document.getElementById(
-      "accessChips"
-    ),
-    document.getElementById(
-      "editAccessChips"
+      containerId
+    );
+
+
+  container
+    .querySelectorAll(
+      ".tag-chip"
     )
-  ];
+    .forEach(
+      chip => {
 
-  containers.forEach(container => {
+        chip.classList.toggle(
+          "active",
+          values.includes(
+            chip.dataset.value
+          )
+        );
 
-    if (!container) return;
+      }
+    );
 
-    if (
-      container.querySelector(
-        '[data-value="create_articles"]'
-      )
-    ) {
-      return;
-    }
-
-    const chip =
-      document.createElement("div");
-
-    chip.className = "chip";
-
-    chip.dataset.value =
-      "create_articles";
-
-    chip.textContent =
-      "Создавать статьи";
-
-    chip.onclick = function() {
-      this.classList.toggle(
-        "selected"
-      );
-    };
-
-    container.appendChild(chip);
-  });
 }
 
+
+function setSelected(
+  container,
+  values
+) {
+
+  container
+    .querySelectorAll(
+      ".chip"
+    )
+    .forEach(
+      chip => {
+
+        chip.classList.toggle(
+          "selected",
+          values.includes(
+            chip.dataset.value
+          )
+        );
+
+      }
+    );
+
+}
+
+
+function getSelected(
+  container
+) {
+
+  return [
+    ...container.querySelectorAll(
+      ".chip.selected"
+    )
+  ]
+    .map(
+      chip =>
+        chip.dataset.value
+    );
+
+}
+
+
 /* =========================================================
-   СОАВТОР — СОЗДАНИЕ
+   СОТРУДНИК — ДОБАВЛЕНИЕ
+   ========================================================= */
+
+const staffModal =
+  document.getElementById(
+    "staffModalOverlay"
+  );
+
+
+document
+  .getElementById(
+    "openAddModal"
+  )
+  .addEventListener(
+    "click",
+    () => {
+
+      editIndex = null;
+
+      document
+        .getElementById(
+          "modalTitle"
+        )
+        .textContent =
+        "Добавить сотрудника";
+
+
+      document
+        .getElementById(
+          "staffNick"
+        )
+        .value = "";
+
+
+      document
+        .getElementById(
+          "staffVk"
+        )
+        .value = "";
+
+
+      document
+        .getElementById(
+          "fileNameLabel"
+        )
+        .textContent =
+        "Файл не выбран";
+
+
+      pendingAvatar = null;
+
+
+      document
+        .querySelectorAll(
+          "#rankTags .tag-chip, #roleTags .tag-chip"
+        )
+        .forEach(
+          element =>
+            element.classList.remove(
+              "active"
+            )
+        );
+
+
+      staffModal.classList.add(
+        "open"
+      );
+
+    }
+  );
+
+
+function closeStaffModal() {
+
+  staffModal.classList.remove(
+    "open"
+  );
+
+}
+
+
+document
+  .getElementById(
+    "cancelModalBtn"
+  )
+  .addEventListener(
+    "click",
+    closeStaffModal
+  );
+
+
+document
+  .getElementById(
+    "cancelModalBtn2"
+  )
+  .addEventListener(
+    "click",
+    closeStaffModal
+  );
+
+
+document
+  .getElementById(
+    "staffAvatarFile"
+  )
+  .addEventListener(
+    "change",
+    e => {
+
+      const file =
+        e.target.files[0];
+
+
+      if (!file) return;
+
+
+      document
+        .getElementById(
+          "fileNameLabel"
+        )
+        .textContent =
+        file.name;
+
+
+      const reader =
+        new FileReader();
+
+
+      reader.onload =
+        () => {
+
+          pendingAvatar =
+            reader.result;
+
+        };
+
+
+      reader.readAsDataURL(
+        file
+      );
+
+    }
+  );
+
+
+document
+  .getElementById(
+    "saveStaffBtn"
+  )
+  .addEventListener(
+    "click",
+    async () => {
+
+      const nick =
+        document
+          .getElementById(
+            "staffNick"
+          )
+          .value
+          .trim();
+
+
+      if (!nick) {
+
+        alert(
+          "Введите ник сотрудника"
+        );
+
+        return;
+
+      }
+
+
+      const ranks =
+        [
+          ...document.querySelectorAll(
+            "#rankTags .tag-chip.active"
+          )
+        ]
+          .map(
+            chip =>
+              chip.dataset.value
+          );
+
+
+      const positions =
+        [
+          ...document.querySelectorAll(
+            "#roleTags .tag-chip.active"
+          )
+        ]
+          .map(
+            chip =>
+              chip.dataset.value
+          );
+
+
+      const vk =
+        document
+          .getElementById(
+            "staffVk"
+          )
+          .value
+          .trim();
+
+
+      const record = {
+
+        nick,
+
+        ranks,
+
+        positions,
+
+        vk,
+
+        avatar:
+          pendingAvatar
+
+      };
+
+
+      if (
+        editIndex === null
+      ) {
+
+        staffData.push(
+          record
+        );
+
+      } else {
+
+        staffData[
+          editIndex
+        ] = record;
+
+      }
+
+
+      await saveServerData();
+
+
+      closeStaffModal();
+
+    }
+  );
+
+
+/* =========================================================
+   СОТРУДНИК — УДАЛЕНИЕ
+   ========================================================= */
+
+window.deleteStaff =
+  async function(index) {
+
+    if (
+      !confirm(
+        "Удалить сотрудника?"
+      )
+    ) {
+
+      return;
+
+    }
+
+
+    staffData.splice(
+      index,
+      1
+    );
+
+
+    await saveServerData();
+
+  };
+
+
+/* =========================================================
+   СОТРУДНИК — РЕДАКТИРОВАНИЕ
+   ========================================================= */
+
+window.editStaff =
+  function(index) {
+
+    editIndex = index;
+
+
+    const item =
+      staffData[index];
+
+
+    document
+      .getElementById(
+        "modalTitle"
+      )
+      .textContent =
+      "Изменить сотрудника";
+
+
+    document
+      .getElementById(
+        "staffNick"
+      )
+      .value =
+      item.nick || "";
+
+
+    document
+      .getElementById(
+        "staffVk"
+      )
+      .value =
+      item.vk || "";
+
+
+    pendingAvatar =
+      item.avatar || null;
+
+
+    document
+      .getElementById(
+        "fileNameLabel"
+      )
+      .textContent =
+      pendingAvatar
+        ? "Загружен аватар"
+        : "Файл не выбран";
+
+
+    setChipsActive(
+      "rankTags",
+      item.ranks ||
+      (
+        item.rank
+          ? [item.rank]
+          : []
+      )
+    );
+
+
+    setChipsActive(
+      "roleTags",
+      item.positions ||
+      (
+        item.position
+          ? [item.position]
+          : []
+      )
+    );
+
+
+    staffModal.classList.add(
+      "open"
+    );
+
+  };
+
+
+/* =========================================================
+   СОАВТОРЫ
    ========================================================= */
 
 const coauthorModal =
@@ -1390,17 +4542,21 @@ const coauthorModal =
     "coauthorModalOverlay"
   );
 
+
 document
   .getElementById(
     "openAddCoauthorModal"
   )
-  ?.addEventListener(
+  .addEventListener(
     "click",
     () => {
 
-      document.getElementById(
-        "coauthorNick"
-      ).value = "";
+      document
+        .getElementById(
+          "coauthorNick"
+        )
+        .value = "";
+
 
       setSelected(
         document.getElementById(
@@ -1409,24 +4565,28 @@ document
         []
       );
 
-      document.getElementById(
-        "newCredsResult"
-      ).style.display =
+
+      document
+        .getElementById(
+          "newCredsResult"
+        )
+        .style.display =
         "none";
 
-      addCreateArticlesPermissionToAccess();
 
       coauthorModal.classList.add(
         "open"
       );
+
     }
   );
+
 
 document
   .getElementById(
     "cancelCoauthorBtn"
   )
-  ?.addEventListener(
+  .addEventListener(
     "click",
     () =>
       coauthorModal.classList.remove(
@@ -1434,18 +4594,23 @@ document
       )
   );
 
+
 document
   .getElementById(
     "saveCoauthorBtn"
   )
-  ?.addEventListener(
+  .addEventListener(
     "click",
     async () => {
 
       const nick =
-        document.getElementById(
-          "coauthorNick"
-        ).value.trim();
+        document
+          .getElementById(
+            "coauthorNick"
+          )
+          .value
+          .trim();
+
 
       const permissions =
         getSelected(
@@ -1454,12 +4619,17 @@ document
           )
         );
 
+
       if (!nick) {
+
         alert(
-          "Введите ник/логин соавтора."
+          "Введите ник/логин соавтора"
         );
+
         return;
+
       }
+
 
       const password =
         Math.random()
@@ -1469,62 +4639,80 @@ document
           Math.random() * 899 + 100
         );
 
+
       coauthorsData.push({
+
         login: nick,
+
         password,
+
         permissions,
+
         status: "active"
+
       });
+
 
       await saveServerData();
 
-      document.getElementById(
-        "newCredsResult"
-      ).innerHTML = `
-        <div class="creds-box">
 
-          <strong>
-            Соавтор успешно создан!
-          </strong>
+      document
+        .getElementById(
+          "newCredsResult"
+        )
+        .innerHTML = `
 
-          <br><br>
+          <div class="creds-box">
 
-          Логин:
-          <code>
-            ${escapeHtml(nick)}
-          </code>
+            <strong>
+              Соавтор успешно создан!
+            </strong>
 
-          <br>
+            <br><br>
 
-          Пароль:
-          <code>
-            ${escapeHtml(password)}
-          </code>
+            Логин:
+            <code>
+              ${escapeHtml(nick)}
+            </code>
 
-          <br><br>
+            <br>
 
-          <span
-            style="
-              font-size:.78rem;
-              color:var(--danger);
-            ">
-            Скопируйте пароль.
-            После закрытия окна он
-            скрывается.
-          </span>
+            Пароль:
+            <code>
+              ${escapeHtml(password)}
+            </code>
 
-        </div>
-      `;
+            <br><br>
 
-      document.getElementById(
-        "newCredsResult"
-      ).style.display =
+            <span
+              style="
+                font-size:.78rem;
+                color:var(--danger);
+              ">
+
+              Скопируйте пароль.
+              После закрытия окна
+              он скрывается.
+
+            </span>
+
+          </div>
+        `;
+
+
+      document
+        .getElementById(
+          "newCredsResult"
+        )
+        .style.display =
         "block";
+
     }
   );
 
+
 /* =========================================================
-   СОАВТОР — РЕДАКТИРОВАНИЕ
+   РЕДАКТИРОВАНИЕ СОАВТОРА
    ========================================================= */
 
 const editCoauthorModal =
@@ -1532,11 +4720,12 @@ const editCoauthorModal =
     "editCoauthorModalOverlay"
   );
 
+
 document
   .getElementById(
     "cancelEditCoauthorBtn"
   )
-  ?.addEventListener(
+  .addEventListener(
     "click",
     () =>
       editCoauthorModal.classList.remove(
@@ -1544,24 +4733,32 @@ document
       )
   );
 
-window.openEditCoauthor =
-  function(idx) {
 
-    editCoauthorIdx = idx;
+window.openEditCoauthor =
+  function(index) {
+
+    editCoauthorIdx =
+      index;
+
 
     const coauthor =
-      coauthorsData[idx];
+      coauthorsData[index];
 
-    document.getElementById(
-      "editCoauthorNick"
-    ).value =
+
+    document
+      .getElementById(
+        "editCoauthorNick"
+      )
+      .value =
       coauthor.login || "";
 
-    document.getElementById(
-      "editCoauthorPassword"
-    ).value = "";
 
-    addCreateArticlesPermissionToAccess();
+    document
+      .getElementById(
+        "editCoauthorPassword"
+      )
+      .value = "";
+
 
     setSelected(
       document.getElementById(
@@ -1570,10 +4767,13 @@ window.openEditCoauthor =
       coauthor.permissions || []
     );
 
+
     editCoauthorModal.classList.add(
       "open"
     );
+
   };
+
 
 window.toggleEditChip =
   async function(chip) {
@@ -1582,6 +4782,7 @@ window.toggleEditChip =
       "selected"
     );
 
+
     if (
       editCoauthorIdx !== null &&
       coauthorsData[
@@ -1589,62 +4790,88 @@ window.toggleEditChip =
       ]
     ) {
 
-      const newPerms =
+      const newPermissions =
         getSelected(
           document.getElementById(
             "editAccessChips"
           )
         );
 
+
       coauthorsData[
         editCoauthorIdx
       ].permissions =
-        newPerms;
+        newPermissions;
+
 
       await saveServerData();
+
     }
+
   };
+
 
 document
   .getElementById(
     "saveEditCoauthorBtn"
   )
-  ?.addEventListener(
+  .addEventListener(
     "click",
     async () => {
 
       if (
         editCoauthorIdx === null
-      ) return;
+      ) {
+
+        return;
+
+      }
+
 
       const newLogin =
-        document.getElementById(
-          "editCoauthorNick"
-        ).value.trim();
+        document
+          .getElementById(
+            "editCoauthorNick"
+          )
+          .value
+          .trim();
 
-      const newPass =
-        document.getElementById(
-          "editCoauthorPassword"
-        ).value.trim();
+
+      const newPassword =
+        document
+          .getElementById(
+            "editCoauthorPassword"
+          )
+          .value
+          .trim();
+
 
       if (!newLogin) {
+
         alert(
-          "Логин не может быть пустым."
+          "Логин не может быть пустым"
         );
+
         return;
+
       }
+
 
       coauthorsData[
         editCoauthorIdx
       ].login =
         newLogin;
 
-      if (newPass) {
+
+      if (newPassword) {
+
         coauthorsData[
           editCoauthorIdx
         ].password =
-          newPass;
+        newPassword;
+
       }
+
 
       coauthorsData[
         editCoauthorIdx
@@ -1655,194 +4882,74 @@ document
           )
         );
 
+
       await saveServerData();
+
 
       editCoauthorModal.classList.remove(
         "open"
       );
+
     }
   );
 
-window.activateCoauthor =
-  async function(idx) {
 
-    coauthorsData[idx].status =
+window.activateCoauthor =
+  async function(index) {
+
+    coauthorsData[
+      index
+    ].status =
       "active";
 
+
     await saveServerData();
+
   };
+
 
 window.blockCoauthor =
-  async function(idx) {
+  async function(index) {
 
-    coauthorsData[idx].status =
+    coauthorsData[
+      index
+    ].status =
       "blocked";
 
+
     await saveServerData();
+
   };
 
+
 window.deleteCoauthor =
-  async function(idx) {
+  async function(index) {
 
     if (
       !confirm(
         "Вы уверены, что хотите удалить этого соавтора?"
       )
     ) {
+
       return;
+
     }
 
+
     coauthorsData.splice(
-      idx,
+      index,
       1
     );
 
+
     await saveServerData();
+
   };
 
-/* =========================================================
-   ХАЙДЫ
-   ========================================================= */
-
-function buildHydesInterface() {
-
-  const view =
-    document.getElementById(
-      "view-hydes"
-    );
-
-  if (!view) return;
-
-  view.innerHTML = `
-    <div
-      class="card"
-      style="padding:25px;"
-    >
-
-      <div
-        style="
-          display:flex;
-          justify-content:space-between;
-          align-items:center;
-          gap:15px;
-          flex-wrap:wrap;
-          margin-bottom:20px;
-        "
-      >
-
-        <div>
-          <h2>Хайды</h2>
-
-          <p
-            style="
-              color:var(--text-dim);
-              margin-top:6px;
-            "
-          >
-            Инструкции и внутренняя документация
-            сотрудников.
-          </p>
-        </div>
-
-        <button
-          id="createArticleBtn"
-          class="add-btn"
-          style="
-            display:none;
-          "
-        >
-          + Добавить статью
-        </button>
-
-      </div>
-
-      <div
-        id="articlesList"
-      ></div>
-
-    </div>
-  `;
-
-  document
-    .getElementById(
-      "createArticleBtn"
-    )
-    .addEventListener(
-      "click",
-      openArticleEditor
-    );
-
-  updateCreateArticleButton();
-}
 
 /* =========================================================
-   КНОПКА СОЗДАНИЯ СТАТЬИ
+   ХАЙДЫ — СПИСОК
    ========================================================= */
-
-function updateCreateArticleButton() {
-
-  const btn =
-    document.getElementById(
-      "createArticleBtn"
-    );
-
-  if (!btn) return;
-
-  btn.style.display =
-    hasPermission(
-      "create_articles"
-    )
-      ? "inline-flex"
-      : "none";
-}
-
-/* =========================================================
-   ОТОБРАЖЕНИЕ СТАТЕЙ
-   ========================================================= */
-
-function getVisibleArticles() {
-
-  const username =
-    getUsername();
-
-  return articlesData.filter(
-    article => {
-
-      /*
-       * Опубликованные статьи
-       * видят все сотрудники.
-       */
-      if (
-        article.status ===
-        "published"
-      ) {
-        return true;
-      }
-
-      /*
-       * Черновик видит:
-       * - администратор;
-       * - автор черновика.
-       */
-      if (
-        article.status ===
-        "draft"
-      ) {
-
-        if (isAdmin()) {
-          return true;
-        }
-
-        return (
-          article.author ===
-          username
-        );
-      }
-
-      return false;
-    }
-  );
-}
 
 function renderArticles() {
 
@@ -1851,647 +4958,772 @@ function renderArticles() {
       "articlesList"
     );
 
+
   if (!container) return;
 
-  updateCreateArticleButton();
 
-  const articles =
-    getVisibleArticles();
+  const admin =
+    isAdmin();
 
-  if (!articles.length) {
 
-    container.innerHTML = `
-      <div
-        style="
-          padding:45px 20px;
-          text-align:center;
-          color:var(--text-faint);
-        "
-      >
+  const visibleArticles =
+    articlesData.filter(
+      article => {
 
-        <div
-          style="
-            font-size:38px;
-            margin-bottom:10px;
-          "
-        >
-          📄
-        </div>
+        if (
+          article.status ===
+          "published"
+        ) {
 
-        Статей пока нет.
+          return true;
 
-      </div>
-    `;
+        }
 
-    return;
-  }
 
-  container.innerHTML =
-    articles
-      .sort(
-        (a, b) =>
-          new Date(
-            b.updatedAt ||
-            b.createdAt ||
-            0
-          ) -
-          new Date(
-            a.updatedAt ||
-            a.createdAt ||
-            0
-          )
-      )
-      .map(
-        article =>
-          createArticleCard(
-            article
-          )
-      )
-      .join("");
-}
+        return admin;
 
-/* =========================================================
-   КАРТОЧКА СТАТЬИ
-   ========================================================= */
+      }
+    );
 
-function createArticleCard(article) {
-
-  const isDraft =
-    article.status ===
-    "draft";
-
-  const canEdit =
-    isAdmin() ||
-    article.author ===
-      getUsername();
-
-  const status =
-    isDraft
-      ? `
-        <span
-          style="
-            display:inline-flex;
-            padding:4px 8px;
-            border-radius:6px;
-            background:#FFF7ED;
-            color:#C2410C;
-            font-size:.72rem;
-            font-weight:700;
-          "
-        >
-          Черновик
-        </span>
-      `
-      : `
-        <span
-          style="
-            display:inline-flex;
-            padding:4px 8px;
-            border-radius:6px;
-            background:#ECFDF5;
-            color:#047857;
-            font-size:.72rem;
-            font-weight:700;
-          "
-        >
-          Опубликовано
-        </span>
-      `;
-
-  return `
-    <div
-      class="card"
-      style="
-        margin-bottom:12px;
-        padding:20px;
-      "
-    >
-
-      <div
-        style="
-          display:flex;
-          justify-content:space-between;
-          gap:15px;
-          align-items:flex-start;
-        "
-      >
-
-        <div
-          style="
-            flex:1;
-            min-width:0;
-          "
-        >
-
-          <div
-            style="
-              display:flex;
-              align-items:center;
-              gap:8px;
-              margin-bottom:8px;
-              flex-wrap:wrap;
-            "
-          >
-            ${status}
-          </div>
-
-          <h3
-            style="
-              font-size:1.05rem;
-              font-weight:800;
-            "
-          >
-            ${escapeHtml(
-              article.title
-            )}
-          </h3>
-
-          ${
-            article.description
-              ? `
-                <p
-                  style="
-                    color:var(--text-dim);
-                    font-size:.85rem;
-                    margin-top:6px;
-                  "
-                >
-                  ${escapeHtml(
-                    article.description
-                  )}
-                </p>
-              `
-              : ""
-          }
-
-          <div
-            style="
-              margin-top:9px;
-              color:var(--text-faint);
-              font-size:.73rem;
-            "
-          >
-            Автор:
-            ${escapeHtml(
-              article.author
-            )}
-            ·
-            ${formatDate(
-              article.updatedAt ||
-              article.createdAt
-            )}
-          </div>
-
-        </div>
-
-        <div
-          style="
-            display:flex;
-            gap:6px;
-            flex-wrap:wrap;
-          "
-        >
-
-          <button
-            class="icon-btn"
-            onclick="openArticle(${JSON.stringify(
-              article.id
-            )})"
-          >
-            Открыть
-          </button>
-
-          ${
-            canEdit
-              ? `
-                <button
-                  class="icon-btn warn"
-                  onclick="editArticle(${JSON.stringify(
-                    article.id
-                  )})"
-                >
-                  Изменить
-                </button>
-
-                <button
-                  class="icon-btn del"
-                  onclick="deleteArticle(${JSON.stringify(
-                    article.id
-                  )})"
-                >
-                  Удалить
-                </button>
-              `
-              : ""
-          }
-
-        </div>
-
-      </div>
-
-    </div>
-  `;
-}
-
-/* =========================================================
-   РЕДАКТОР СТАТЬИ
-   ========================================================= */
-
-function openArticleEditor() {
 
   if (
-    !hasPermission(
-      "create_articles"
-    )
+    visibleArticles.length === 0
   ) {
-    alert(
-      "У вас нет разрешения «Создавать статьи»."
-    );
-    return;
-  }
 
-  editingArticleId = null;
-  articleButtons = [];
-
-  const overlay =
-    createArticleEditorModal();
-
-  overlay.classList.add(
-    "open"
-  );
-}
-
-function createArticleEditorModal() {
-
-  let overlay =
-    document.getElementById(
-      "articleEditorModal"
-    );
-
-  if (overlay) {
-    return overlay;
-  }
-
-  overlay =
-    document.createElement(
-      "div"
-    );
-
-  overlay.id =
-    "articleEditorModal";
-
-  overlay.className =
-    "modal-overlay";
-
-  overlay.innerHTML = `
-    <div
-      class="modal"
-      style="
-        max-width:850px;
-      "
-    >
-
-      <div class="modal-head">
-
-        <div>
-          <h3
-            id="articleEditorTitle"
-          >
-            Новая статья
-          </h3>
-
-          <p>
-            Создайте инструкцию или внутренний материал.
-          </p>
-        </div>
-
-        <button
-          id="closeArticleEditor"
-          class="icon-btn del"
-          style="
-            border:none;
-            background:none;
-            font-size:16px;
-          "
-        >
-          ✕
-        </button>
-
-      </div>
+    container.innerHTML = `
 
       <div
-        class="modal-body"
         style="
-          padding-top:10px;
-        "
-      >
+          text-align:center;
+          padding:45px 20px;
+          color:var(--text-faint);
+        ">
 
-        <div class="form-group">
+        <div
+          style="
+            font-size:32px;
+            margin-bottom:10px;
+          ">
 
-          <label>
-            Заголовок
-          </label>
-
-          <input
-            id="articleTitleInput"
-            type="text"
-            placeholder="Например: Правила работы с репортами"
-          >
-
-        </div>
-
-        <div class="form-group">
-
-          <label>
-            Описание
-            <span
-              style="
-                color:var(--text-faint);
-                font-size:.7rem;
-              "
-            >
-              (необязательно)
-            </span>
-          </label>
-
-          <input
-            id="articleDescriptionInput"
-            type="text"
-            placeholder="Краткое описание статьи"
-          >
-
-        </div>
-
-        <div class="form-group">
-
-          <div
-            style="
-              display:flex;
-              justify-content:space-between;
-              align-items:center;
-              margin-bottom:6px;
-            "
-          >
-
-            <label
-              style="
-                margin:0;
-              "
-            >
-              Текст статьи
-            </label>
-
-            <button
-              id="addArticleButton"
-              class="icon-btn"
-            >
-              + Добавить кнопку
-            </button>
-
-          </div>
-
-          <textarea
-            id="articleContentInput"
-            placeholder="Введите текст статьи..."
-            style="
-              width:100%;
-              min-height:330px;
-              resize:vertical;
-              padding:14px;
-              border:1px solid var(--border);
-              border-radius:9px;
-              background:var(--bg);
-              color:var(--text);
-              outline:none;
-              font-size:.92rem;
-              line-height:1.6;
-            "
-          ></textarea>
+          📄
 
         </div>
 
         <div
-          class="form-group"
-        >
+          style="
+            font-weight:700;
+            color:var(--text-dim);
+          ">
 
-          <label>
-            Кнопки статьи
-          </label>
-
-          <div
-            id="articleButtonsList"
-            style="
-              display:flex;
-              flex-direction:column;
-              gap:8px;
-            "
-          ></div>
+          Статей пока нет
 
         </div>
 
       </div>
 
-      <div
-        class="modal-foot"
-        style="
-          flex-wrap:wrap;
-        "
-      >
-
-        <button
-          id="articleDraftBtn"
-          class="btn"
-          style="
-            background:var(--surface);
-            color:var(--text);
-            border:1px solid var(--border);
-          "
-        >
-          💾 Черновик
-        </button>
-
-        <button
-          id="articlePublishBtn"
-          class="btn"
-        >
-          🌐 Опубликовать
-        </button>
-
-      </div>
-
-    </div>
-  `;
-
-  document.body.appendChild(
-    overlay
-  );
-
-  document
-    .getElementById(
-      "closeArticleEditor"
-    )
-    .addEventListener(
-      "click",
-      () =>
-        overlay.classList.remove(
-          "open"
-        )
-    );
-
-  document
-    .getElementById(
-      "addArticleButton"
-    )
-    .addEventListener(
-      "click",
-      addArticleButton
-    );
-
-  document
-    .getElementById(
-      "articleDraftBtn"
-    )
-    .addEventListener(
-      "click",
-      () =>
-        saveArticle(
-          "draft"
-        )
-    );
-
-  document
-    .getElementById(
-      "articlePublishBtn"
-    )
-    .addEventListener(
-      "click",
-      () =>
-        saveArticle(
-          "published"
-        )
-    );
-
-  return overlay;
-}
-
-/* =========================================================
-   ДОБАВЛЕНИЕ КНОПКИ
-   ========================================================= */
-
-function addArticleButton() {
-
-  const id =
-    generateId();
-
-  articleButtons.push({
-    id,
-    text: "",
-    copyText: ""
-  });
-
-  renderArticleButtons();
-}
-
-function renderArticleButtons() {
-
-  const container =
-    document.getElementById(
-      "articleButtonsList"
-    );
-
-  if (!container) return;
-
-  if (!articleButtons.length) {
-
-    container.innerHTML = `
-      <div
-        style="
-          padding:14px;
-          border:1px dashed var(--border);
-          border-radius:8px;
-          color:var(--text-faint);
-          font-size:.8rem;
-        "
-      >
-        Кнопок пока нет.
-        Нажмите «+ Добавить кнопку».
-      </div>
     `;
 
     return;
+
   }
 
+
   container.innerHTML =
-    articleButtons.map(
-      (button, index) => `
+    visibleArticles
+      .map(article => {
 
-        <div
-          style="
-            display:grid;
-            grid-template-columns:1fr 1fr auto;
-            gap:8px;
-            align-items:center;
-          "
-        >
+        const index =
+          articlesData.indexOf(
+            article
+          );
 
-          <input
-            type="text"
-            placeholder="Текст кнопки"
-            value="${escapeHtml(
-              button.text
-            )}"
-            oninput="
-              articleButtons[${index}].text=this.value
-            "
-            style="
-              padding:9px;
-              border:1px solid var(--border);
-              border-radius:7px;
-              outline:none;
-            "
-          >
 
-          <input
-            type="text"
-            placeholder="Текст, который копировать"
-            value="${escapeHtml(
-              button.copyText
-            )}"
-            oninput="
-              articleButtons[${index}].copyText=this.value
-            "
-            style="
-              padding:9px;
-              border:1px solid var(--border);
-              border-radius:7px;
-              outline:none;
-            "
-          >
+        const status =
+          article.status ===
+          "draft"
 
-          <button
-            class="icon-btn del"
-            onclick="
-              removeArticleButton(${index})
-            "
-          >
-            Удалить
-          </button>
+            ? `
+              <span
+                class="article-status draft">
 
-        </div>
-      `
-    ).join("");
+                Черновик
+
+              </span>
+            `
+
+            : `
+              <span
+                class="article-status published">
+
+                Опубликовано
+
+              </span>
+            `;
+
+
+        return `
+
+          <div class="article-item">
+
+            <div
+              style="
+                display:flex;
+                justify-content:space-between;
+                align-items:flex-start;
+                gap:15px;
+              ">
+
+              <div style="flex:1;">
+
+                <div class="article-title">
+
+                  ${escapeHtml(
+                    article.title
+                  )}
+
+                </div>
+
+
+                ${
+                  article.description
+
+                    ? `
+                      <div
+                        class="article-description">
+
+                        ${escapeHtml(
+                          article.description
+                        )}
+
+                      </div>
+                    `
+
+                    : ""
+                }
+
+
+                <div class="article-meta">
+
+                  ${status}
+
+                  <span
+                    style="
+                      color:var(--text-faint);
+                      font-size:.72rem;
+                    ">
+
+                    ${escapeHtml(
+                      article.author ||
+                      "Администратор"
+                    )}
+
+                  </span>
+
+                </div>
+
+              </div>
+
+
+              <div
+                style="
+                  display:flex;
+                  gap:6px;
+                  flex-wrap:wrap;
+                ">
+
+                <button
+                  class="article-open-btn"
+                  onclick="
+                    openArticle(
+                      ${index}
+                    )
+                  ">
+
+                  Открыть
+
+                </button>
+
+
+                ${
+                  admin
+
+                    ? `
+
+                      <button
+                        class="icon-btn warn"
+                        onclick="
+                          editArticle(
+                            ${index}
+                          )
+                        ">
+
+                        Изменить
+
+                      </button>
+
+
+                      <button
+                        class="icon-btn del"
+                        onclick="
+                          deleteArticle(
+                            ${index}
+                          )
+                        ">
+
+                        Удалить
+
+                      </button>
+
+                    `
+
+                    : ""
+                }
+
+              </div>
+
+            </div>
+
+          </div>
+
+        `;
+
+      })
+      .join("");
+
 }
 
-window.removeArticleButton =
-  function(index) {
 
-    articleButtons.splice(
-      index,
-      1
+/* =========================================================
+   ДОБАВЛЕНИЕ СТАТЬИ
+   ========================================================= */
+
+document
+  .getElementById(
+    "addArticleBtn"
+  )
+  .addEventListener(
+    "click",
+    () => {
+
+      if (!isAdmin()) {
+
+        alert(
+          "Только администратор может создавать статьи."
+        );
+
+        return;
+
+      }
+
+
+      document
+        .getElementById(
+          "articleTitle"
+        )
+        .value = "";
+
+
+      document
+        .getElementById(
+          "articleDescription"
+        )
+        .value = "";
+
+
+      document
+        .getElementById(
+          "articleCreateModal"
+        )
+        .classList.add(
+          "open"
+        );
+
+    }
+  );
+
+
+document
+  .getElementById(
+    "closeArticleCreate"
+  )
+  .addEventListener(
+    "click",
+    () => {
+
+      document
+        .getElementById(
+          "articleCreateModal"
+        )
+        .classList.remove(
+          "open"
+        );
+
+    }
+  );
+
+
+document
+  .getElementById(
+    "cancelArticleCreate"
+  )
+  .addEventListener(
+    "click",
+    () => {
+
+      document
+        .getElementById(
+          "articleCreateModal"
+        )
+        .classList.remove(
+          "open"
+        );
+
+    }
+  );
+
+
+/* =========================================================
+   ПЕРЕХОД В РЕДАКТОР
+   ========================================================= */
+
+document
+  .getElementById(
+    "continueArticleCreate"
+  )
+  .addEventListener(
+    "click",
+    () => {
+
+      const title =
+        document
+          .getElementById(
+            "articleTitle"
+          )
+          .value
+          .trim();
+
+
+      const description =
+        document
+          .getElementById(
+            "articleDescription"
+          )
+          .value
+          .trim();
+
+
+      if (!title) {
+
+        alert(
+          "Введите заголовок статьи."
+        );
+
+        return;
+
+      }
+
+
+      currentArticle = {
+
+        id:
+          crypto.randomUUID(),
+
+        title,
+
+        description,
+
+        content: "",
+
+        status: "draft",
+
+        author:
+          localStorage.getItem(
+            "ft_username"
+          ) ||
+          "Администратор",
+
+        createdAt:
+          new Date()
+            .toISOString(),
+
+        updatedAt:
+          new Date()
+            .toISOString()
+
+      };
+
+
+      document
+        .getElementById(
+          "articleEditorTitle"
+        )
+        .textContent =
+        title;
+
+
+      document
+        .getElementById(
+          "articleEditorDescription"
+        )
+        .textContent =
+        description ||
+        "Без описания";
+
+
+      document
+        .getElementById(
+          "articleEditor"
+        )
+        .innerHTML = "";
+
+
+      document
+        .getElementById(
+          "articleCreateModal"
+        )
+        .classList.remove(
+          "open"
+        );
+
+
+      document
+        .getElementById(
+          "articleEditorModal"
+        )
+        .classList.add(
+          "open"
+        );
+
+    }
+  );
+
+
+/* =========================================================
+   РЕДАКТОР
+   ========================================================= */
+
+window.formatArticle =
+  function(command) {
+
+    const editor =
+      document.getElementById(
+        "articleEditor"
+      );
+
+
+    editor.focus();
+
+
+    document.execCommand(
+      command,
+      false,
+      null
     );
 
-    renderArticleButtons();
   };
+
+
+/* =========================================================
+   ДОБАВИТЬ КНОПКУ
+   ========================================================= */
+
+window.insertArticleButton =
+  function() {
+
+    document
+      .getElementById(
+        "articleButtonText"
+      )
+      .value = "";
+
+
+    document
+      .getElementById(
+        "articleButtonUrl"
+      )
+      .value = "";
+
+
+    document
+      .getElementById(
+        "articleButtonCopyText"
+      )
+      .value = "";
+
+
+    document
+      .getElementById(
+        "articleButtonModal"
+      )
+      .classList.add(
+        "open"
+      );
+
+  };
+
+
+document
+  .getElementById(
+    "closeArticleButton"
+  )
+  .addEventListener(
+    "click",
+    () => {
+
+      document
+        .getElementById(
+          "articleButtonModal"
+        )
+        .classList.remove(
+          "open"
+        );
+
+    }
+  );
+
+
+document
+  .getElementById(
+    "cancelArticleButton"
+  )
+  .addEventListener(
+    "click",
+    () => {
+
+      document
+        .getElementById(
+          "articleButtonModal"
+        )
+        .classList.remove(
+          "open"
+        );
+
+    }
+  );
+
+
+document
+  .getElementById(
+    "insertArticleButtonConfirm"
+  )
+  .addEventListener(
+    "click",
+    () => {
+
+      const text =
+        document
+          .getElementById(
+            "articleButtonText"
+          )
+          .value
+          .trim();
+
+
+      const url =
+        document
+          .getElementById(
+            "articleButtonUrl"
+          )
+          .value
+          .trim();
+
+
+      const copyText =
+        document
+          .getElementById(
+            "articleButtonCopyText"
+          )
+          .value;
+
+
+      if (!text) {
+
+        alert(
+          "Введите текст кнопки."
+        );
+
+        return;
+
+      }
+
+
+      if (!url) {
+
+        alert(
+          "Введите ссылку."
+        );
+
+        return;
+
+      }
+
+
+      if (!copyText) {
+
+        alert(
+          "Введите текст для копирования."
+        );
+
+        return;
+
+      }
+
+
+      let parsedUrl;
+
+
+      try {
+
+        parsedUrl =
+          new URL(url);
+
+
+        if (
+          parsedUrl.protocol !==
+            "http:" &&
+          parsedUrl.protocol !==
+            "https:"
+        ) {
+
+          throw new Error();
+
+        }
+
+      } catch {
+
+        alert(
+          "Введите корректную ссылку, например https://example.com"
+        );
+
+        return;
+
+      }
+
+
+      const editor =
+        document.getElementById(
+          "articleEditor"
+        );
+
+
+      editor.focus();
+
+
+      const html = `
+
+        <a
+          href="${escapeHtml(url)}"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="link-button"
+          data-copy-text="${escapeHtml(
+            copyText
+          )}"
+          onclick="
+            copyArticleButton(
+              event,
+              this
+            )
+          ">
+
+          ${escapeHtml(text)}
+
+        </a>
+
+      `;
+
+
+      document.execCommand(
+        "insertHTML",
+        false,
+        html
+      );
+
+
+      document
+        .getElementById(
+          "articleButtonModal"
+        )
+        .classList.remove(
+          "open"
+        );
+
+    }
+  );
+
+
+/* =========================================================
+   КОПИРОВАНИЕ
+   ========================================================= */
+
+window.copyArticleButton =
+  async function(
+    event,
+    element
+  ) {
+
+    event.preventDefault();
+
+
+    const text =
+      element.getAttribute(
+        "data-copy-text"
+      ) || "";
+
+
+    try {
+
+      await navigator
+        .clipboard
+        .writeText(text);
+
+
+      const oldText =
+        element.textContent;
+
+
+      element.textContent =
+        "✓ Скопировано";
+
+
+      setTimeout(
+        () => {
+
+          element.textContent =
+            oldText;
+
+        },
+        1500
+      );
+
+
+    } catch (error) {
+
+      alert(
+        "Не удалось скопировать текст."
+      );
+
+    }
+
+
+    const url =
+      element.getAttribute(
+        "href"
+      );
+
+
+    if (url) {
+
+      window.open(
+        url,
+        "_blank",
+        "noopener,noreferrer"
+      );
+
+    }
+
+  };
+
 
 /* =========================================================
    СОХРАНЕНИЕ СТАТЬИ
@@ -2501,375 +5733,269 @@ async function saveArticle(
   status
 ) {
 
-  if (
-    !hasPermission(
-      "create_articles"
-    )
-  ) {
-    alert(
-      "У вас нет разрешения «Создавать статьи»."
-    );
+  if (!currentArticle) {
+
     return;
+
   }
 
-  const title =
-    document.getElementById(
-      "articleTitleInput"
-    ).value.trim();
 
-  const description =
-    document.getElementById(
-      "articleDescriptionInput"
-    ).value.trim();
+  if (!isAdmin()) {
+
+    alert(
+      "Только администратор может изменять статьи."
+    );
+
+    return;
+
+  }
+
 
   const content =
-    document.getElementById(
-      "articleContentInput"
-    ).value;
+    document
+      .getElementById(
+        "articleEditor"
+      )
+      .innerHTML
+      .trim();
 
-  if (!title) {
 
-    alert(
-      "Введите заголовок статьи."
-    );
-
-    return;
-  }
-
-  if (!content.trim()) {
+  if (!content) {
 
     alert(
       "Введите текст статьи."
     );
 
     return;
+
   }
 
-  for (
-    const button of articleButtons
-  ) {
 
-    if (
-      !button.text.trim()
-    ) {
+  currentArticle.content =
+    content;
 
-      alert(
-        "У каждой кнопки должен быть указан текст."
-      );
 
-      return;
-    }
+  currentArticle.status =
+    status;
 
-    if (
-      !button.copyText
-    ) {
 
-      alert(
-        "Укажите текст, который будет копироваться кнопкой."
-      );
-
-      return;
-    }
-  }
-
-  const now =
+  currentArticle.updatedAt =
     new Date().toISOString();
 
-  let article;
 
-  if (
-    editingArticleId
-  ) {
+  const index =
+    articlesData.findIndex(
+      article =>
+        article.id ===
+        currentArticle.id
+    );
 
-    article =
-      articlesData.find(
-        a =>
-          a.id ===
-          editingArticleId
-      );
 
-    if (!article) {
-      alert(
-        "Статья не найдена."
-      );
-      return;
-    }
+  if (index === -1) {
 
-    /*
-     * Нельзя редактировать чужую
-     * статью обычному сотруднику.
-     */
-    if (
-      !isAdmin() &&
-      article.author !==
-        getUsername()
-    ) {
-
-      alert(
-        "Вы можете изменять только свои статьи."
-      );
-
-      return;
-    }
-
-    article.title =
-      title;
-
-    article.description =
-      description;
-
-    article.content =
-      content;
-
-    article.buttons =
-      articleButtons;
-
-    article.status =
-      status;
-
-    article.updatedAt =
-      now;
+    articlesData.push(
+      currentArticle
+    );
 
   } else {
 
-    article = {
+    articlesData[index] =
+      currentArticle;
 
-      id:
-        generateId(),
-
-      title,
-
-      description,
-
-      content,
-
-      buttons:
-        articleButtons,
-
-      status,
-
-      author:
-        getUsername(),
-
-      createdAt:
-        now,
-
-      updatedAt:
-        now
-    };
-
-    articlesData.push(
-      article
-    );
   }
+
 
   await saveServerData();
 
-  const overlay =
-    document.getElementById(
-      "articleEditorModal"
-    );
 
-  if (overlay) {
-    overlay.classList.remove(
+  document
+    .getElementById(
+      "articleEditorModal"
+    )
+    .classList.remove(
       "open"
     );
-  }
+
+
+  currentArticle = null;
+
+
+  renderArticles();
+
 
   alert(
-    status === "published"
-      ? "Статья опубликована."
-      : "Статья сохранена в черновики."
+    status === "draft"
+      ? "Статья сохранена как черновик."
+      : "Статья опубликована."
   );
+
 }
 
+
 /* =========================================================
-   РЕДАКТИРОВАНИЕ СТАТЬИ
+   ЧЕРНОВИК
    ========================================================= */
 
-window.editArticle =
-  function(id) {
+document
+  .getElementById(
+    "saveArticleDraft"
+  )
+  .addEventListener(
+    "click",
+    () => {
 
-    const article =
-      articlesData.find(
-        a => a.id === id
+      saveArticle(
+        "draft"
       );
 
-    if (!article) return;
-
-    if (
-      !isAdmin() &&
-      article.author !==
-        getUsername()
-    ) {
-
-      alert(
-        "Вы можете изменять только свои статьи."
-      );
-
-      return;
     }
+  );
 
-    editingArticleId =
-      article.id;
 
-    articleButtons =
-      Array.isArray(
-        article.buttons
-      )
-        ? JSON.parse(
-            JSON.stringify(
-              article.buttons
-            )
+/* =========================================================
+   ПУБЛИКАЦИЯ
+   ========================================================= */
+
+document
+  .getElementById(
+    "publishArticleBtn"
+  )
+  .addEventListener(
+    "click",
+    () => {
+
+      saveArticle(
+        "published"
+      );
+
+    }
+  );
+
+
+/* =========================================================
+   ЗАКРЫТИЕ РЕДАКТОРА
+   ========================================================= */
+
+document
+  .getElementById(
+    "closeArticleEditor"
+  )
+  .addEventListener(
+    "click",
+    () => {
+
+      const hasText =
+        document
+          .getElementById(
+            "articleEditor"
           )
-        : [];
+          .innerText
+          .trim();
 
-    const overlay =
-      createArticleEditorModal();
 
-    document.getElementById(
-      "articleEditorTitle"
-    ).textContent =
-      "Редактирование статьи";
+      if (
+        hasText &&
+        !confirm(
+          "Закрыть редактор? Несохранённые изменения будут потеряны."
+        )
+      ) {
 
-    document.getElementById(
-      "articleTitleInput"
-    ).value =
-      article.title || "";
+        return;
 
-    document.getElementById(
-      "articleDescriptionInput"
-    ).value =
-      article.description || "";
+      }
 
-    document.getElementById(
-      "articleContentInput"
-    ).value =
-      article.content || "";
 
-    renderArticleButtons();
+      document
+        .getElementById(
+          "articleEditorModal"
+        )
+        .classList.remove(
+          "open"
+        );
 
-    overlay.classList.add(
-      "open"
-    );
-  };
+    }
+  );
+
 
 /* =========================================================
-   УДАЛЕНИЕ СТАТЬИ
-   ========================================================= */
-
-window.deleteArticle =
-  async function(id) {
-
-    const article =
-      articlesData.find(
-        a => a.id === id
-      );
-
-    if (!article) return;
-
-    if (
-      !isAdmin() &&
-      article.author !==
-        getUsername()
-    ) {
-
-      alert(
-        "Вы можете удалять только свои статьи."
-      );
-
-      return;
-    }
-
-    if (
-      !confirm(
-        "Удалить эту статью?"
-      )
-    ) {
-      return;
-    }
-
-    articlesData =
-      articlesData.filter(
-        a => a.id !== id
-      );
-
-    await saveServerData();
-  };
-
-/* =========================================================
-   ПРОСМОТР СТАТЬИ
+   ОТКРЫТИЕ СТАТЬИ
    ========================================================= */
 
 window.openArticle =
-  function(id) {
+  function(index) {
 
     const article =
-      articlesData.find(
-        a => a.id === id
-      );
+      articlesData[index];
 
-    if (!article) return;
 
-    /*
-     * Дополнительная проверка:
-     * черновик нельзя открыть
-     * чужому сотруднику.
-     */
+    if (!article) {
+
+      return;
+
+    }
+
+
     if (
       article.status ===
         "draft" &&
-      !isAdmin() &&
-      article.author !==
-        getUsername()
+      !isAdmin()
     ) {
 
       alert(
-        "Этот материал находится в черновике."
+        "Этот материал ещё не опубликован."
       );
 
       return;
+
     }
 
-    const overlay =
+
+    const reader =
       document.createElement(
         "div"
       );
 
-    overlay.className =
+
+    reader.className =
       "modal-overlay open";
 
-    overlay.innerHTML = `
+
+    reader.innerHTML = `
+
       <div
-        class="modal"
-        style="
-          max-width:850px;
-        "
-      >
+        class="modal article-reader">
 
         <div class="modal-head">
 
           <div>
 
             <h3>
+
               ${escapeHtml(
                 article.title
               )}
+
             </h3>
+
 
             ${
               article.description
+
                 ? `
                   <p>
+
                     ${escapeHtml(
                       article.description
                     )}
+
                   </p>
                 `
+
                 : ""
             }
 
           </div>
+
 
           <button
             class="icon-btn del"
@@ -2879,251 +6005,153 @@ window.openArticle =
               font-size:16px;
             "
             onclick="
-              this.closest('.modal-overlay').remove()
-            "
-          >
+              this
+                .closest('.modal-overlay')
+                .remove()
+            ">
+
             ✕
+
           </button>
 
         </div>
 
-        <div
-          class="modal-body"
-          style="
-            padding-top:8px;
-          "
-        >
 
-          <div
-            style="
-              color:var(--text-dim);
-              font-size:.73rem;
-              margin-bottom:18px;
-            "
-          >
-            Автор:
-            ${escapeHtml(
-              article.author
-            )}
-            ·
-            ${formatDate(
-              article.updatedAt ||
-              article.createdAt
-            )}
+        <div class="article-reader-body">
+
+          <div class="article-content">
+
+            ${article.content}
+
           </div>
-
-          <div
-            style="
-              white-space:pre-wrap;
-              line-height:1.7;
-              font-size:.92rem;
-              color:var(--text);
-            "
-          >
-            ${escapeHtml(
-              article.content
-            )}
-          </div>
-
-          ${
-            article.buttons &&
-            article.buttons.length
-              ? `
-                <div
-                  style="
-                    margin-top:25px;
-                    display:flex;
-                    flex-wrap:wrap;
-                    gap:8px;
-                  "
-                >
-
-                  ${article.buttons.map(
-                    (button, index) => `
-                      <button
-                        class="add-btn"
-                        onclick="
-                          copyArticleButtonText(
-                            ${JSON.stringify(
-                              button.copyText
-                            )},
-                            this
-                          )
-                        "
-                      >
-                        ${escapeHtml(
-                          button.text
-                        )}
-                      </button>
-                    `
-                  ).join("")}
-
-                </div>
-              `
-              : ""
-          }
 
         </div>
 
       </div>
+
     `;
 
+
     document.body.appendChild(
-      overlay
+      reader
     );
+
   };
 
+
 /* =========================================================
-   КОПИРОВАНИЕ ТЕКСТА КНОПКОЙ
+   РЕДАКТИРОВАНИЕ СТАТЬИ
    ========================================================= */
 
-window.copyArticleButtonText =
-  async function(
-    text,
-    button
-  ) {
+window.editArticle =
+  function(index) {
 
-    /*
-     * НИКАКОЙ проверки на URL нет.
-     *
-     * Можно указать:
-     * https://google.com
-     * google.com
-     * abc123
-     * /test
-     * любой текст
-     */
+    if (!isAdmin()) {
 
-    try {
-
-      await navigator.clipboard.writeText(
-        String(text)
+      alert(
+        "Только администратор может редактировать статьи."
       );
 
-      const oldText =
-        button.textContent;
+      return;
 
-      button.textContent =
-        "✓ Скопировано";
-
-      setTimeout(() => {
-        button.textContent =
-          oldText;
-      }, 1200);
-
-    } catch (e) {
-
-      /*
-       * Запасной способ
-       * для браузеров,
-       * где Clipboard API
-       * недоступен.
-       */
-
-      const textarea =
-        document.createElement(
-          "textarea"
-        );
-
-      textarea.value =
-        String(text);
-
-      textarea.style.position =
-        "fixed";
-
-      textarea.style.opacity =
-        "0";
-
-      document.body.appendChild(
-        textarea
-      );
-
-      textarea.select();
-
-      try {
-        document.execCommand(
-          "copy"
-        );
-
-        const oldText =
-          button.textContent;
-
-        button.textContent =
-          "✓ Скопировано";
-
-        setTimeout(() => {
-          button.textContent =
-            oldText;
-        }, 1200);
-
-      } catch {
-        alert(
-          "Не удалось скопировать текст."
-        );
-      }
-
-      textarea.remove();
     }
+
+
+    const article =
+      articlesData[index];
+
+
+    if (!article) {
+
+      return;
+
+    }
+
+
+    currentArticle = {
+      ...article
+    };
+
+
+    document
+      .getElementById(
+        "articleEditorTitle"
+      )
+      .textContent =
+      article.title;
+
+
+    document
+      .getElementById(
+        "articleEditorDescription"
+      )
+      .textContent =
+      article.description ||
+      "Без описания";
+
+
+    document
+      .getElementById(
+        "articleEditor"
+      )
+      .innerHTML =
+      article.content || "";
+
+
+    document
+      .getElementById(
+        "articleEditorModal"
+      )
+      .classList.add(
+        "open"
+      );
+
   };
 
+
 /* =========================================================
-   СИНХРОНИЗАЦИЯ ПРАВ
+   УДАЛЕНИЕ СТАТЬИ
    ========================================================= */
 
-function refreshCurrentUserPermissions() {
+window.deleteArticle =
+  async function(index) {
 
-  if (isAdmin()) return;
+    if (!isAdmin()) {
 
-  const username =
-    getUsername();
+      alert(
+        "Только администратор может удалять статьи."
+      );
 
-  const me =
-    coauthorsData.find(
-      c =>
-        c.login === username
+      return;
+
+    }
+
+
+    if (
+      !confirm(
+        "Вы уверены, что хотите удалить эту статью?"
+      )
+    ) {
+
+      return;
+
+    }
+
+
+    articlesData.splice(
+      index,
+      1
     );
 
-  if (!me) return;
 
-  localStorage.setItem(
-    "ft_permissions",
-    JSON.stringify(
-      me.permissions || []
-    )
-  );
+    await saveServerData();
 
-  applySidebarVisibility();
-  updateCreateArticleButton();
-}
 
-/* =========================================================
-   ДОПОЛНИТЕЛЬНО:
-   если права были изменены,
-   обновляем их после рендера.
-   ========================================================= */
+    renderArticles();
 
-const originalRenderCoauthors =
-  renderCoauthors;
-
-renderCoauthors = function() {
-
-  originalRenderCoauthors();
-
-  refreshCurrentUserPermissions();
-};
-
-/* =========================================================
-   ИНИЦИАЛИЗАЦИЯ
-   ========================================================= */
-
-addCreateArticlesPermissionToAccess();
-
-if (
-  document.getElementById(
-    "view-hydes"
-  )
-) {
-  buildHydesInterface();
-}
+  };
 
 </script>
+
+</body>
+</html>
