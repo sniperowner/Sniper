@@ -36,8 +36,8 @@
     .login-card .sub { color: var(--text-dim); font-size: 0.88rem; margin-bottom: 1.5rem; }
     .form-group { margin-bottom: 1.1rem; }
     .form-group label { display: block; margin-bottom: 0.4rem; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-faint); }
-    .form-group input, .form-group select { width: 100%; padding: 0.7rem 0.85rem; border-radius: 8px; border: 1px solid var(--border); background-color: var(--bg); color: var(--text); font-size: 0.95rem; outline: none; box-sizing: border-box; }
-    .form-group input:focus, .form-group select:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); background-color: #fff; }
+    .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 0.7rem 0.85rem; border-radius: 8px; border: 1px solid var(--border); background-color: var(--bg); color: var(--text); font-size: 0.95rem; outline: none; box-sizing: border-box; }
+    .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); background-color: #fff; }
     .btn { width: 100%; padding: 0.75rem; background-color: var(--text); color: white; border: none; border-radius: 8px; font-size: 0.95rem; font-weight: 700; cursor: pointer; transition: background 0.2s; }
     .btn:hover { background-color: #000; }
     .btn:disabled { background-color: #C7CAD1; cursor: not-allowed; }
@@ -72,8 +72,15 @@
     .page-view { display: none; }
     .page-view.active-page { display: block; }
 
+    /* Поиск сотрудников */
+    .staff-toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; gap: 16px; flex-wrap: wrap; }
+    .search-box { position: relative; flex: 1; max-width: 320px; }
+    .search-box input { width: 100%; padding: 0.55rem 0.85rem 0.55rem 2.4rem; border-radius: 999px; border: 1px solid var(--border); background: var(--surface); font-size: 0.88rem; outline: none; }
+    .search-box input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+    .search-icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--text-faint); font-size: 0.9rem; }
+
     /* Табы и Таблицы */
-    .tabs { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
+    .tabs { display: flex; gap: 8px; flex-wrap: wrap; }
     .tab { padding: .4rem .85rem; border-radius: 999px; border: 1px solid var(--border); background: var(--surface); font-size: .82rem; font-weight: 600; color: var(--text-dim); cursor: pointer; }
     .tab.active { background: var(--text); color: #fff; border-color: var(--text); }
 
@@ -95,9 +102,7 @@
     .r-metod { background: #F3E8FF; color: #7C3AED; }
     .r-default { background: #F3F4F6; color: #6B7280; }
 
-    /* Бейджи и стили для должностей */
     .role-badge { display: inline-block; padding: .24rem .55rem; border-radius: 6px; font-size: .75rem; font-weight: 700; margin-right: 4px; margin-bottom: 2px; }
-    
     .vk-link { color: var(--accent); text-decoration: none; font-weight: 600; }
     .row-actions { display: flex; gap: 6px; }
     .icon-btn { padding: .4rem .7rem; font-size: .78rem; font-weight: 600; border-radius: 7px; border: 1px solid var(--border); background: var(--surface); cursor: pointer; }
@@ -108,6 +113,19 @@
     .card-footer { padding: 16px 20px; background: var(--bg); display: flex; justify-content: space-between; align-items: center; }
     .add-btn { display: inline-flex; align-items: center; gap: 6px; padding: .6rem 1rem; background: var(--text); color: #fff; border: none; border-radius: 8px; font-size: .86rem; font-weight: 700; cursor: pointer; }
 
+    /* Хайды стили */
+    .hydes-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+    .hydes-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px; }
+    .hyde-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px; box-shadow: var(--shadow-sm); display: flex; flex-direction: column; justify-content: space-between; position: relative; }
+    .hyde-card.draft { border-style: dashed; background: var(--bg); }
+    .hyde-title { font-size: 1.05rem; font-weight: 700; margin-bottom: 6px; }
+    .hyde-desc { font-size: 0.88rem; color: var(--text-dim); margin-bottom: 14px; line-height: 1.4; }
+    .hyde-badge { position: absolute; top: 16px; right: 16px; font-size: 0.7rem; font-weight: 700; padding: 2px 8px; border-radius: 6px; }
+    .hyde-badge.draft { background: var(--warning-soft); color: var(--warning); }
+    .hyde-badge.published { background: #ECFDF5; color: #059669; }
+    .hyde-btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; width: 100%; padding: 0.6rem; background: var(--accent); color: white; border: none; border-radius: 8px; font-weight: 600; font-size: 0.85rem; cursor: pointer; text-decoration: none; transition: background 0.2s; margin-top: 10px; }
+    .hyde-btn:hover { background: var(--accent-dark); }
+
     /* Статусы в разделе Доступ */
     .status-pill { display: inline-flex; align-items: center; gap: 6px; padding: .2rem .6rem; border-radius: 99px; font-size: 0.75rem; font-weight: 700; }
     .status-pill.active { background: #ECFDF5; color: #059669; }
@@ -116,7 +134,7 @@
     /* Модальные окна */
     .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(15, 17, 26, .45); align-items: center; justify-content: center; z-index: 100; padding: 20px; backdrop-filter: blur(2px); }
     .modal-overlay.open { display: flex; }
-    .modal { background: var(--surface); width: 100%; max-width: 480px; border-radius: 16px; box-shadow: var(--shadow-md); max-height: 90vh; overflow-y: auto; color: var(--text); }
+    .modal { background: var(--surface); width: 100%; max-width: 520px; border-radius: 16px; box-shadow: var(--shadow-md); max-height: 90vh; overflow-y: auto; color: var(--text); }
     .modal-head { padding: 22px 24px 4px; display: flex; justify-content: space-between; align-items: flex-start; }
     .modal-head h3 { font-size: 1.15rem; font-weight: 800; }
     .modal-head p { color: var(--text-dim); font-size: .85rem; margin-top: 4px; }
@@ -136,7 +154,6 @@
     .tag-chip[data-value="Стажёр"] { background: #eff6ff; color: #1d4ed8; border-color: #bfdbfe; }
     .tag-chip[data-value="Метод"] { background: #f0fdf4; color: #15803d; border-color: #bbf7d0; }
 
-    /* Уникальные цвета для должностей */
     .role-chip[data-value="Обычный сотрудник"] { background: #f3f4f6; color: #4b5563; border-color: #d1d5db; }
     .role-chip[data-value="Руководитель Активной модерации"] { background: #eff6ff; color: #1e40af; border-color: #93c5fd; }
     .role-chip[data-value="Руководитель медиа"] { background: #faf5ff; color: #6b21a8; border-color: #d8b4fe; }
@@ -233,12 +250,18 @@
 
         <!-- 2. Страница: Сотрудники -->
         <div class="page-view" id="view-staff">
-          <div class="tabs" id="tabs">
-            <button class="tab active" data-filter="Все">Все</button>
-            <button class="tab" data-filter="Бета">Бета</button>
-            <button class="tab" data-filter="Альфа">Альфа</button>
-            <button class="tab" data-filter="Стажёр">Стажёр</button>
-            <button class="tab" data-filter="Метод">Метод</button>
+          <div class="staff-toolbar">
+            <div class="tabs" id="tabs">
+              <button class="tab active" data-filter="Все">Все</button>
+              <button class="tab" data-filter="Бета">Бета</button>
+              <button class="tab" data-filter="Альфа">Альфа</button>
+              <button class="tab" data-filter="Стажёр">Стажёр</button>
+              <button class="tab" data-filter="Метод">Метод</button>
+            </div>
+            <div class="search-box">
+              <span class="search-icon">🔍</span>
+              <input type="text" id="staffSearchInput" placeholder="Поиск по нику...">
+            </div>
           </div>
           <div class="card">
             <table>
@@ -282,9 +305,15 @@
 
         <!-- 4. Страница: Хайды -->
         <div class="page-view" id="view-hydes">
-          <div class="card" style="padding: 40px; text-align:center;">
-            <h2>Хайды</h2>
-            <p style="color:var(--text-dim); margin-top:8px;">Секретная документация и внутренние инструкции состава.</p>
+          <div class="hydes-header">
+            <div>
+              <h2>Секретная документация</h2>
+              <p style="color:var(--text-dim); font-size:0.9rem;">Внутренние инструкции и материалы состава.</p>
+            </div>
+            <button class="add-btn" id="openAddHydeModal">+ Добавить статью</button>
+          </div>
+          <div class="hydes-grid" id="hydesGrid">
+            <!-- Список хайдов заполняется динамически -->
           </div>
         </div>
 
@@ -377,6 +406,66 @@
     </div>
   </div>
 
+  <!-- Модалка: Добавление статьи (Хайд) -->
+  <div class="modal-overlay" id="hydeModalOverlay">
+    <div class="modal" style="max-width: 600px;">
+      <div class="modal-head">
+        <div>
+          <h3>Новая статья (Хайд)</h3>
+          <p>Заполните заголовок, текст и добавьте кастомные кнопки скопируемого текста.</p>
+        </div>
+        <button class="icon-btn del" id="closeHydeModalBtn" style="border:none;background:none;font-size:16px;cursor:pointer;">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label>Заголовок статьи *</label>
+          <input type="text" id="hydeTitleInput" placeholder="Например: Правила выдачи наказаний">
+        </div>
+        <div class="form-group">
+          <label>Описание по желанию</label>
+          <input type="text" id="hydeDescInput" placeholder="Краткое описание или подзаголовок">
+        </div>
+        <div class="form-group">
+          <label>Текст статьи *</label>
+          <textarea id="hydeContentInput" rows="6" placeholder="Основной текст инструкции..."></textarea>
+        </div>
+
+        <div class="form-group">
+          <div class="label-row">
+            <label>Интерактивные кнопки (Копирование текста)</label>
+            <span class="hint">Вставьте ссылки и текст для кнопки</span>
+          </div>
+          <div id="hydeButtonsList" style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 8px;"></div>
+          <button type="button" class="btn" style="background: var(--bg); color: var(--text); border: 1px solid var(--border); font-size: 0.82rem; padding: 0.5rem;" id="addHydeBtnField">+ Добавить кнопку</button>
+        </div>
+      </div>
+      <div class="modal-foot">
+        <button class="btn" id="saveHydeDraftBtn" style="background: var(--warning); color: #fff;">Черновик</button>
+        <button class="btn" id="saveHydePubBtn" style="background: #16A34A; color: #fff;">Опубликовать</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Модалка просмотра статьи -->
+  <div class="modal-overlay" id="viewHydeModalOverlay">
+    <div class="modal" style="max-width: 650px;">
+      <div class="modal-head">
+        <div>
+          <h3 id="viewHydeTitle">Заголовок</h3>
+          <p id="viewHydeDesc" style="color:var(--text-dim); margin-top:2px;"></p>
+        </div>
+        <button class="icon-btn del" onclick="document.getElementById('viewHydeModalOverlay').classList.remove('open')" style="border:none;background:none;font-size:16px;cursor:pointer;">✕</button>
+      </div>
+      <div class="modal-body" style="padding-top: 10px;">
+        <div id="viewHydeContent" style="font-size: 0.95rem; line-height: 1.6; white-space: pre-wrap; margin-bottom: 20px;"></div>
+        <div id="viewHydeButtons" style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px;"></div>
+      </div>
+      <div class="modal-foot">
+        <button class="btn" onclick="document.getElementById('viewHydeModalOverlay').classList.remove('open')">Закрыть</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Модалка: Добавление соавтора -->
   <div class="modal-overlay" id="coauthorModalOverlay">
     <div class="modal">
@@ -454,6 +543,7 @@
     const WORKER_URL = "https://shy-wood-231f.potapovsasko.workers.dev";
     let staffData = [];
     let coauthorsData = [];
+    let hydesData = [];
     let currentFilter = "Все";
     let editIndex = null;
     let editCoauthorIdx = null;
@@ -592,20 +682,451 @@
         let permissions = JSON.parse(localStorage.getItem("ft_permissions") || "[]");
 
         if (role === "admin" || permissions.includes(page) || page === "home") {
-          const targetView = document.getElementById(`view-${page}`);
-          if (targetView) targetView.classList.add("active-page");
-          updateTopbar(page);
+          document.getElementById(`view-${page}`).classList.add("active-page");
+          if (pageTitles[page]) {
+            document.getElementById("pageTitle").textContent = pageTitles[page].title;
+            document.getElementById("pageSub").textContent = pageTitles[page].sub;
+          }
         } else {
           document.getElementById("view-forbidden").classList.add("active-page");
-          updateTopbar("forbidden");
+          document.getElementById("pageTitle").textContent = "Доступ ограничен";
+          document.getElementById("pageSub").textContent = "";
         }
       });
     });
 
-    function updateTopbar(pageKey) {
-      const info = pageTitles[pageKey] || { title: "Раздел", sub: "Управление" };
-      document.getElementById("pageTitle").textContent = info.title;
-      document.getElementById("pageSub").textContent = info.sub;
+    // Загрузка данных (Сотрудники, Соавторы, Хайды)
+    async function loadServerData() {
+      try {
+        const res = await fetch(`${WORKER_URL}/api/data`);
+        const data = await res.json();
+        staffData = data.staff || [];
+        coauthorsData = data.coauthors || [];
+        hydesData = data.hydes || [
+          {
+            title: "Базовые правила модерации",
+            desc: "Основные регламенты проверки игроков.",
+            content: "Здесь расписан детальный регламент проверок...",
+            status: "published",
+            buttons: [{ text: "Скопировать шаблон", url: "https://funtime.su" }]
+          },
+          {
+            title: "Черновик отчетов",
+            desc: "Тестовая статья для проверки.",
+            content: "Секретный черновик...",
+            status: "draft",
+            buttons: []
+          }
+        ];
+      } catch (e) {
+        // Локальные демо-данные на случай сбоя API
+        staffData = [
+          { nick: "KillerFrost", ranks: ["Бета"], roles: ["Руководитель Активной модерации"], vk: "https://vk.com/killer", avatar: "" },
+          { nick: "AlexSupport", ranks: ["Стажёр"], roles: ["Обычный сотрудник"], vk: "https://vk.com/alex", avatar: "" }
+        ];
+        coauthorsData = [
+          { login: "helper_alex", status: "active", permissions: ["staff", "hydes"], password: "••••••" }
+        ];
+        hydesData = [
+          {
+            title: "Регламент выдачи банов",
+            desc: "Инструкция по срокам и причинам наказаний.",
+            content: "Каждый модератор обязан сверяться с актуальной таблицей наказаний перед выдачей перманентного блока.",
+            status: "published",
+            buttons: [{ text: "Открыть таблицу", url: "https://vk.com" }]
+          }
+        ];
+      }
+      renderStaff();
+      renderCoauthors();
+      renderHydes();
+    }
+
+    // --- Сотрудники и поиск ---
+    document.querySelectorAll(".tab").forEach(tab => {
+      tab.addEventListener("click", () => {
+        document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+        tab.classList.add("active");
+        currentFilter = tab.dataset.filter;
+        renderStaff();
+      });
+
+    });
+
+    document.getElementById("staffSearchInput").addEventListener("input", () => {
+      renderStaff();
+    });
+
+    function renderStaff() {
+      const tbody = document.getElementById("staffList");
+      tbody.innerHTML = "";
+      const query = document.getElementById("staffSearchInput").value.toLowerCase().trim();
+
+      const role = localStorage.getItem("ft_role") || "admin";
+      let permissions = JSON.parse(localStorage.getItem("ft_permissions") || "[]");
+      const canManage = role === "admin" || permissions.includes("staff_actions");
+      const canAdd = role === "admin" || permissions.includes("staff_add");
+
+      document.getElementById("staffActionsHeader").style.display = canManage ? "" : "none";
+      document.getElementById("staffFooterCard").style.display = canAdd ? "flex" : "none";
+
+      const filtered = staffData.filter(st => {
+        const matchesFilter = currentFilter === "Все" || (st.ranks && st.ranks.includes(currentFilter));
+        const matchesSearch = !query || st.nick.toLowerCase().includes(query);
+        return matchesFilter && matchesSearch;
+      });
+
+      if (filtered.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:var(--text-dim); padding: 30px;">Сотрудники не найдены</td></tr>`;
+        return;
+      }
+
+      filtered.forEach((st, idx) => {
+        const realIdx = staffData.indexOf(st);
+        const tr = document.createElement("tr");
+
+        let ranksHtml = (st.ranks || []).map(r => `<span class="badge ${rankClass[r] || 'r-default'}">${r}</span>`).join("");
+        let rolesHtml = (st.roles || []).map(roleName => `<span class="role-badge role-chip" data-value="${roleName}">${roleName}</span>`).join("");
+
+        tr.innerHTML = `
+          <td>
+            <div class="player-cell">
+              <img class="avatar" src="${st.avatar || 'https://via.placeholder.com/32'}" alt="">
+              <span class="player-name">${st.nick}</span>
+            </div>
+          </td>
+          <td>${ranksHtml}</td>
+          <td>${rolesHtml}</td>
+          <td><a class="vk-link" href="${st.vk}" target="_blank">Профиль VK</a></td>
+          ${canManage ? `
+            <td>
+              <div class="row-actions">
+                <button class="icon-btn warn" onclick="openEditStaff(${realIdx})">Изменить</button>
+                <button class="icon-btn del" onclick="deleteStaff(${realIdx})">Удалить</button>
+              </div>
+            </td>
+          ` : '<td></td>'}
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    // --- Управление Хайдами ---
+    function renderHydes() {
+      const grid = document.getElementById("hydesGrid");
+      grid.innerHTML = "";
+
+      const role = localStorage.getItem("ft_role") || "admin";
+      const isAdmin = role === "admin";
+
+      hydesData.forEach((hyde, idx) => {
+        // Черновик видит только администратор
+        if (hyde.status === "draft" && !isAdmin) return;
+
+        const card = document.createElement("div");
+        card.className = `hyde-card ${hyde.status === 'draft' ? 'draft' : ''}`;
+
+        let badgeHtml = hyde.status === 'draft' 
+          ? `<span class="hyde-badge draft">Черновик</span>` 
+          : `<span class="hyde-badge published">Опубликовано</span>`;
+
+        card.innerHTML = `
+          ${badgeHtml}
+          <div>
+            <div class="hyde-title">${hyde.title}</div>
+            <div class="hyde-desc">${hyde.desc || ''}</div>
+          </div>
+          <button class="hyde-btn" onclick="openViewHyde(${idx})">Открыть статью</button>
+        `;
+        grid.appendChild(card);
+      });
+    }
+
+    document.getElementById("openAddHydeModal").addEventListener("click", () => {
+      document.getElementById("hydeTitleInput").value = "";
+      document.getElementById("hydeDescInput").value = "";
+      document.getElementById("hydeContentInput").value = "";
+      document.getElementById("hydeButtonsList").innerHTML = "";
+      document.getElementById("hydeModalOverlay").classList.add("open");
+    });
+
+    document.getElementById("closeHydeModalBtn").addEventListener("click", () => {
+      document.getElementById("hydeModalOverlay").classList.remove("open");
+    });
+
+    document.getElementById("addHydeBtnField").addEventListener("click", () => {
+      const container = document.getElementById("hydeButtonsList");
+      const row = document.createElement("div");
+      row.className = "hyde-btn-row";
+      row.style.cssText = "display: flex; gap: 8px; align-items: center;";
+      row.innerHTML = `
+        <input type="text" placeholder="Текст на кнопке" class="hb-text" style="flex:1; padding: 6px 10px; border-radius:6px; border:1px solid var(--border); font-size:13px;">
+        <input type="text" placeholder="Ссылка (URL)" class="hb-url" style="flex:1; padding: 6px 10px; border-radius:6px; border:1px solid var(--border); font-size:13px;">
+        <button type="button" class="icon-btn del" onclick="this.parentElement.remove()" style="padding: 6px 10px;">✕</button>
+      `;
+      container.appendChild(row);
+    });
+
+    function saveHyde(status) {
+      const title = document.getElementById("hydeTitleInput").value.trim();
+      const desc = document.getElementById("hydeDescInput").value.trim();
+      const content = document.getElementById("hydeContentInput").value.trim();
+
+      if (!title || !content) {
+        alert("Заполните заголовок и текст статьи!");
+        return;
+      }
+
+      const buttons = [];
+      document.querySelectorAll("#hydeButtonsList .hyde-btn-row").forEach(row => {
+        const text = row.querySelector(".hb-text").value.trim();
+        const url = row.querySelector(".hb-url").value.trim();
+        if (text && url) {
+          buttons.push({ text, url });
+        }
+      });
+
+      hydesData.push({ title, desc, content, status, buttons });
+      document.getElementById("hydeModalOverlay").classList.remove("open");
+      renderHydes();
+    }
+
+    document.getElementById("saveHydeDraftBtn").addEventListener("click", () => saveHyde("draft"));
+    document.getElementById("saveHydePubBtn").addEventListener("click", () => saveHyde("published"));
+
+    function openViewHyde(idx) {
+      const hyde = hydesData[idx];
+      document.getElementById("viewHydeTitle").textContent = hyde.title;
+      document.getElementById("viewHydeDesc").textContent = hyde.desc || "";
+      document.getElementById("viewHydeContent").textContent = hyde.content;
+
+      const btnContainer = document.getElementById("viewHydeButtons");
+      btnContainer.innerHTML = "";
+
+      if (hyde.buttons && hyde.buttons.length > 0) {
+        hyde.buttons.forEach(b => {
+          const a = document.createElement("a");
+          a.href = b.url;
+          a.target = "_blank";
+          a.className = "hyde-btn";
+          a.style.cssText = "flex: 1; min-width: 140px; margin-top: 0;";
+          a.textContent = b.text;
+          
+          // Функция копирования текста кнопки в буфер обмена при клике
+          a.addEventListener("click", (e) => {
+            navigator.clipboard.writeText(b.text);
+          });
+
+          btnContainer.appendChild(a);
+        });
+      }
+
+      document.getElementById("viewHydeModalOverlay").classList.add("open");
+    }
+
+    // --- Сотрудники (модалки, добавление/редактирование) ---
+    function toggleTag(el) {
+      el.classList.toggle("active");
+    }
+
+    document.getElementById("openAddModal")?.addEventListener("click", () => {
+      editIndex = null;
+      document.getElementById("modalTitle").textContent = "Добавить сотрудника";
+      document.getElementById("staffNick").value = "";
+      document.getElementById("staffVk").value = "";
+      document.getElementById("fileNameLabel").textContent = "Файл не выбран";
+      pendingAvatar = null;
+      document.querySelectorAll(".tag-chip").forEach(c => c.classList.remove("active"));
+      document.getElementById("staffModalOverlay").classList.add("open");
+    });
+
+    document.getElementById("cancelModalBtn").addEventListener("click", closeModal);
+    document.getElementById("cancelModalBtn2").addEventListener("click", closeModal);
+
+    function closeModal() {
+      document.getElementById("staffModalOverlay").classList.remove("open");
+    }
+
+    document.getElementById("staffAvatarFile").addEventListener("change", (e) => {
+      const file = e.target.files[0];
+      if (file) {
+        document.getElementById("fileNameLabel").textContent = file.name;
+        const reader = new FileReader();
+        reader.onload = function(evt) {
+          pendingAvatar = evt.target.result;
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+
+    document.getElementById("saveStaffBtn").addEventListener("click", () => {
+      const nick = document.getElementById("staffNick").value.trim();
+      const vk = document.getElementById("staffVk").value.trim();
+
+      const ranks = [];
+      document.querySelectorAll("#rankTags .tag-chip.active").forEach(c => ranks.push(c.dataset.value));
+
+      const roles = [];
+      document.querySelectorAll("#roleTags .tag-chip.active").forEach(c => roles.push(c.dataset.value));
+
+      if (!nick) {
+        alert("Введите ник сотрудника!");
+        return;
+      }
+
+      const staffObj = {
+        nick,
+        ranks,
+        roles: roles.length > 0 ? roles : ["Обычный сотрудник"],
+        vk: vk || "#",
+        avatar: pendingAvatar || (editIndex !== null ? staffData[editIndex].avatar : "")
+      };
+
+      if (editIndex !== null) {
+        staffData[editIndex] = staffObj;
+      } else {
+        staffData.push(staffObj);
+      }
+
+      closeModal();
+      renderStaff();
+    });
+
+    function openEditStaff(idx) {
+      editIndex = idx;
+      const st = staffData[idx];
+      document.getElementById("modalTitle").textContent = "Изменить сотрудника";
+      document.getElementById("staffNick").value = st.nick;
+      document.getElementById("staffVk").value = st.vk;
+      document.getElementById("fileNameLabel").textContent = st.avatar ? "Аватар загружен" : "Файл не выбран";
+      pendingAvatar = st.avatar;
+
+      document.querySelectorAll(".tag-chip").forEach(c => {
+        if ((st.ranks && st.ranks.includes(c.dataset.value)) || (st.roles && st.roles.includes(c.dataset.value))) {
+          c.classList.add("active");
+        } else {
+          c.classList.remove("active");
+        }
+      });
+
+      document.getElementById("staffModalOverlay").classList.add("open");
+    }
+
+    function deleteStaff(idx) {
+      if (confirm("Вы уверены, что хотите удалить этого сотрудника?")) {
+        staffData.splice(idx, 1);
+        renderStaff();
+      }
+    }
+
+    // --- Соавторы ---
+    function renderCoauthors() {
+      const tbody = document.getElementById("coauthorsList");
+      tbody.innerHTML = "";
+      coauthorsData.forEach((co, idx) => {
+        const tr = document.createElement("tr");
+        let statusHtml = co.status === "blocked" 
+          ? `<span class="status-pill blocked">Заблокирован</span>` 
+          : `<span class="status-pill active">Активен</span>`;
+
+        tr.innerHTML = `
+          <td><strong>${co.login}</strong></td>
+          <td>${statusHtml}</td>
+          <td><code style="font-size:11px;">${(co.permissions || []).join(", ")}</code></td>
+          <td><code>${co.password || '••••••'}</code></td>
+          <td>
+            <div class="row-actions">
+              <button class="icon-btn warn" onclick="openEditCoauthor(${idx})">Изменить</button>
+              <button class="icon-btn del" onclick="deleteCoauthor(${idx})">Удалить</button>
+            </div>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    document.getElementById("openAddCoauthorModal").addEventListener("click", () => {
+      document.getElementById("coauthorNick").value = "";
+      document.querySelectorAll("#accessChips .chip").forEach(c => c.classList.remove("selected"));
+      document.getElementById("newCredsResult").style.display = "none";
+      document.getElementById("coauthorModalOverlay").classList.add("open");
+    });
+
+    document.getElementById("cancelCoauthorBtn").addEventListener("click", () => {
+      document.getElementById("coauthorModalOverlay").classList.remove("open");
+    });
+
+    document.getElementById("saveCoauthorBtn").addEventListener("click", () => {
+      const login = document.getElementById("coauthorNick").value.trim();
+      if (!login) {
+        alert("Введите логин соавтора!");
+        return;
+      }
+      const permissions = [];
+      document.querySelectorAll("#accessChips .chip.selected").forEach(c => permissions.push(c.dataset.value));
+
+      const randomPassword = Math.random().toString(36.slice(-8));
+      coauthorsData.push({ login, status: "active", permissions, password: randomPassword });
+
+      document.getElementById("newCredsResult").style.display = "block";
+      document.getElementById("newCredsResult").innerHTML = `
+        <div class="creds-box">
+          Соавтор успешно создан!<br>
+          Логин: <code>${login}</code><br>
+          Пароль: <code>${randomPassword}</code>
+        </div>
+      `;
+      renderCoauthors();
+    });
+
+    function openEditCoauthor(idx) {
+      editCoauthorIdx = idx;
+      const co = coauthorsData[idx];
+      document.getElementById("editCoauthorNick").value = co.login;
+      document.getElementById("editCoauthorPassword").value = "";
+
+      document.querySelectorAll("#editAccessChips .chip").forEach(c => {
+        if (co.permissions && co.permissions.includes(c.dataset.value)) {
+          c.classList.add("selected");
+        } else {
+          c.classList.remove("selected");
+        }
+      });
+      document.getElementById("editCoauthorModalOverlay").classList.add("open");
+    }
+
+    function toggleEditChip(el) {
+      el.classList.toggle("selected");
+      // Мгновенное сохранение прав
+      if (editCoauthorIdx !== null) {
+        const co = coauthorsData[editCoauthorIdx];
+        const permissions = [];
+        document.querySelectorAll("#editAccessChips .chip.selected").forEach(c => permissions.push(c.dataset.value));
+        co.permissions = permissions;
+        renderCoauthors();
+      }
+    }
+
+    document.getElementById("cancelEditCoauthorBtn").addEventListener("click", () => {
+      document.getElementById("editCoauthorModalOverlay").classList.remove("open");
+    });
+
+    document.getElementById("saveEditCoauthorBtn").addEventListener("click", () => {
+      const co = coauthorsData[editCoauthorIdx];
+      co.login = document.getElementById("editCoauthorNick").value.trim();
+      const newPass = document.getElementById("editCoauthorPassword").value.trim();
+      if (newPass) {
+        co.password = newPass;
+      }
+      document.getElementById("editCoauthorModalOverlay").classList.remove("open");
+      renderCoauthors();
+    });
+
+    function deleteCoauthor(idx) {
+      if (confirm("Удалить этого соавтора?")) {
+        coauthorsData.splice(idx, 1);
+        renderCoauthors();
+      }
     }
   </script>
 </body>
