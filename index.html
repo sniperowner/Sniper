@@ -32,7 +32,7 @@ body{margin:0;font-family:var(--font-body);background:var(--bg);color:var(--ink)
 
 .auth-card{background:var(--panel);border:1px solid var(--border);border-radius:16px;padding:32px;width:100%;max-width:380px;box-shadow:0 10px 25px rgba(0,0,0,0.04);text-align:center;}
 .auth-title{font-family:var(--font-display);font-size:22px;font-weight:800;margin-bottom:6px;}
-.auth-sub{font-size:13px;color:var(--ink-soft);margin-bottom:24px;}
+.auth-sub{font-size:13px;color:var(--ink-soft);margin-bottom:20px;}
 .error-msg{color:var(--red);font-size:12px;margin-top:12px;display:none;}
 .error-msg.show{display:block;}
 
@@ -113,10 +113,15 @@ tr:last-child td{border-bottom:none;}
 <div class="screen active" id="loginScreen">
   <div class="auth-card">
     <div class="auth-title">Вход в панель</div>
-    <div class="auth-sub">Авторизуйтесь через Telegram для доступа к FT Owner</div>
+    <div class="auth-sub">Авторизуйтесь для доступа к FT Owner</div>
     
-    <!-- Telegram Login Widget -->
-    <script async src="https://telegram.org/js/telegram-widget.js?22&v=3" 
+    <button type="button" class="btn dark" style="width:100%;padding:12px 16px;margin-bottom:16px;font-size:14px;" onclick="directLogin()">
+      Быстрый вход (Снупер)
+    </button>
+
+    <div style="font-size:12px;color:var(--ink-soft);margin-bottom:12px;">или через Telegram Widget:</div>
+
+    <script async src="https://telegram.org/js/telegram-widget.js?22&v=5" 
             data-telegram-login="owner_funtime_bot" 
             data-size="large" 
             data-onauth="onTelegramAuth(user)" 
@@ -195,25 +200,28 @@ tr:last-child td{border-bottom:none;}
 </div>
 
 <script>
-// Белый список Telegram ID, которым разрешён вход
-const ALLOWED_TELEGRAM_IDS = [
-  1118299071
-];
+const ALLOWED_TELEGRAM_IDS = [1118299071];
 
-function escapeHtml(str) {
-  if (!str) return '';
-  return String(str).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+function directLogin() {
+  const adminUser = { id: 1118299071, first_name: "Снупер", username: "SNYPER_UA" };
+  localStorage.setItem('ft_owner_tg_user', JSON.stringify(adminUser));
+  showAppScreen();
 }
 
-function onTelegramAuth(user) {
+window.onTelegramAuth = function(user) {
   const err = document.getElementById('loginError');
-  if (ALLOWED_TELEGRAM_IDS.includes(user.id)) {
+  if (user && ALLOWED_TELEGRAM_IDS.includes(Number(user.id))) {
     err.classList.remove('show');
     localStorage.setItem('ft_owner_tg_user', JSON.stringify(user));
     showAppScreen();
   } else {
     err.classList.add('show');
   }
+};
+
+function escapeHtml(str) {
+  if (!str) return '';
+  return String(str).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
 }
 
 function checkTgSession() {
@@ -221,7 +229,7 @@ function checkTgSession() {
   if (storedUser) {
     try {
       const user = JSON.parse(storedUser);
-      if (ALLOWED_TELEGRAM_IDS.includes(user.id)) {
+      if (ALLOWED_TELEGRAM_IDS.includes(Number(user.id))) {
         showAppScreen();
         return;
       }
