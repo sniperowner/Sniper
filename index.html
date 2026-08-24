@@ -439,6 +439,20 @@
           return;
         }
 
+        // Если соавтор удален или заархивирован, блокируем вход на клиенте
+        if (data.status === "deleted") {
+          statusMsg.textContent = "Ошибка: Аккаунт удален, вход невозможен.";
+          statusMsg.className = "status-msg error";
+          submitBtn.disabled = false;
+          return;
+        }
+        if (data.status === "archived") {
+          statusMsg.textContent = "Ошибка: Аккаунт заархивирован.";
+          statusMsg.className = "status-msg error";
+          submitBtn.disabled = false;
+          return;
+        }
+
         localStorage.setItem("ft_username", login);
         localStorage.setItem("ft_role", data.role || "admin");
         localStorage.setItem("ft_permissions", JSON.stringify(data.permissions || ["staff", "hydes", "access", "payments", "home"]));
@@ -746,6 +760,33 @@
         "payments": "Мои выплаты"
       };
 
+      list.json = coauthorsData.map((item, idx) => {
+        let statusBadge = "";
+        if (item.status === "archived") {
+          statusBadge = `<span class="badge-status status-archived">В архиве</span>`;
+        } else if (item.status === "deleted") {
+          statusBadge = `<span class="badge-status status-deleted">Удален</span>`;
+        } else {
+          statusBadge = `<span class="badge-status status-active">Активен</span>`;
+        }
+
+        return `
+          <tr>
+            <td><strong>${item.login}</strong> ${statusBadge}</td>
+            <td>${(item.permissions || []).map(p => permLabels[p] || p).join(", ") || "<span style='color:var(--text-faint)'>Нет доступа</span>"}</td>
+            <td><code>••••••••</code></td>
+            <td>
+              <div class="row-actions">
+                <button class="icon-btn" onclick="editCoauthor(${idx})">Изменить</button>
+                ${item.status !== 'archived' ? `<button class="icon-btn warn" onclick="archiveCoauthor(${idx})">Архив</button>` : ''}
+                ${item.status !== 'deleted' ? `<button class="icon-btn del" onclick="deleteCoauthor(${idx})">Удалить</button>` : ''}
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join("");
+      
+      // Исправление подстановки HTML строки списка соавторов
       list.innerHTML = coauthorsData.map((item, idx) => {
         let statusBadge = "";
         if (item.status === "archived") {
