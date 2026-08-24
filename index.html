@@ -24,378 +24,107 @@
     --shadow-sm: 0 1px 2px rgba(16,24,40,.04);
     --shadow-md: 0 12px 30px rgba(16,24,40,.10);
   }
-  * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  }
+  * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
+  body { background-color: var(--bg); color: var(--text); min-height: 100vh; }
 
-  body {
-      background-color: #F7F8FB;
-      color: #12141C;
-      min-height: 100vh;
-  }
-
-  /* --- Авторизация (без изменений) --- */
-  #authSection {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
-      padding: 24px;
-  }
-
-  .login-card {
-      background: #FFFFFF;
-      padding: 2.25rem 2rem;
-      border-radius: 16px;
-      box-shadow: 0 12px 30px rgba(16, 24, 40, 0.10);
-      width: 100%;
-      max-width: 400px;
-      border: 1px solid #E7E9EE;
-  }
-
-  .login-card h2 {
-      margin-bottom: 0.4rem;
-      text-align: left;
-      color: #12141C;
-      font-size: 1.35rem;
-      font-weight: 800;
-      letter-spacing: -0.02em;
-  }
-
-  .login-card .sub {
-      color: #6B7280;
-      font-size: 0.88rem;
-      margin-bottom: 1.5rem;
-  }
-
-  .form-group {
-      margin-bottom: 1.1rem;
-  }
-
-  .form-group label {
-      display: block;
-      margin-bottom: 0.4rem;
-      font-size: 0.72rem;
-      font-weight: 700;
-      letter-spacing: 0.06em;
-      text-transform: uppercase;
-      color: #9CA3AF;
-  }
-
-  .form-group input, .form-group select {
-      width: 100%;
-      padding: 0.7rem 0.85rem;
-      border-radius: 8px;
-      border: 1px solid #E7E9EE;
-      background-color: #F7F8FB;
-      color: #12141C;
-      font-size: 0.95rem;
-      outline: none;
-      transition: border-color .15s, box-shadow .15s, background-color .15s;
-  }
-
-  .form-group input:focus, .form-group select:focus {
-      border-color: #4F46E5;
-      box-shadow: 0 0 0 3px #EEF0FF;
-      background-color: #fff;
-  }
-
-  .btn {
-      width: 100%;
-      padding: 0.75rem;
-      background-color: #12141C;
-      color: white;
-      border: none;
-      border-radius: 8px;
-      font-size: 0.95rem;
-      font-weight: 700;
-      cursor: pointer;
-      transition: background-color 0.2s;
-  }
-
+  /* Авторизация */
+  #authSection { display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 24px; }
+  .login-card { background: #FFFFFF; padding: 2.25rem 2rem; border-radius: 16px; box-shadow: var(--shadow-md); width: 100%; max-width: 400px; border: 1px solid var(--border); }
+  .login-card h2 { margin-bottom: 0.4rem; color: var(--text); font-size: 1.35rem; font-weight: 800; }
+  .login-card .sub { color: var(--text-dim); font-size: 0.88rem; margin-bottom: 1.5rem; }
+  .form-group { margin-bottom: 1.1rem; }
+  .form-group label { display: block; margin-bottom: 0.4rem; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-faint); }
+  .form-group input, .form-group select { width: 100%; padding: 0.7rem 0.85rem; border-radius: 8px; border: 1px solid var(--border); background-color: var(--bg); color: var(--text); font-size: 0.95rem; outline: none; }
+  .form-group input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); background-color: #fff; }
+  .btn { width: 100%; padding: 0.75rem; background-color: var(--text); color: white; border: none; border-radius: 8px; font-size: 0.95rem; font-weight: 700; cursor: pointer; }
   .btn:hover { background-color: #000; }
   .btn:disabled { background-color: #C7CAD1; cursor: not-allowed; }
-  .btn-danger { background-color: #DC2626; }
-  .btn-danger:hover { background-color: #B91C1C; }
-
-  .status-msg {
-      margin-top: 1rem;
-      text-align: center;
-      font-size: 0.85rem;
-      min-height: 1.2em;
-      font-weight: 500;
-  }
-  .status-msg.error { color: #DC2626; }
+  .status-msg { margin-top: 1rem; text-align: center; font-size: 0.85rem; font-weight: 500; }
+  .status-msg.error { color: var(--danger); }
   .status-msg.success { color: #16A34A; }
-  .status-msg.info { color: #4F46E5; }
+  .status-msg.info { color: var(--accent); }
 
-  /* ---------- APP SHELL (внутренность — как было в начале) ---------- */
-  #dashboardSection{display:none;min-height:100vh;}
-  .shell{display:grid;grid-template-columns:230px 1fr;min-height:100vh;}
+  /* Dashboard Shell */
+  #dashboardSection { display: none; min-height: 100vh; }
+  .shell { display: grid; grid-template-columns: 230px 1fr; min-height: 100vh; }
+  .sidebar { background: var(--surface); border-right: 1px solid var(--border); padding: 20px 14px; display: flex; flex-direction: column; position: sticky; top: 0; height: 100vh; }
+  .brand { display: flex; align-items: center; gap: 10px; padding: 6px 8px 22px 8px; }
+  .brand .dot { width: 22px; height: 22px; border-radius: 6px; background: linear-gradient(135deg,var(--accent),var(--accent-dark)); }
+  .brand span { font-weight: 800; font-size: 1.02rem; }
+  .nav-label { font-size: .68rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--text-faint); padding: 14px 10px 6px; }
+  .nav-item { display: flex; align-items: center; gap: 10px; padding: .55rem .65rem; border-radius: 8px; color: var(--text-dim); font-size: .9rem; font-weight: 500; text-decoration: none; cursor: pointer; user-select: none; }
+  .nav-item .ic { width: 18px; text-align: center; }
+  .nav-item:hover { background: var(--bg); color: var(--text); }
+  .nav-item.active { background: var(--accent-soft); color: var(--accent); font-weight: 600; }
+  .sidebar-footer { margin-top: auto; display: flex; flex-direction: column; gap: 2px; padding-top: 14px; border-top: 1px solid var(--border); }
+  .sidebar-footer .nav-item.danger { color: var(--danger); }
+  .dev-tag { padding: .5rem .65rem; font-size: .78rem; color: var(--text-faint); font-family: monospace; }
 
-  .sidebar{
-    background:var(--surface);
-    border-right:1px solid var(--border);
-    padding:20px 14px;
-    display:flex;
-    flex-direction:column;
-    position:sticky;top:0;height:100vh;
-  }
-  .brand{
-    display:flex;align-items:center;gap:10px;
-    padding:6px 8px 22px 8px;
-  }
-  .brand .dot{
-    width:22px;height:22px;border-radius:6px;
-    background:linear-gradient(135deg,var(--accent),var(--accent-dark));
-    flex-shrink:0;
-  }
-  .brand span{font-weight:800;font-size:1.02rem;letter-spacing:-0.01em;}
+  .main { padding: 28px 36px 60px; max-width: 1160px; }
+  .topbar { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 28px; }
+  .topbar h1 { font-size: 1.5rem; font-weight: 800; }
+  .topbar .sub { color: var(--text-dim); font-size: .92rem; margin-top: 4px; }
+  .user-pill { display: flex; align-items: center; gap: 8px; padding: .45rem .8rem; background: var(--surface); border: 1px solid var(--border); border-radius: 999px; font-size: .86rem; font-weight: 600; }
+  .user-pill .uic { width: 22px; height: 22px; border-radius: 50%; background: var(--accent-soft); color: var(--accent); display: flex; align-items: center; justify-content: center; font-size: .72rem; font-weight: 800; }
 
-  .nav-label{
-    font-size:.68rem;font-weight:700;letter-spacing:.08em;
-    text-transform:uppercase;color:var(--text-faint);
-    padding:14px 10px 6px;
-  }
-  .nav-item{
-    display:flex;align-items:center;gap:10px;
-    padding:.55rem .65rem;
-    border-radius:8px;
-    color:var(--text-dim);
-    font-size:.9rem;font-weight:500;
-    text-decoration:none;
-    cursor:pointer;
-    user-select:none;
-  }
-  .nav-item .ic{width:18px;text-align:center;flex-shrink:0;}
-  .nav-item:hover{background:var(--bg);color:var(--text);}
-  .nav-item.active{background:var(--accent-soft);color:var(--accent);font-weight:600;}
+  .page-view { display: none; }
+  .page-view.active-page { display: block; }
 
-  .sidebar-footer{
-    margin-top:auto;
-    display:flex;flex-direction:column;gap:2px;
-    padding-top:14px;border-top:1px solid var(--border);
-  }
-  .sidebar-footer .nav-item.link{color:var(--accent);}
-  .sidebar-footer .nav-item.danger{color:var(--danger);}
-  .dev-tag{
-    padding:.5rem .65rem;font-size:.78rem;color:var(--text-faint);
-    font-family:'SFMono-Regular',Consolas,monospace;
-  }
+  /* Табы и карточки */
+  .tabs { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
+  .tab { padding: .4rem .85rem; border-radius: 999px; border: 1px solid var(--border); background: var(--surface); font-size: .82rem; font-weight: 600; color: var(--text-dim); cursor: pointer; }
+  .tab.active { background: var(--text); color: #fff; border-color: var(--text); }
 
-  .main{padding:28px 36px 60px;max-width:1160px;}
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; box-shadow: var(--shadow-sm); overflow: hidden; margin-bottom: 20px; }
+  table { width: 100%; border-collapse: collapse; }
+  thead th { text-align: left; font-size: .7rem; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; color: var(--text-faint); padding: 14px 20px; background: var(--bg); border-bottom: 1px solid var(--border); }
+  tbody td { padding: 14px 20px; border-bottom: 1px solid var(--border); font-size: .9px; vertical-align: middle; }
+  tbody tr:last-child td { border-bottom: none; }
 
-  .topbar{
-    display:flex;justify-content:space-between;align-items:flex-start;
-    margin-bottom:28px;
-  }
-  .topbar h1{font-size:1.5rem;font-weight:800;letter-spacing:-0.02em;}
-  .topbar .sub{color:var(--text-dim);font-size:.92rem;margin-top:4px;}
-  .user-pill{
-    display:flex;align-items:center;gap:8px;
-    padding:.45rem .8rem;
-    background:var(--surface);
-    border:1px solid var(--border);
-    border-radius:999px;
-    font-size:.86rem;font-weight:600;
-    color:var(--text);
-  }
-  .user-pill .uic{
-    width:22px;height:22px;border-radius:50%;
-    background:var(--accent-soft);color:var(--accent);
-    display:flex;align-items:center;justify-content:center;
-    font-size:.72rem;font-weight:800;
-  }
+  .player-cell { display: flex; align-items: center; gap: 10px; }
+  .avatar { width: 32px; height: 32px; border-radius: 8px; object-fit: cover; background: var(--bg); }
+  .player-name { font-weight: 700; }
+  .badge { display: inline-block; padding: .24rem .55rem; border-radius: 6px; font-size: .75rem; font-weight: 700; }
+  .r-beta { background: #ECFDF5; color: #059669; }
+  .r-alpha { background: #FFF7ED; color: #EA580C; }
+  .r-stazher { background: #EFF6FF; color: #2563EB; }
+  .r-metod { background: #ECFDF5; color: #16A34A; }
+  .r-default { background: #F3F4F6; color: #6B7280; }
+  .vk-link { color: var(--accent); text-decoration: none; font-weight: 600; }
+  .row-actions { display: flex; gap: 6px; }
+  .icon-btn { padding: .4rem .7rem; font-size: .78rem; font-weight: 600; border-radius: 7px; border: 1px solid var(--border); background: var(--surface); cursor: pointer; }
+  .icon-btn.del { color: var(--danger); border-color: #FBD5D5; }
+  .card-footer { padding: 16px 20px; background: var(--bg); display: flex; justify-content: space-between; align-items: center; }
+  .add-btn { display: inline-flex; align-items: center; gap: 6px; padding: .6rem 1rem; background: var(--text); color: #fff; border: none; border-radius: 8px; font-size: .86rem; font-weight: 700; cursor: pointer; }
 
-  /* filter tabs */
-  .tabs{display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap;}
-  .tab{
-    padding:.4rem .85rem;
-    border-radius:999px;
-    border:1px solid var(--border);
-    background:var(--surface);
-    font-size:.82rem;font-weight:600;
-    color:var(--text-dim);
-    transition:all .15s;
-  }
-  .tab:hover{border-color:#D1D5DB;}
-  .tab.active{background:var(--text);color:#fff;border-color:var(--text);}
+  /* Модальное окно */
+  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(15,17,26,.45); align-items: center; justify-content: center; z-index: 100; padding: 20px; backdrop-filter: blur(2px); }
+  .modal-overlay.open { display: flex; }
+  .modal { background: var(--surface); width: 100%; max-width: 440px; border-radius: 16px; box-shadow: var(--shadow-md); max-height: 88vh; overflow-y: auto; }
+  .modal-head { padding: 22px 24px 4px; }
+  .modal-head h3 { font-size: 1.15rem; font-weight: 800; }
+  .modal-head p { color: var(--text-dim); font-size: .85rem; margin-top: 4px; }
+  .modal-body { padding: 16px 24px 4px; }
+  .modal-foot { padding: 18px 24px 24px; display: flex; gap: 10px; }
+  .modal-foot .btn { flex: 1; }
+  .chip-group { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 6px; }
+  .chip { padding: .4rem .75rem; border-radius: 999px; border: 1.5px solid var(--border); background: var(--surface); font-size: .8rem; font-weight: 600; color: var(--text-dim); cursor: pointer; user-select: none; }
+  .chip.selected { border-color: var(--accent); background: var(--accent-soft); color: var(--accent); }
+  .file-row { display: flex; align-items: center; gap: 10px; padding: .6rem .7rem; border: 1px dashed var(--border); border-radius: 8px; font-size: .82rem; color: var(--text-dim); }
+  .file-row label { padding: .32rem .7rem; background: var(--bg); border: 1px solid var(--border); border-radius: 6px; font-size: .78rem; font-weight: 600; color: var(--text); cursor: pointer; }
+  .file-row input[type=file] { display: none; }
 
-  /* table card */
-  .card{
-    background:var(--surface);
-    border:1px solid var(--border);
-    border-radius:14px;
-    box-shadow:var(--shadow-sm);
-    overflow:hidden;
-  }
-  table{width:100%;border-collapse:collapse;}
-  thead th{
-    text-align:left;
-    font-size:.7rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;
-    color:var(--text-faint);
-    padding:14px 20px;
-    background:var(--bg);
-    border-bottom:1px solid var(--border);
-  }
-  tbody td{
-    padding:14px 20px;
-    border-bottom:1px solid var(--border);
-    font-size:.9rem;
-    vertical-align:middle;
-  }
-  tbody tr:last-child td{border-bottom:none;}
-  tbody tr:hover{background:#FBFBFD;}
+  /* Сообщение запрета доступа */
+  .access-denied { text-align: center; padding: 60px 20px; }
+  .access-denied h2 { font-size: 1.4rem; color: var(--danger); margin-bottom: 10px; }
+  .access-denied p { color: var(--text-dim); font-size: 0.95rem; }
 
-  .player-cell{display:flex;align-items:center;gap:10px;}
-  .avatar{
-    width:32px;height:32px;border-radius:8px;
-    box-shadow:0 0 0 1px var(--border);
-    object-fit:cover;background:var(--bg);
-  }
-  .player-name{font-weight:700;}
-  .you-tag{
-    font-size:.7rem;color:var(--text-faint);font-weight:600;
-    margin-left:4px;
-  }
-
-  .badge-row{display:flex;flex-wrap:wrap;gap:5px;}
-  .badge{
-    display:inline-block;
-    padding:.24rem .55rem;
-    border-radius:6px;
-    font-size:.75rem;
-    font-weight:700;
-    white-space:nowrap;
-  }
-  .r-beta{background:#ECFDF5;color:#059669;}
-  .r-alpha{background:#FFF7ED;color:#EA580C;}
-  .r-stazher{background:#EFF6FF;color:#2563EB;}
-  .r-metod{background:#ECFDF5;color:#16A34A;}
-  .r-default{background:#F3F4F6;color:#6B7280;}
-
-  .p-red{background:#FEF2F2;color:#DC2626;}
-  .p-purple{background:#F5F3FF;color:#7C3AED;}
-  .p-indigo{background:#EEF2FF;color:#4F46E5;}
-  .p-green{background:#ECFDF5;color:#059669;}
-  .p-violet{background:#FAF5FF;color:#A855F7;}
-  .p-orange{background:#FFF7ED;color:#EA580C;}
-  .p-teal{background:#F0FDF4;color:#16A34A;}
-  .p-gray{background:#F3F4F6;color:#6B7280;}
-
-  .vk-link{color:var(--accent);text-decoration:none;font-weight:600;}
-  .vk-link:hover{text-decoration:underline;}
-  .dash{color:var(--text-faint);}
-
-  .row-actions{display:flex;gap:6px;}
-  .icon-btn{
-    padding:.4rem .7rem;
-    font-size:.78rem;font-weight:600;
-    border-radius:7px;border:1px solid var(--border);
-    background:var(--surface);color:var(--text);
-  }
-  .icon-btn:hover{background:var(--bg);}
-  .icon-btn.del{color:var(--danger);border-color:#FBD5D5;}
-  .icon-btn.del:hover{background:var(--danger-soft);}
-
-  .card-footer{padding:16px 20px;border-top:1px solid var(--border);background:var(--bg);}
-  .add-btn{
-    display:inline-flex;align-items:center;gap:6px;
-    padding:.6rem 1rem;
-    background:var(--text);color:#fff;
-    border:none;border-radius:8px;
-    font-size:.86rem;font-weight:700;
-  }
-  .add-btn:hover{background:#000;}
-
-  .empty-state{padding:48px 20px;text-align:center;color:var(--text-dim);}
-  .empty-state .big{font-size:1.6rem;margin-bottom:6px;}
-
-  /* ---------- MODAL ---------- */
-  .modal-overlay{
-    display:none;position:fixed;inset:0;
-    background:rgba(15,17,26,.45);
-    align-items:center;justify-content:center;
-    z-index:100;padding:20px;
-    backdrop-filter:blur(2px);
-  }
-  .modal-overlay.open{display:flex;}
-  .modal{
-    background:var(--surface);
-    width:100%;max-width:420px;
-    border-radius:16px;
-    box-shadow:var(--shadow-md);
-    max-height:88vh;overflow-y:auto;
-  }
-  .modal-head{
-    padding:22px 24px 4px;
-  }
-  .modal-head h3{font-size:1.15rem;font-weight:800;letter-spacing:-0.01em;}
-  .modal-head p{color:var(--text-dim);font-size:.85rem;margin-top:4px;}
-  .modal-body{padding:16px 24px 4px;}
-  .modal-foot{
-    padding:18px 24px 24px;
-    display:flex;gap:10px;
-  }
-  .modal-foot .btn{flex:1;}
-
-  .chip-group{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:4px;}
-  .chip{
-    padding:.4rem .75rem;
-    border-radius:999px;
-    border:1.5px solid var(--border);
-    background:var(--surface);
-    font-size:.8rem;font-weight:600;
-    color:var(--text-dim);
-    transition:all .12s;
-    user-select:none;
-  }
-  .chip:hover{border-color:#C7CAD1;}
-  .chip.selected{
-    border-color:var(--accent);
-    background:var(--accent-soft);
-    color:var(--accent);
-  }
-  .chip.disabled-look{opacity:.55;}
-
-  .file-row{
-    display:flex;align-items:center;gap:10px;
-    padding:.6rem .7rem;
-    border:1px dashed var(--border);
-    border-radius:8px;
-    font-size:.82rem;color:var(--text-dim);
-  }
-  .file-row label{
-    padding:.32rem .7rem;
-    background:var(--bg);border:1px solid var(--border);
-    border-radius:6px;font-size:.78rem;font-weight:600;
-    color:var(--text);cursor:pointer;flex-shrink:0;
-  }
-  .file-row input[type=file]{display:none;}
-  .file-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-
-  @media (max-width:820px){
-    .shell{grid-template-columns:1fr;}
-    .sidebar{
-      position:relative;height:auto;
-      flex-direction:row;flex-wrap:wrap;align-items:center;
-      border-right:none;border-bottom:1px solid var(--border);
-    }
-    .sidebar-footer{margin-top:0;border-top:none;flex-direction:row;}
-    .main{padding:20px;}
-    table{font-size:.82rem;}
-    thead{display:none;}
-    tbody tr{display:block;padding:12px 4px;border-bottom:1px solid var(--border);}
-    tbody td{display:block;border-bottom:none;padding:4px 16px;}
-  }
+  .creds-box { background: var(--accent-soft); padding: 12px; border-radius: 8px; margin-top: 10px; font-size: 0.9rem; border: 1px dashed var(--accent); }
 </style>
 </head>
 <body>
 
-  <!-- СЕКЦИЯ АВТОРИЗАЦИИ (без изменений) -->
+  <!-- Авторизация -->
   <div id="authSection">
       <div class="login-card">
           <h2>FT Owner Admin</h2>
@@ -415,23 +144,22 @@
       </div>
   </div>
 
-  <!-- ================= DASHBOARD (как было в начале) ================= -->
+  <!-- Dashboard -->
   <div id="dashboardSection">
     <div class="shell">
       <aside class="sidebar">
         <div class="brand"><div class="dot"></div><span>FT Owner</span></div>
 
         <div class="nav-label">Главное</div>
-        <a class="nav-item" data-toast="Скоро"><span class="ic">🏠</span>Главная</a>
-        <a class="nav-item active"><span class="ic">👥</span>Сотрудники</a>
-        <a class="nav-item" data-toast="Скоро"><span class="ic">📄</span>Хайды</a>
-        <a class="nav-item" data-toast="Скоро"><span class="ic">🔑</span>Доступ</a>
+        <a class="nav-item" data-page="home"><span class="ic">🏠</span>Главная</a>
+        <a class="nav-item active" data-page="staff"><span class="ic">👥</span>Сотрудники</a>
+        <a class="nav-item" data-page="hydes"><span class="ic">📄</span>Хайды</a>
+        <a class="nav-item" data-page="access"><span class="ic">🔑</span>Доступ</a>
 
         <div class="nav-label">Профиль</div>
-        <a class="nav-item" data-toast="Скоро"><span class="ic">💳</span>Мои выплаты</a>
+        <a class="nav-item" data-page="payments"><span class="ic">💳</span>Мои выплаты</a>
 
         <div class="sidebar-footer">
-          <a class="nav-item link" href="#"><span class="ic">↗</span>На сайт</a>
           <a class="nav-item danger" id="logoutBtn"><span class="ic">↺</span>Выйти</a>
           <div class="dev-tag">&lt;/&gt; Developer</div>
         </div>
@@ -440,153 +168,165 @@
       <main class="main">
         <div class="topbar">
           <div>
-            <h1>Сотрудники</h1>
-            <p class="sub">Команда, которая работает для сервера FunTime.</p>
+            <h1 id="pageTitle">Сотрудники</h1>
+            <p class="sub" id="pageSub">Команда, которая работает для сервера FunTime.</p>
           </div>
           <div class="user-pill"><span class="uic" id="userInitial">S</span><span id="userNameLabel">—</span></div>
         </div>
 
-        <div class="tabs" id="tabs">
-          <button class="tab active" data-filter="Все">Все</button>
-          <button class="tab" data-filter="Бета">Бета</button>
-          <button class="tab" data-filter="Альфа">Альфа</button>
-          <button class="tab" data-filter="Стажёр">Стажёр</button>
-          <button class="tab" data-filter="Метод">Метод</button>
+        <!-- 1. Страница: Сотрудники -->
+        <div class="page-view active-page" id="view-staff">
+          <div class="tabs" id="tabs">
+            <button class="tab active" data-filter="Все">Все</button>
+            <button class="tab" data-filter="Бета">Бета</button>
+            <button class="tab" data-filter="Альфа">Альфа</button>
+            <button class="tab" data-filter="Стажёр">Стажёр</button>
+            <button class="tab" data-filter="Метод">Метод</button>
+          </div>
+          <div class="card">
+            <table>
+              <thead>
+                <tr>
+                  <th>Сотрудник</th>
+                  <th>Ранг</th>
+                  <th>Должность</th>
+                  <th>VK</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody id="staffList"></tbody>
+            </table>
+            <div class="card-footer">
+              <button class="add-btn" id="openAddModal">+ Добавить сотрудника</button>
+            </div>
+          </div>
         </div>
 
-        <div class="card">
-          <table>
-            <thead>
-              <tr>
-                <th>Сотрудник</th>
-                <th>Ранг</th>
-                <th>Должность</th>
-                <th>VK</th>
-                <th></th>
-              </tr>
-            </thead>
-            <tbody id="staffList"></tbody>
-          </table>
-          <div class="card-footer">
-            <button class="add-btn" id="openAddModal">+ Добавить сотрудника</button>
+        <!-- 2. Страница: Доступ (Соавторы) -->
+        <div class="page-view" id="view-access">
+          <div class="card">
+            <table>
+              <thead>
+                <tr>
+                  <th>Соавтор (Логин)</th>
+                  <th>Доступные разделы</th>
+                  <th>Пароль</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody id="coauthorsList"></tbody>
+            </table>
+            <div class="card-footer">
+              <button class="add-btn" id="openAddCoauthorModal">+ Добавить соавтора</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Другие страницы (Заглушки / Проверка прав) -->
+        <div class="page-view" id="view-home">
+          <div class="card" style="padding: 40px; text-align:center;"><h2>Главная панель</h2><p style="color:var(--text-dim); margin-top:8px;">Добро пожаловать в систему управления.</p></div>
+        </div>
+        <div class="page-view" id="view-hydes">
+          <div class="card" style="padding: 40px; text-align:center;"><h2>Хайды</h2><p style="color:var(--text-dim); margin-top:8px;">Секретная документация и хайды состава.</p></div>
+        </div>
+        <div class="page-view" id="view-payments">
+          <div class="card" style="padding: 40px; text-align:center;"><h2>Выплаты</h2><p style="color:var(--text-dim); margin-top:8px;">Информация по вашим выплатам.</p></div>
+        </div>
+
+        <!-- Блок ошибки доступа -->
+        <div class="page-view" id="view-forbidden">
+          <div class="access-denied">
+            <h2>Доступ ограничен</h2>
+            <p>Вам не было предоставлено доступ к данной странице, обратитесь к владельцу.</p>
           </div>
         </div>
       </main>
     </div>
   </div>
 
-  <!-- ================= MODAL: ADD/EDIT STAFF ================= -->
+  <!-- Модалка: Добавление сотрудника -->
   <div class="modal-overlay" id="staffModalOverlay">
     <div class="modal">
       <div class="modal-head">
         <h3 id="modalTitle">Добавить сотрудника</h3>
-        <p>Заполните данные, чтобы добавить нового участника команды.</p>
+        <p>Заполните данные участника команды.</p>
       </div>
       <div class="modal-body">
-        <div class="form-group">
-          <label>Ник</label>
-          <input type="text" id="staffNick" placeholder="Например, KillerFrost">
-        </div>
-
-        <div class="form-group">
-          <label>Ранг <span style="text-transform:none;font-weight:500;color:var(--text-faint);">(можно выбрать несколько)</span></label>
+        <div class="form-group"><label>Ник</label><input type="text" id="staffNick"></div>
+        <div class="form-group"><label>Ранг</label>
           <div class="chip-group" id="rankChips">
-            <div class="chip" data-value="Бета">Бета</div>
-            <div class="chip" data-value="Альфа">Альфа</div>
-            <div class="chip" data-value="Стажёр">Стажёр</div>
-            <div class="chip" data-value="Метод">Метод</div>
+            <div class="chip" data-value="Бета">Бета</div><div class="chip" data-value="Альфа">Альфа</div>
+            <div class="chip" data-value="Стажёр">Стажёр</div><div class="chip" data-value="Метод">Метод</div>
           </div>
         </div>
-
-        <div class="form-group">
-          <label>Должность <span style="text-transform:none;font-weight:500;color:var(--text-faint);">(можно выбрать несколько)</span></label>
+        <div class="form-group"><label>Должность</label>
           <div class="chip-group" id="posChips">
-            <div class="chip disabled-look" data-value="Обычный сотрудник">Обычный сотрудник</div>
-            <div class="chip" data-value="Руководитель Активной модерации">Руководитель Активной модерации</div>
-            <div class="chip" data-value="Руководитель медиа">Руководитель медиа</div>
-            <div class="chip" data-value="Руководитель репортов">Руководитель репортов</div>
-            <div class="chip" data-value="Заместитель репортов">Заместитель репортов</div>
-            <div class="chip" data-value="Заместитель Активной модерации">Заместитель Активной модерации</div>
-            <div class="chip" data-value="Руководитель ОМЧ">Руководитель ОМЧ</div>
-            <div class="chip" data-value="Заместитель ОМЧ">Заместитель ОМЧ</div>
+            <div class="chip" data-value="Руководитель Активной модерации">Рук. Акт. Модерации</div>
+            <div class="chip" data-value="Руководитель медиа">Рук. Медиа</div>
+            <div class="chip" data-value="Руководитель репортов">Рук. Репортов</div>
           </div>
         </div>
-
-        <div class="form-group">
-          <label>Ссылка VK</label>
-          <input type="text" id="staffVk" placeholder="https://vk.com/username">
-        </div>
-
-        <div class="form-group">
-          <label>Аватар <span style="text-transform:none;font-weight:500;color:var(--text-faint);">(необязательно, загрузить вручную)</span></label>
-          <div class="file-row">
-            <label for="staffAvatarFile">Выберите файл</label>
-            <span class="file-name" id="fileNameLabel">Файл не выбран</span>
-            <input type="file" id="staffAvatarFile" accept="image/*">
-          </div>
+        <div class="form-group"><label>Ссылка VK</label><input type="text" id="staffVk" placeholder="https://vk.com/..."></div>
+        <div class="form-group"><label>Аватар</label>
+          <div class="file-row"><label for="staffAvatarFile">Файл</label><span id="fileNameLabel">Не выбран</span><input type="file" id="staffAvatarFile" accept="image/*"></div>
         </div>
       </div>
       <div class="modal-foot">
         <button class="btn" style="background:var(--surface);color:var(--text);border:1px solid var(--border);" id="cancelModalBtn">Отмена</button>
-        <button class="btn" style="background:var(--accent);" id="saveStaffBtn">Добавить</button>
+        <button class="btn" id="saveStaffBtn">Добавить</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Модалка: Добавление соавтора -->
+  <div class="modal-overlay" id="coauthorModalOverlay">
+    <div class="modal">
+      <div class="modal-head">
+        <h3>Добавить соавтора</h3>
+        ف<p>Укажите ник и выберите страницы, к которым будет доступ.</p>
+      </div>
+      <div class="modal-body">
+        <div class="form-group"><label>Логин / Ник соавтора</label><input type="text" id="coauthorNick" placeholder="Например: helper_alex"></div>
+        <div class="form-group"><label>Доступные разделы</label>
+          <div class="chip-group" id="accessChips">
+            <div class="chip" data-value="staff">Сотрудники</div>
+            <div class="chip" data-value="hydes">Хайды</div>
+            <div class="chip" data-value="access">Доступ</div>
+            <div class="chip" data-value="payments">Мои выплаты</div>
+          </div>
+        </div>
+        <div id="newCredsResult" style="display:none;"></div>
+      </div>
+      <div class="modal-foot">
+        <button class="btn" style="background:var(--surface);color:var(--text);border:1px solid var(--border);" id="cancelCoauthorBtn">Отмена</button>
+        <button class="btn" id="saveCoauthorBtn">Создать соавтора</button>
       </div>
     </div>
   </div>
 
 <script>
   const WORKER_URL = "https://shy-wood-231f.potapovsasko.workers.dev";
-
-  const authSection = document.getElementById("authSection");
-  const dashboardSection = document.getElementById("dashboardSection");
-  const loginForm = document.getElementById("loginForm");
-  const submitBtn = document.getElementById("submitBtn");
-  const statusMsg = document.getElementById("statusMsg");
-  const logoutBtn = document.getElementById("logoutBtn");
-
-  const staffList = document.getElementById("staffList");
-  const tabs = document.getElementById("tabs");
-  const userInitial = document.getElementById("userInitial");
-  const userNameLabel = document.getElementById("userNameLabel");
-
-  const staffModalOverlay = document.getElementById("staffModalOverlay");
-  const openAddModal = document.getElementById("openAddModal");
-  const cancelModalBtn = document.getElementById("cancelModalBtn");
-  const saveStaffBtn = document.getElementById("saveStaffBtn");
-  const modalTitle = document.getElementById("modalTitle");
-  const staffNick = document.getElementById("staffNick");
-  const staffVk = document.getElementById("staffVk");
-  const rankChips = document.getElementById("rankChips");
-  const posChips = document.getElementById("posChips");
-  const staffAvatarFile = document.getElementById("staffAvatarFile");
-  const fileNameLabel = document.getElementById("fileNameLabel");
-
-  let staffData = JSON.parse(localStorage.getItem("ft_staff_data")) || [
-    { nick: "SniperPUBG", ranks: ["Метод"], positions: ["Владелец"], vk: "", avatar: null }
-  ];
+  let staffData = [];
+  let coauthorsData = [];
   let currentFilter = "Все";
   let editIndex = null;
   let pendingAvatar = null;
 
   const rankClass = { "Бета": "r-beta", "Альфа": "r-alpha", "Стажёр": "r-stazher", "Метод": "r-metod" };
-  const posColors = ["p-red","p-purple","p-indigo","p-green","p-violet","p-orange","p-teal","p-gray"];
-  const posColorMap = {};
-  document.querySelectorAll("#posChips .chip").forEach((el, i) => {
-    posColorMap[el.dataset.value] = posColors[i % posColors.length];
-  });
-  posColorMap["Владелец"] = "p-indigo";
 
-  // Проверка авторизации при загрузке
   if (localStorage.getItem("ft_authenticated") === "true") {
       showDashboard();
   }
 
-  // Авторизация — логика оставлена без изменений
-  loginForm.addEventListener("submit", async (e) => {
+  document.getElementById("loginForm").addEventListener("submit", async (e) => {
       e.preventDefault();
       const login = document.getElementById("username").value.trim();
       const password = document.getElementById("password").value.trim();
+      const statusMsg = document.getElementById("statusMsg");
+      const submitBtn = document.getElementById("submitBtn");
 
-      setStatus("Проверка данных...", "info");
+      statusMsg.textContent = "Проверка данных...";
+      statusMsg.className = "status-msg info";
       submitBtn.disabled = true;
 
       try {
@@ -595,21 +335,23 @@
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({ login, password })
           });
-
           const data = await res.json();
-
           if (!data.success) {
-              setStatus(data.error || "Ошибка входа", "error");
+              statusMsg.textContent = data.error || "Ошибка входа";
+              statusMsg.className = "status-msg error";
               submitBtn.disabled = false;
               return;
           }
 
           localStorage.setItem("ft_username", login);
-          setStatus("Подтвердите вход в Telegram...", "info");
-          startPolling(data.sessionId);
+          localStorage.setItem("ft_role", data.role || "admin");
+          localStorage.setItem("ft_permissions", JSON.stringify(data.permissions || ["staff", "hydes", "access", "payments", "home"]));
 
+          statusMsg.textContent = "Подтвердите вход в Telegram...";
+          startPolling(data.sessionId);
       } catch (err) {
-          setStatus("Ошибка соединения", "error");
+          statusMsg.textContent = "Ошибка соединения";
+          statusMsg.className = "status-msg error";
           submitBtn.disabled = false;
       }
   });
@@ -619,203 +361,236 @@
           try {
               const res = await fetch(`${WORKER_URL}/api/check-status?sessionId=${sessionId}`);
               const data = await res.json();
-
               if (data.status === "approved") {
                   clearInterval(pollInterval);
                   localStorage.setItem("ft_authenticated", "true");
                   showDashboard();
-              } else if (data.status === "denied") {
+              } else if (data.status === "denied" || data.status === "expired") {
                   clearInterval(pollInterval);
-                  setStatus("Вход отклонён!", "error");
-                  submitBtn.disabled = false;
-              } else if (data.status === "expired") {
-                  clearInterval(pollInterval);
-                  setStatus("Время ожидания истекло", "error");
-                  submitBtn.disabled = false;
+                  document.getElementById("statusMsg").textContent = "Вход отклонён или истек";
+                  document.getElementById("statusMsg").className = "status-msg error";
+                  document.getElementById("submitBtn").disabled = false;
               }
-          } catch (err) {
-              console.error("Ошибка опроса:", err);
-          }
+          } catch (e) {}
       }, 2000);
   }
 
-  function setStatus(text, type) {
-      statusMsg.textContent = text;
-      statusMsg.className = `status-msg ${type}`;
-  }
-
-  function showDashboard() {
-      authSection.style.display = "none";
-      dashboardSection.style.display = "block";
+  async function showDashboard() {
+      document.getElementById("authSection").style.display = "none";
+      document.getElementById("dashboardSection").style.display = "block";
       const name = localStorage.getItem("ft_username") || "SniperPUBG";
-      userNameLabel.textContent = name;
-      userInitial.textContent = name.charAt(0).toUpperCase();
-      renderStaff();
+      document.getElementById("userNameLabel").textContent = name;
+      document.getElementById("userInitial").textContent = name.charAt(0).toUpperCase();
+
+      await loadServerData();
   }
 
-  // Выход
-  logoutBtn.addEventListener("click", () => {
-      localStorage.removeItem("ft_authenticated");
+  document.getElementById("logoutBtn").addEventListener("click", () => {
+      localStorage.clear();
       location.reload();
   });
 
-  document.querySelectorAll(".nav-item[data-toast]").forEach(el => {
-    el.addEventListener("click", () => {
-      el.style.opacity = ".5";
-      setTimeout(() => el.style.opacity = "1", 600);
+  /* Навигация и проверка прав */
+  document.querySelectorAll(".sidebar .nav-item[data-page]").forEach(item => {
+    item.addEventListener("click", (e) => {
+      e.preventDefault();
+      const page = item.dataset.page;
+      
+      document.querySelectorAll(".sidebar .nav-item").forEach(el => el.classList.remove("active"));
+      item.classList.add("active");
+
+      document.querySelectorAll(".page-view").forEach(v => v.classList.remove("active-page"));
+
+      const role = localStorage.getItem("ft_role") || "admin";
+      let permissions = JSON.parse(localStorage.getItem("ft_permissions") || "[]");
+
+      if (role === "admin" || permissions.includes(page) || page === "home") {
+        const targetView = document.getElementById(`view-${page}`);
+        if (targetView) targetView.classList.add("active-page");
+      } else {
+        document.getElementById("view-forbidden").classList.add("active-page");
+      }
     });
   });
 
-  /* ---------- FILTER TABS ---------- */
-  tabs.addEventListener("click", (e) => {
-    const btn = e.target.closest(".tab");
-    if (!btn) return;
-    tabs.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
-    btn.classList.add("active");
-    currentFilter = btn.dataset.filter;
+  /* Загрузка данных с сервера */
+  async function loadServerData() {
+    try {
+      const res = await fetch(`${WORKER_URL}/api/data`);
+      const data = await res.json();
+      if (data.success) {
+        staffData = data.staff || [];
+        coauthorsData = data.coauthors || [];
+      }
+    } catch (e) {
+      staffData = JSON.parse(localStorage.getItem("ft_staff_data")) || [];
+      coauthorsData = JSON.parse(localStorage.getItem("ft_coauthors_data")) || [];
+    }
     renderStaff();
-  });
+    renderCoauthors();
+  }
 
-  /* ---------- CHIP TOGGLES ---------- */
+  async function saveServerData() {
+    localStorage.setItem("ft_staff_data", JSON.stringify(staffData));
+    localStorage.setItem("ft_coauthors_data", JSON.stringify(coauthorsData));
+    try {
+      await fetch(`${WORKER_URL}/api/data`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ staff: staffData, coauthors: coauthorsData })
+      });
+    } catch (e) {}
+    renderStaff();
+    renderCoauthors();
+  }
+
+  /* Чипы и модалки */
   function bindChips(container) {
     container.querySelectorAll(".chip").forEach(chip => {
       chip.addEventListener("click", () => chip.classList.toggle("selected"));
     });
   }
-  bindChips(rankChips);
-  bindChips(posChips);
+  bindChips(document.getElementById("rankChips"));
+  bindChips(document.getElementById("posChips"));
+  bindChips(document.getElementById("accessChips"));
 
   function getSelected(container) {
     return [...container.querySelectorAll(".chip.selected")].map(c => c.dataset.value);
   }
   function setSelected(container, values) {
-    container.querySelectorAll(".chip").forEach(c => {
-      c.classList.toggle("selected", values.includes(c.dataset.value));
-    });
+    container.querySelectorAll(".chip").forEach(c => c.classList.toggle("selected", values.includes(c.dataset.value)));
   }
 
-  /* ---------- AVATAR UPLOAD ---------- */
-  staffAvatarFile.addEventListener("change", () => {
-    const file = staffAvatarFile.files[0];
-    if (!file) { fileNameLabel.textContent = "Файл не выбран"; pendingAvatar = null; return; }
-    fileNameLabel.textContent = file.name;
+  // Сотрудники модалка
+  const staffModal = document.getElementById("staffModalOverlay");
+  document.getElementById("openAddModal").addEventListener("click", () => {
+    editIndex = null;
+    document.getElementById("modalTitle").textContent = "Добавить сотрудника";
+    document.getElementById("staffNick").value = "";
+    document.getElementById("staffVk").value = "";
+    setSelected(document.getElementById("rankChips"), []);
+    setSelected(document.getElementById("posChips"), []);
+    staffModal.classList.add("open");
+  });
+  document.getElementById("cancelModalBtn").addEventListener("click", () => staffModal.classList.remove("open"));
+
+  let pendingAvatar = null;
+  document.getElementById("staffAvatarFile").addEventListener("change", (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    document.getElementById("fileNameLabel").textContent = file.name;
     const reader = new FileReader();
     reader.onload = () => { pendingAvatar = reader.result; };
     reader.readAsDataURL(file);
   });
 
-  /* ---------- MODAL OPEN/CLOSE ---------- */
-  function openModal(index = null) {
-    editIndex = index;
-    pendingAvatar = null;
-    fileNameLabel.textContent = "Файл не выбран";
-    staffAvatarFile.value = "";
-
-    if (index === null) {
-      modalTitle.textContent = "Добавить сотрудника";
-      saveStaffBtn.textContent = "Добавить";
-      staffNick.value = "";
-      staffVk.value = "";
-      setSelected(rankChips, []);
-      setSelected(posChips, []);
-    } else {
-      const item = staffData[index];
-      modalTitle.textContent = "Изменить сотрудника";
-      saveStaffBtn.textContent = "Сохранить";
-      staffNick.value = item.nick;
-      staffVk.value = item.vk || "";
-      setSelected(rankChips, item.ranks || []);
-      setSelected(posChips, item.positions || []);
-      pendingAvatar = item.avatar || null;
-      if (item.avatar) fileNameLabel.textContent = "Текущий аватар сохранён";
-    }
-    staffModalOverlay.classList.add("open");
-  }
-  function closeModal() { staffModalOverlay.classList.remove("open"); editIndex = null; }
-
-  openAddModal.addEventListener("click", () => openModal(null));
-  cancelModalBtn.addEventListener("click", closeModal);
-  staffModalOverlay.addEventListener("click", (e) => { if (e.target === staffModalOverlay) closeModal(); });
-
-  saveStaffBtn.addEventListener("click", () => {
-    const nick = staffNick.value.trim();
-    if (!nick) { staffNick.focus(); return; }
-    const ranks = getSelected(rankChips);
-    const positions = getSelected(posChips);
-    const vk = staffVk.value.trim();
+  document.getElementById("saveStaffBtn").addEventListener("click", () => {
+    const nick = document.getElementById("staffNick").value.trim();
+    if (!nick) return;
+    const ranks = getSelected(document.getElementById("rankChips"));
+    const positions = getSelected(document.getElementById("posChips"));
+    const vk = document.getElementById("staffVk").value.trim();
 
     const record = { nick, ranks, positions, vk, avatar: pendingAvatar };
-
     if (editIndex === null) staffData.push(record);
     else staffData[editIndex] = record;
 
-    saveAndRender();
-    closeModal();
+    saveServerData();
+    staffModal.classList.remove("open");
   });
 
-  /* ---------- DELETE ---------- */
-  function deleteStaff(index) {
-    staffData.splice(index, 1);
-    saveAndRender();
-  }
-  window.deleteStaff = deleteStaff;
-  window.editStaff = (index) => openModal(index);
+  window.deleteStaff = (idx) => { staffData.splice(idx, 1); saveServerData(); };
+  window.editStaff = (idx) => {
+    editIndex = idx;
+    const item = staffData[idx];
+    document.getElementById("modalTitle").textContent = "Изменить сотрудника";
+    document.getElementById("staffNick").value = item.nick;
+    document.getElementById("staffVk").value = item.vk || "";
+    setSelected(document.getElementById("rankChips"), item.ranks || []);
+    setSelected(document.getElementById("posChips"), item.positions || []);
+    pendingAvatar = item.avatar || null;
+    staffModal.classList.add("open");
+  };
 
-  function saveAndRender() {
-    localStorage.setItem("ft_staff_data", JSON.stringify(staffData));
-    renderStaff();
-  }
+  /* Соавторы модалка */
+  const coauthorModal = document.getElementById("coauthorModalOverlay");
+  document.getElementById("openAddCoauthorModal").addEventListener("click", () => {
+    document.getElementById("coauthorNick").value = "";
+    setSelected(document.getElementById("accessChips"), []);
+    document.getElementById("newCredsResult").style.display = "none";
+    coauthorModal.classList.add("open");
+  });
+  document.getElementById("cancelCoauthorBtn").addEventListener("click", () => coauthorModal.classList.remove("open"));
 
-  /* ---------- RENDER ---------- */
+  document.getElementById("saveCoauthorBtn").addEventListener("click", async () => {
+    const nick = document.getElementById("coauthorNick").value.trim();
+    const permissions = getSelected(document.getElementById("accessChips"));
+    if (!nick) return;
+
+    // Генерация случайного пароля
+    const password = Math.random().toString(36.slice(-8)) + Math.floor(Math.random() * 1000);
+    
+    coauthorsData.push({ login: nick, password, permissions });
+    await saveServerData();
+
+    document.getElementById("newCredsResult").innerHTML = `
+      <div class="creds-box">
+        <strong>Соавтор успешно создан!</strong><br>
+        Логин: <code>${nick}</code><br>
+        Пароль: <code>${password}</code><br>
+        <span style="font-size:0.75rem; color:var(--danger)">Сохраните пароль, он больше не будет показан!</span>
+      </div>
+    `;
+    document.getElementById("newCredsResult").style.display = "block";
+  });
+
+  window.deleteCoauthor = (idx) => { coauthorsData.splice(idx, 1); saveServerData(); };
+
+  /* Рендер */
   function renderStaff() {
-    const currentUser = localStorage.getItem("ft_username") || "SniperPUBG";
+    const list = document.getElementById("staffList");
     let items = staffData.map((item, idx) => ({ item, idx }));
-    if (currentFilter !== "Все") {
-      items = items.filter(({ item }) => (item.ranks || []).includes(currentFilter));
-    }
+    if (currentFilter !== "Все") items = items.filter(x => (x.item.ranks || []).includes(currentFilter));
 
     if (items.length === 0) {
-      staffList.innerHTML = `<tr><td colspan="5"><div class="empty-state"><div class="big">👥</div>Нет сотрудников в этой категории</div></td></tr>`;
+      list.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:30px; color:var(--text-dim);">Нет сотрудников</td></tr>`;
       return;
     }
-
-    staffList.innerHTML = items.map(({ item, idx }) => {
-      const isYou = item.nick.toLowerCase() === currentUser.toLowerCase();
-      const avatarSrc = item.avatar ? item.avatar : `https://mc-heads.net/avatar/${encodeURIComponent(item.nick)}/32`;
-
-      const rankBadges = (item.ranks && item.ranks.length)
-        ? item.ranks.map(r => `<span class="badge ${rankClass[r] || 'r-default'}">${r}</span>`).join("")
-        : `<span class="badge r-default">—</span>`;
-
-      const posBadges = (item.positions && item.positions.length)
-        ? item.positions.map(p => `<span class="badge ${posColorMap[p] || 'p-gray'}">${p}</span>`).join("")
-        : `<span class="dash">—</span>`;
-
-      const vkCell = item.vk
-        ? `<a class="vk-link" href="${item.vk}" target="_blank" rel="noopener">${item.vk.replace(/^https?:\/\//, "")}</a>`
-        : `<span class="dash">—</span>`;
-
-      return `
-        <tr>
-          <td>
-            <div class="player-cell">
-              <img class="avatar" src="${avatarSrc}" alt="skin" onerror="this.src='https://mc-heads.net/avatar/MHF_Steve/32'">
-              <span class="player-name">${item.nick}</span>
-              ${isYou ? `<span class="you-tag">это вы</span>` : ""}
-            </div>
-          </td>
-          <td><div class="badge-row">${rankBadges}</div></td>
-          <td><div class="badge-row">${posBadges}</div></td>
-          <td>${vkCell}</td>
-          <td>
-            <div class="row-actions">
-              <button class="icon-btn" onclick="editStaff(${idx})">Изменить</button>
-              <button class="icon-btn del" onclick="deleteStaff(${idx})">Удалить</button>
-            </div>
-          </td>
-        </tr>`;
-    }).join("");
+    list.innerHTML = items.map(({ item, idx }) => `
+      <tr>
+        <td><div class="player-cell"><img class="avatar" src="${item.avatar || 'https://mc-heads.net/avatar/MHF_Steve/32'}"><span class="player-name">${item.nick}</span></div></td>
+        <td>${(item.ranks || []).map(r => `<span class="badge ${rankClass[r] || 'r-default'}">${r}</span>`).join(" ")}</td>
+        <td>${(item.positions || []).join(", ") || "—"}</td>
+        <td>${item.vk ? `<a class="vklink" href="${item.vk}" target="_blank">${item.vk}</a>` : "—"}</td>
+        <td><div class="row-actions"><button class="icon-btn" onclick="editStaff(${idx})">Изменить</button><button class="icon-btn del" onclick="deleteStaff(${idx})">Удалить</button></div></td>
+      </tr>
+    `).join("");
   }
+
+  function renderCoauthors() {
+    const list = document.getElementById("coauthorsList");
+    if (coauthorsData.length === 0) {
+      list.innerHTML = `<tr><td colspan="4" style="text-align:center; padding:30px; color:var(--text-dim);">Нет добавленных соавторов</td></tr>`;
+      return;
+    }
+    list.innerHTML = coauthorsData.map((item, idx) => `
+      <tr>
+        <td><strong>${item.login}</strong></td>
+        <td>${item.permissions.join(", ") || "Нет доступа"}</td>
+        <td><code>••••••••</code></td>
+        <td><div class="row-actions"><button class="icon-btn del" onclick="deleteCoauthor(${idx})">Удалить</button></div></td>
+      </tr>
+    `).join("");
+  }
+
+  document.getElementById("tabs").addEventListener("click", (e) => {
+    const btn = e.target.closest(".tab");
+    if (!btn) return;
+    document.querySelectorAll("#tabs .tab").forEach(t => t.classList.remove("active"));
+    btn.classList.add("active");
+    currentFilter = btn.dataset.filter;
+    renderStaff();
+  });
 </script>
 </body>
 </html>
