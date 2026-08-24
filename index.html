@@ -36,7 +36,7 @@
     .login-card .sub { color: var(--text-dim); font-size: 0.88rem; margin-bottom: 1.5rem; }
     .form-group { margin-bottom: 1.1rem; }
     .form-group label { display: block; margin-bottom: 0.4rem; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-faint); }
-    .form-group input, .form-group select { width: 100%; padding: 0.7rem 0.85rem; border-radius: 8px; border: 1px solid var(--border); background-color: var(--bg); color: var(--text); font-size: 0.95rem; outline: none; }
+    .form-group input, .form-group select { width: 100%; padding: 0.7rem 0.85rem; border-radius: 8px; border: 1px solid var(--border); background-color: var(--bg); color: var(--text); font-size: 0.95rem; outline: none; box-sizing: border-box; }
     .form-group input:focus, .form-group select:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); background-color: #fff; }
     .btn { width: 100%; padding: 0.75rem; background-color: var(--text); color: white; border: none; border-radius: 8px; font-size: 0.95rem; font-weight: 700; cursor: pointer; transition: background 0.2s; }
     .btn:hover { background-color: #000; }
@@ -86,17 +86,12 @@
     .player-cell { display: flex; align-items: center; gap: 10px; }
     .avatar { width: 32px; height: 32px; border-radius: 8px; object-fit: cover; background: var(--bg); }
     .player-name { font-weight: 700; }
-    .badge { display: inline-block; padding: .24rem .55rem; border-radius: 6px; font-size: .75rem; font-weight: 700; margin-right: 4px; }
+    .badge { display: inline-block; padding: .24rem .55rem; border-radius: 6px; font-size: .75rem; font-weight: 700; margin-right: 4px; margin-bottom: 2px; }
     .r-beta { background: #ECFDF5; color: #059669; }
     .r-alpha { background: #FFF7ED; color: #EA580C; }
     .r-stazher { background: #EFF6FF; color: #2563EB; }
     .r-metod { background: #F3E8FF; color: #7C3AED; }
     .r-default { background: #F3F4F6; color: #6B7280; }
-    
-    .badge-status { display: inline-block; padding: .2rem .5rem; border-radius: 5px; font-size: .72rem; font-weight: 700; margin-left: 6px; }
-    .status-active { background: #ECFDF5; color: #059669; }
-    .status-archived { background: var(--warning-soft); color: var(--warning); }
-    .status-deleted { background: var(--danger-soft); color: var(--danger); }
 
     .vk-link { color: var(--accent); text-decoration: none; font-weight: 600; }
     .row-actions { display: flex; gap: 6px; }
@@ -106,22 +101,42 @@
     .card-footer { padding: 16px 20px; background: var(--bg); display: flex; justify-content: space-between; align-items: center; }
     .add-btn { display: inline-flex; align-items: center; gap: 6px; padding: .6rem 1rem; background: var(--text); color: #fff; border: none; border-radius: 8px; font-size: .86rem; font-weight: 700; cursor: pointer; }
 
-    /* Модальные окна */
+    /* Модальные окна (общие) */
     .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(15, 17, 26, .45); align-items: center; justify-content: center; z-index: 100; padding: 20px; backdrop-filter: blur(2px); }
     .modal-overlay.open { display: flex; }
-    .modal { background: var(--surface); width: 100%; max-width: 460px; border-radius: 16px; box-shadow: var(--shadow-md); max-height: 88vh; overflow-y: auto; }
-    .modal-head { padding: 22px 24px 4px; }
+    .modal { background: var(--surface); width: 100%; max-width: 480px; border-radius: 16px; box-shadow: var(--shadow-md); max-height: 90vh; overflow-y: auto; color: var(--text); }
+    .modal-head { padding: 22px 24px 4px; display: flex; justify-content: space-between; align-items: flex-start; }
     .modal-head h3 { font-size: 1.15rem; font-weight: 800; }
     .modal-head p { color: var(--text-dim); font-size: .85rem; margin-top: 4px; }
     .modal-body { padding: 16px 24px 4px; }
     .modal-foot { padding: 18px 24px 24px; display: flex; gap: 10px; }
     .modal-foot .btn { flex: 1; }
+
+    /* Стили для чипов рангов/должностей/доступов */
+    .label-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+    .label-row label { margin-bottom: 0 !important; }
+    .hint { font-size: 11px; color: var(--text-faint); font-weight: 500; text-transform: none !important; letter-spacing: normal !important; }
+
+    .tags-container { display: flex; flex-wrap: wrap; gap: 6px; }
+    .tag-chip { background: var(--bg); border: 1px solid var(--border); padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: 500; cursor: pointer; color: var(--text-dim); transition: all 0.2s; user-select: none; }
+    .tag-chip[data-value="Бета"] { background: #ecfdf5; color: #047857; border-color: #a7f3d0; }
+    .tag-chip[data-value="Альфа"] { background: #fff7ed; color: #c2410c; border-color: #fed7aa; }
+    .tag-chip[data-value="Стажёр"] { background: #eff6ff; color: #1d4ed8; border-color: #bfdbfe; }
+    .tag-chip[data-value="Метод"] { background: #f0fdf4; color: #15803d; border-color: #bbf7d0; }
+
+    .tag-chip.active { border-color: var(--accent); background: var(--accent-soft); color: var(--accent); font-weight: 600; box-shadow: inset 0 0 0 1px var(--accent); }
+
+    .role-chip { background: #fdf2f8; color: #db2777; border-color: #fbcfe8; border-radius: 8px; }
+    .role-chip.active { background: #fce7f3; border-color: #db2777; color: #be185d; box-shadow: inset 0 0 0 1px #db2777; }
+
+    /* Кастомный инпут файла в модалке сотрудника */
+    .file-input-wrapper { display: flex; align-items: center; gap: 12px; border: 1px solid var(--border); padding: 6px 10px; border-radius: 8px; background: var(--bg); }
+    .file-btn { background: var(--surface); border: 1px solid var(--border); padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; color: var(--text); }
+    .file-name { font-size: 12px; color: var(--text-dim); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
     .chip-group { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 6px; }
     .chip { padding: .4rem .75rem; border-radius: 999px; border: 1.5px solid var(--border); background: var(--surface); font-size: .8rem; font-weight: 600; color: var(--text-dim); cursor: pointer; user-select: none; }
     .chip.selected { border-color: var(--accent); background: var(--accent-soft); color: var(--accent); }
-    .file-row { display: flex; align-items: center; gap: 10px; padding: .6rem .7rem; border: 1px dashed var(--border); border-radius: 8px; font-size: .82rem; color: var(--text-dim); }
-    .file-row label { padding: .32rem .7rem; background: var(--bg); border: 1px solid var(--border); border-radius: 6px; font-size: .78rem; font-weight: 600; color: var(--text); cursor: pointer; }
-    .file-row input[type=file] { display: none; }
 
     /* Ограничение доступа */
     .access-denied { text-align: center; padding: 60px 20px; background: var(--surface); border: 1px solid var(--border); border-radius: 14px; }
@@ -274,46 +289,76 @@
     </div>
   </div>
 
-  <!-- Модалка: Добавление/Редактирование сотрудника -->
+  <!-- Модалка: Добавление/Редактирование сотрудника (по вашему новому дизайну с чипами) -->
   <div class="modal-overlay" id="staffModalOverlay">
     <div class="modal">
       <div class="modal-head">
-        <h3 id="modalTitle">Добавить сотрудника</h3>
-        <p>Заполните данные участника команды.</p>
+        <div>
+          <h3 id="modalTitle">Добавить сотрудника</h3>
+          <p>Заполните данные участника команды.</p>
+        </div>
+        <button class="icon-btn del" id="cancelModalBtn" style="padding: 4px 8px; border:none; background:none; font-size: 16px; cursor:pointer;">✕</button>
       </div>
       <div class="modal-body">
+        <!-- Ник -->
         <div class="form-group">
           <label>Ник</label>
-          <input type="text" id="staffNick">
+          <input type="text" id="staffNick" placeholder="Например, KillerFrost" class="form-control">
         </div>
+
+        <!-- Ранг (теги с мультивыбором) -->
         <div class="form-group">
-          <label>Ранг</label>
-          <select id="staffRank">
-            <option value="Бета">Бета</option>
-            <option value="Альфа">Альфа</option>
-            <option value="Стажёр">Стажёр</option>
-            <option value="Метод">Метод</option>
-          </select>
+          <div class="label-row">
+            <label>Ранг</label>
+            <span class="hint">(можно выбрать несколько)</span>
+          </div>
+          <div class="tags-container" id="rankTags">
+            <button type="button" class="tag-chip" data-value="Беta" onclick="toggleTag(this)">Бета</button>
+            <button type="button" class="tag-chip" data-value="Альфа" onclick="toggleTag(this)">Альфа</button>
+            <button type="button" class="tag-chip" data-value="Стажёр" onclick="toggleTag(this)">Стажёр</button>
+            <button type="button" class="tag-chip" data-value="Метод" onclick="toggleTag(this)">Метод</button>
+          </div>
         </div>
+
+        <!-- Должность (теги с мультивыбором) -->
         <div class="form-group">
-          <label>Должность</label>
-          <input type="text" id="staffPosition" placeholder="Например: Рук. Активной модерации">
+          <div class="label-row">
+            <label>Должность</label>
+            <span class="hint">(можно выбрать несколько)</span>
+          </div>
+          <div class="tags-container vertical" id="roleTags">
+            <button type="button" class="tag-chip role-chip" data-value="Обычный сотрудник" onclick="toggleTag(this)">Обычный сотрудник</button>
+            <button type="button" class="tag-chip role-chip" data-value="Руководитель Активной модерации" onclick="toggleTag(this)">Руководитель Активной модерации</button>
+            <button type="button" class="tag-chip role-chip" data-value="Руководитель медиа" onclick="toggleTag(this)">Руководитель медиа</button>
+            <button type="button" class="tag-chip role-chip" data-value="Руководитель репортов" onclick="toggleTag(this)">Руководитель репортов</button>
+            <button type="button" class="tag-chip role-chip" data-value="Заместитель репортов" onclick="toggleTag(this)">Заместитель репортов</button>
+            <button type="button" class="tag-chip role-chip" data-value="Заместитель Активной модерации" onclick="toggleTag(this)">Заместитель Активной модерации</button>
+            <button type="button" class="tag-chip role-chip" data-value="Руководитель ОМЧ" onclick="toggleTag(this)">Руководитель ОМЧ</button>
+            <button type="button" class="tag-chip role-chip" data-value="Заместитель ОМЧ" onclick="toggleTag(this)">Заместитель ОМЧ</button>
+          </div>
         </div>
+
+        <!-- Ссылка ВК -->
         <div class="form-group">
-          <label>Ссылка VK</label>
-          <input type="text" id="staffVk" placeholder="https://vk.com/...">
+          <label>Ссылка ВК</label>
+          <input type="text" id="staffVk" placeholder="https://vk.com/username">
         </div>
+
+        <!-- Аватар -->
         <div class="form-group">
-          <label>Аватар</label>
-          <div class="file-row">
-            <label for="staffAvatarFile">Файл</label>
-            <span id="fileNameLabel">Не выбран</span>
-            <input type="file" id="staffAvatarFile" accept="image/*">
+          <div class="label-row">
+            <label>Аватар</label>
+            <span class="hint">(необязательно)</span>
+          </div>
+          <div class="file-input-wrapper">
+            <label class="file-btn" for="staffAvatarFile">Выберите файл</label>
+            <span id="fileNameLabel" class="file-name">Файл не выбран</span>
+            <input type="file" id="staffAvatarFile" accept="image/*" style="display: none;">
           </div>
         </div>
       </div>
       <div class="modal-foot">
-        <button class="btn" style="background:var(--surface);color:var(--text);border:1px solid var(--border);" id="cancelModalBtn">Отмена</button>
+        <button class="btn" style="background:var(--surface);color:var(--text);border:1px solid var(--border);" id="cancelModalBtn2">Отмена</button>
         <button class="btn" id="saveStaffBtn">Сохранить</button>
       </div>
     </div>
@@ -323,8 +368,11 @@
   <div class="modal-overlay" id="coauthorModalOverlay">
     <div class="modal">
       <div class="modal-head">
-        <h3>Добавить соавтора</h3>
-        <p>Укажите ник и выберите страницы, к которым будет доступ.</p>
+        <div>
+          <h3>Добавить соавтора</h3>
+          <p>Укажите ник и выберите страницы, к которым будет доступ.</p>
+        </div>
+        <button class="icon-btn del" onclick="document.getElementById('coauthorModalOverlay').classList.remove('open')" style="border:none;background:none;font-size:16px;cursor:pointer;">✕</button>
       </div>
       <div class="modal-body">
         <div class="form-group">
@@ -353,8 +401,11 @@
   <div class="modal-overlay" id="editCoauthorModalOverlay">
     <div class="modal">
       <div class="modal-head">
-        <h3>Изменить соавтора</h3>
-        <p>Обновите логин, пароль или доступы соавтора.</p>
+        <div>
+          <h3>Изменить соавтора</h3>
+          <p>Обновите логин, пароль или доступы соавтора.</p>
+        </div>
+        <button class="icon-btn del" onclick="document.getElementById('editCoauthorModalOverlay').classList.remove('open')" style="border:none;background:none;font-size:16px;cursor:pointer;">✕</button>
       </div>
       <div class="modal-body">
         <div class="form-group">
@@ -393,6 +444,7 @@
 
     const rankClass = {
       "Бета": "r-beta",
+      "Беta": "r-beta",
       "Альфа": "r-alpha",
       "Стажёр": "r-stazher",
       "Метод": "r-metod"
@@ -439,7 +491,6 @@
           return;
         }
 
-        // Если соавтор удален или заархивирован, блокируем вход на клиенте
         if (data.status === "deleted") {
           statusMsg.textContent = "Ошибка: Аккаунт удален, вход невозможен.";
           statusMsg.className = "status-msg error";
@@ -531,6 +582,16 @@
       document.getElementById("pageSub").textContent = info.sub;
     }
 
+    // Фильтрация таблицы сотрудников по табам
+    document.querySelectorAll(".tab").forEach(tab => {
+      tab.addEventListener("click", () => {
+        document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+        tab.classList.add("active");
+        currentFilter = tab.dataset.filter;
+        renderStaff();
+      });
+    });
+
     // Загрузка и сохранение данных
     async function loadServerData() {
       try {
@@ -562,7 +623,102 @@
       renderCoauthors();
     }
 
-    // Логика чипов для соавторов
+    // Рендер таблицы сотрудников с учетом фильтров
+    function renderStaff() {
+      const tbody = document.getElementById("staffList");
+      const filtered = staffData.filter(s => {
+        if (currentFilter === "Все") return true;
+        const ranks = s.ranks || (s.rank ? [s.rank] : []);
+        return ranks.includes(currentFilter);
+      });
+
+      if (filtered.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--text-faint);">Нет сотрудников для отображения</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = filtered.map((s, index) => {
+        const originalIndex = staffData.indexOf(s);
+        const ranks = s.ranks || (s.rank ? [s.rank] : []);
+        const positions = s.positions || (s.position ? [s.position] : []);
+
+        const ranksHtml = ranks.map(r => `<span class="badge ${rankClass[r] || 'r-default'}">${r}</span>`).join(' ');
+        const positionsText = positions.join(', ') || '—';
+        const avatarSrc = s.avatar || 'https://via.placeholder.com/32';
+        const vkHtml = s.vk ? `<a href="${s.vk}" target="_blank" class="vk-link">Ссылка</a>` : '—';
+
+        return `
+          <tr>
+            <td>
+              <div class="player-cell">
+                <img src="${avatarSrc}" class="avatar" alt="">
+                <span class="player-name">${s.nick}</span>
+              </div>
+            </td>
+            <td>${ranksHtml}</td>
+            <td>${positionsText}</td>
+            <td>${vkHtml}</td>
+            <td>
+              <div class="row-actions">
+                <button class="icon-btn warn" onclick="editStaff(${originalIndex})">Изменить</button>
+                <button class="icon-btn del" onclick="deleteStaff(${originalIndex})">Удалить</button>
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    // Рендер таблицы соавторов
+    function renderCoauthors() {
+      const tbody = document.getElementById("coauthorsList");
+      if (!coauthorsData || coauthorsData.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: var(--text-faint);">Соавторы отсутствуют</td></tr>`;
+        return;
+      }
+
+      const permLabels = { staff: "Сотрудники", hydes: "Хайды", access: "Доступ", payments: "Мои выплаты" };
+
+      tbody.innerHTML = coauthorsData.map((c, idx) => {
+        const perms = (c.permissions || []).map(p => permLabels[p] || p).join(', ') || 'Нет доступов';
+        return `
+          <tr>
+            <td><strong>${c.login}</strong></td>
+            <td>${perms}</td>
+            <td><code>${c.password || '******'}</code></td>
+            <td>
+              <div class="row-actions">
+                <button class="icon-btn warn" onclick="openEditCoauthor(${idx})">Изменить</button>
+                <button class="icon-btn del" onclick="deleteCoauthor(${idx})">Удалить</button>
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    // Переключение тегов (чипов) в модалках
+    window.toggleTag = function(btn) {
+      btn.classList.toggle('active');
+    };
+
+    function setChipsActive(containerId, values) {
+      const container = document.getElementById(containerId);
+      container.querySelectorAll('.tag-chip').forEach(chip => {
+        if (values.includes(chip.dataset.value)) {
+          chip.classList.add('active');
+        } else {
+          chip.classList.remove('active');
+        }
+      });
+    }
+
+    function getActiveChips(containerId) {
+      const container = document.getElementById(containerId);
+      return Array.from(container.querySelectorAll('.tag-chip.active')).map(chip => chip.dataset.value);
+    }
+
+    // Логика чипов для доступов соавторов
     function bindChips(container) {
       container.querySelectorAll(".chip").forEach(chip => {
         chip.addEventListener("click", () => chip.classList.toggle("selected"));
@@ -580,18 +736,23 @@
 
     // Обработчики модального окна сотрудников
     const staffModal = document.getElementById("staffModalOverlay");
+    
     document.getElementById("openAddModal").addEventListener("click", () => {
       editIndex = null;
       document.getElementById("modalTitle").textContent = "Добавить сотрудника";
       document.getElementById("staffNick").value = "";
-      document.getElementById("staffRank").value = "Бета";
-      document.getElementById("staffPosition").value = "";
       document.getElementById("staffVk").value = "";
-      document.getElementById("fileNameLabel").textContent = "Не выбран";
+      document.getElementById("fileNameLabel").textContent = "Файл не выбран";
       pendingAvatar = null;
+      
+      // Сброс тегов
+      document.querySelectorAll('#rankTags .tag-chip, #roleTags .tag-chip').forEach(el => el.classList.remove('active'));
       staffModal.classList.add("open");
     });
-    document.getElementById("cancelModalBtn").addEventListener("click", () => staffModal.classList.remove("open"));
+
+    const closeModalFunc = () => staffModal.classList.remove("open");
+    document.getElementById("cancelModalBtn").addEventListener("click", closeModalFunc);
+    document.getElementById("cancelModalBtn2").addEventListener("click", closeModalFunc);
 
     document.getElementById("staffAvatarFile").addEventListener("change", (e) => {
       const file = e.target.files[0];
@@ -605,13 +766,17 @@
     document.getElementById("saveStaffBtn").addEventListener("click", () => {
       const nick = document.getElementById("staffNick").value.trim();
       if (!nick) return alert("Введите ник сотрудника");
-      const rank = document.getElementById("staffRank").value;
-      const position = document.getElementById("staffPosition").value.trim();
+      
+      const ranks = getActiveChips("rankTags");
+      const positions = getActiveChips("roleTags");
       const vk = document.getElementById("staffVk").value.trim();
 
-      const record = { nick, ranks: [rank], positions: position ? [position] : [], vk, avatar: pendingAvatar };
-      if (editIndex === null) staffData.push(record);
-      else staffData[editIndex] = record;
+      const record = { nick, ranks, positions, vk, avatar: pendingAvatar };
+      if (editIndex === null) {
+        staffData.push(record);
+      } else {
+        staffData[editIndex] = record;
+      }
 
       saveServerData();
       staffModal.classList.remove("open");
@@ -628,12 +793,16 @@
       editIndex = idx;
       const item = staffData[idx];
       document.getElementById("modalTitle").textContent = "Изменить сотрудника";
-      document.getElementById("staffNick").value = item.nick;
-      document.getElementById("staffRank").value = (item.ranks && item.ranks[0]) || "Бета";
-      document.getElementById("staffPosition").value = (item.positions && item.positions.join(", ")) || "";
+      document.getElementById("staffNick").value = item.nick || "";
       document.getElementById("staffVk").value = item.vk || "";
+      
       pendingAvatar = item.avatar || null;
-      document.getElementById("fileNameLabel").textContent = pendingAvatar ? "Загружен аватар" : "Не выбран";
+      document.getElementById("fileNameLabel").textContent = pendingAvatar ? "Загружен аватар" : "Файл не выбран";
+
+      // Восстанавливаем выбранные теги
+      setChipsActive("rankTags", item.ranks || (item.rank ? [item.rank] : []));
+      setChipsActive("roleTags", item.positions || (item.position ? [item.position] : []));
+
       staffModal.classList.add("open");
     };
 
@@ -668,161 +837,43 @@
       document.getElementById("newCredsResult").style.display = "block";
     });
 
-    // Обработчики модального окна редактирования соавтора
+    // Редактирование соавтора
     const editCoauthorModal = document.getElementById("editCoauthorModalOverlay");
     document.getElementById("cancelEditCoauthorBtn").addEventListener("click", () => editCoauthorModal.classList.remove("open"));
 
-    window.editCoauthor = (idx) => {
+    window.openEditCoauthor = (idx) => {
       editCoauthorIdx = idx;
-      const item = coauthorsData[idx];
-      document.getElementById("editCoauthorNick").value = item.login;
+      const coauthor = coauthorsData[idx];
+      document.getElementById("editCoauthorNick").value = coauthor.login || "";
       document.getElementById("editCoauthorPassword").value = "";
-      setSelected(document.getElementById("editAccessChips"), item.permissions || []);
+      setSelected(document.getElementById("editAccessChips"), coauthor.permissions || []);
       editCoauthorModal.classList.add("open");
     };
 
-    document.getElementById("saveEditCoauthorBtn").addEventListener("click", () => {
+    document.getElementById("saveEditCoauthorBtn").addEventListener("click", async () => {
+      if (editCoauthorIdx === null) return;
       const newLogin = document.getElementById("editCoauthorNick").value.trim();
-      const newPassword = document.getElementById("editCoauthorPassword").value.trim();
-      const newPermissions = getSelected(document.getElementById("editAccessChips"));
+      const newPass = document.getElementById("editCoauthorPassword").value.trim();
+      const newPerms = getSelected(document.getElementById("editAccessChips"));
 
       if (!newLogin) return alert("Логин не может быть пустым");
 
       coauthorsData[editCoauthorIdx].login = newLogin;
-      if (newPassword) {
-        coauthorsData[editCoauthorIdx].password = newPassword;
+      if (newPass) {
+        coauthorsData[editCoauthorIdx].password = newPass;
       }
-      coauthorsData[editCoauthorIdx].permissions = newPermissions;
+      coauthorsData[editCoauthorIdx].permissions = newPerms;
 
-      saveServerData();
+      await saveServerData();
       editCoauthorModal.classList.remove("open");
     });
 
-    window.archiveCoauthor = (idx) => {
-      if (confirm("Отправить соавтора в архив? Аккаунт будет заблокирован.")) {
-        coauthorsData[idx].status = "archived";
-        saveServerData();
+    window.deleteCoauthor = async (idx) => {
+      if (confirm("Вы уверены, что хотите удалить этого соавтора?")) {
+        coauthorsData.splice(idx, 1);
+        await saveServerData();
       }
     };
-
-    window.deleteCoauthor = (idx) => {
-      if (confirm("Удалить соавтора? Человек больше не сможет войти.")) {
-        coauthorsData[idx].status = "deleted";
-        saveServerData();
-      }
-    };
-
-    // Отрисовка таблиц
-    function renderStaff() {
-      const list = document.getElementById("staffList");
-      let items = staffData.map((item, idx) => ({ item, idx }));
-      if (currentFilter !== "Все") {
-        items = items.filter(x => (x.item.ranks || []).includes(currentFilter));
-      }
-
-      if (items.length === 0) {
-        list.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:30px; color:var(--text-dim);">Нет сотрудников в данной категории</td></tr>`;
-        return;
-      }
-
-      list.innerHTML = items.map(({ item, idx }) => `
-        <tr>
-          <td>
-            <div class="player-cell">
-              <img class="avatar" src="${item.avatar || 'https://mc-heads.net/avatar/' + encodeURIComponent(item.nick) + '/32'}">
-              <span class="player-name">${item.nick}</span>
-            </div>
-          </td>
-          <td>${(item.ranks || []).map(r => `<span class="badge ${rankClass[r] || 'r-default'}">${r}</span>`).join("")}</td>
-          <td>${(item.positions || []).join(", ") || "—"}</td>
-          <td>${item.vk ? `<a class="vk-link" href="${item.vk}" target="_blank">${item.vk}</a>` : "—"}</td>
-          <td>
-            <div class="row-actions">
-              <button class="icon-btn" onclick="editStaff(${idx})">Изменить</button>
-              <button class="icon-btn del" onclick="deleteStaff(${idx})">Удалить</button>
-            </div>
-          </td>
-        </tr>
-      `).join("");
-    }
-
-    function renderCoauthors() {
-      const list = document.getElementById("coauthorsList");
-      if (coauthorsData.length === 0) {
-        list.innerHTML = `<tr><td colspan="4" style="text-align:center; padding:30px; color:var(--text-dim);">Нет добавленных соавторов</td></tr>`;
-        return;
-      }
-
-      const permLabels = {
-        "staff": "Сотрудники",
-        "hydes": "Хайды",
-        "access": "Доступ",
-        "payments": "Мои выплаты"
-      };
-
-      list.json = coauthorsData.map((item, idx) => {
-        let statusBadge = "";
-        if (item.status === "archived") {
-          statusBadge = `<span class="badge-status status-archived">В архиве</span>`;
-        } else if (item.status === "deleted") {
-          statusBadge = `<span class="badge-status status-deleted">Удален</span>`;
-        } else {
-          statusBadge = `<span class="badge-status status-active">Активен</span>`;
-        }
-
-        return `
-          <tr>
-            <td><strong>${item.login}</strong> ${statusBadge}</td>
-            <td>${(item.permissions || []).map(p => permLabels[p] || p).join(", ") || "<span style='color:var(--text-faint)'>Нет доступа</span>"}</td>
-            <td><code>••••••••</code></td>
-            <td>
-              <div class="row-actions">
-                <button class="icon-btn" onclick="editCoauthor(${idx})">Изменить</button>
-                ${item.status !== 'archived' ? `<button class="icon-btn warn" onclick="archiveCoauthor(${idx})">Архив</button>` : ''}
-                ${item.status !== 'deleted' ? `<button class="icon-btn del" onclick="deleteCoauthor(${idx})">Удалить</button>` : ''}
-              </div>
-            </td>
-          </tr>
-        `;
-      }).join("");
-      
-      // Исправление подстановки HTML строки списка соавторов
-      list.innerHTML = coauthorsData.map((item, idx) => {
-        let statusBadge = "";
-        if (item.status === "archived") {
-          statusBadge = `<span class="badge-status status-archived">В архиве</span>`;
-        } else if (item.status === "deleted") {
-          statusBadge = `<span class="badge-status status-deleted">Удален</span>`;
-        } else {
-          statusBadge = `<span class="badge-status status-active">Активен</span>`;
-        }
-
-        return `
-          <tr>
-            <td><strong>${item.login}</strong> ${statusBadge}</td>
-            <td>${(item.permissions || []).map(p => permLabels[p] || p).join(", ") || "<span style='color:var(--text-faint)'>Нет доступа</span>"}</td>
-            <td><code>••••••••</code></td>
-            <td>
-              <div class="row-actions">
-                <button class="icon-btn" onclick="editCoauthor(${idx})">Изменить</button>
-                ${item.status !== 'archived' ? `<button class="icon-btn warn" onclick="archiveCoauthor(${idx})">Архив</button>` : ''}
-                ${item.status !== 'deleted' ? `<button class="icon-btn del" onclick="deleteCoauthor(${idx})">Удалить</button>` : ''}
-              </div>
-            </td>
-          </tr>
-        `;
-      }).join("");
-    }
-
-    // Переключение табов фильтра сотрудников
-    document.getElementById("tabs").addEventListener("click", (e) => {
-      const btn = e.target.closest(".tab");
-      if (!btn) return;
-      document.querySelectorAll("#tabs .tab").forEach(t => t.classList.remove("active"));
-      btn.classList.add("active");
-      currentFilter = btn.dataset.filter;
-      renderStaff();
-    });
   </script>
 </body>
 </html>
