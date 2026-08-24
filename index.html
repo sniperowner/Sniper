@@ -35,7 +35,7 @@
     .form-group { margin-bottom: 1.1rem; }
     .form-group label { display: block; margin-bottom: 0.4rem; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-faint); }
     .form-group input, .form-group select { width: 100%; padding: 0.7rem 0.85rem; border-radius: 8px; border: 1px solid var(--border); background-color: var(--bg); color: var(--text); font-size: 0.95rem; outline: none; }
-    .form-group input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); background-color: #fff; }
+    .form-group input:focus, .form-group select:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); background-color: #fff; }
     .btn { width: 100%; padding: 0.75rem; background-color: var(--text); color: white; border: none; border-radius: 8px; font-size: 0.95rem; font-weight: 700; cursor: pointer; transition: background 0.2s; }
     .btn:hover { background-color: #000; }
     .btn:disabled { background-color: #C7CAD1; cursor: not-allowed; }
@@ -265,7 +265,7 @@
     </div>
   </div>
 
-  <!-- Модалка: Добавление/Редактирование сотрудника -->
+  <!-- Модалка: Добавление/Редактирование сотрудника (исходный дизайн полей) -->
   <div class="modal-overlay" id="staffModalOverlay">
     <div class="modal">
       <div class="modal-head">
@@ -279,20 +279,16 @@
         </div>
         <div class="form-group">
           <label>Ранг</label>
-          <div class="chip-group" id="rankChips">
-            <div class="chip" data-value="Бета">Бета</div>
-            <div class="chip" data-value="Альфа">Альфа</div>
-            <div class="chip" data-value="Стажёр">Стажёр</div>
-            <div class="chip" data-value="Метод">Метод</div>
-          </div>
+          <select id="staffRank">
+            <option value="Бета">Бета</option>
+            <option value="Альфа">Альфа</option>
+            <option value="Стажёр">Стажёр</option>
+            <option value="Метод">Метод</option>
+          </select>
         </div>
         <div class="form-group">
           <label>Должность</label>
-          <div class="chip-group" id="posChips">
-            <div class="chip" data-value="Руководитель Активной модерации">Рук. Акт. Модерации</div>
-            <div class="chip" data-value="Руководитель медиа">Рук. Медиа</div>
-            <div class="chip" data-value="Руководитель репортов">Рук. Репортов</div>
-          </div>
+          <input type="text" id="staffPosition" placeholder="Например: Рук. Активной модерации">
         </div>
         <div class="form-group">
           <label>Ссылка VK</label>
@@ -509,21 +505,19 @@
       renderCoauthors();
     }
 
-    // Логика переключения чипов (галочек)
+    // Логика чипов для соавторов
     function bindChips(container) {
       container.querySelectorAll(".chip").forEach(chip => {
         chip.addEventListener("click", () => chip.classList.toggle("selected"));
       });
     }
-    bindChips(document.getElementById("rankChips"));
-    bindChips(document.getElementById("posChips"));
     bindChips(document.getElementById("accessChips"));
 
-    function getSelected(container) {
-      return [...container.querySelectorAll(".chip.selected")].map(c => c.dataset.value);
-    }
     function setSelected(container, values) {
       container.querySelectorAll(".chip").forEach(c => c.classList.toggle("selected", values.includes(c.dataset.value)));
+    }
+    function getSelected(container) {
+      return [...container.querySelectorAll(".chip.selected")].map(c => c.dataset.value);
     }
 
     // Обработчики модального окна сотрудников
@@ -532,11 +526,11 @@
       editIndex = null;
       document.getElementById("modalTitle").textContent = "Добавить сотрудника";
       document.getElementById("staffNick").value = "";
+      document.getElementById("staffRank").value = "Бета";
+      document.getElementById("staffPosition").value = "";
       document.getElementById("staffVk").value = "";
       document.getElementById("fileNameLabel").textContent = "Не выбран";
       pendingAvatar = null;
-      setSelected(document.getElementById("rankChips"), []);
-      setSelected(document.getElementById("posChips"), []);
       staffModal.classList.add("open");
     });
     document.getElementById("cancelModalBtn").addEventListener("click", () => staffModal.classList.remove("open"));
@@ -553,11 +547,11 @@
     document.getElementById("saveStaffBtn").addEventListener("click", () => {
       const nick = document.getElementById("staffNick").value.trim();
       if (!nick) return alert("Введите ник сотрудника");
-      const ranks = getSelected(document.getElementById("rankChips"));
-      const positions = getSelected(document.getElementById("posChips"));
+      const rank = document.getElementById("staffRank").value;
+      const position = document.getElementById("staffPosition").value.trim();
       const vk = document.getElementById("staffVk").value.trim();
 
-      const record = { nick, ranks, positions, vk, avatar: pendingAvatar };
+      const record = { nick, ranks: [rank], positions: position ? [position] : [], vk, avatar: pendingAvatar };
       if (editIndex === null) staffData.push(record);
       else staffData[editIndex] = record;
 
@@ -577,9 +571,9 @@
       const item = staffData[idx];
       document.getElementById("modalTitle").textContent = "Изменить сотрудника";
       document.getElementById("staffNick").value = item.nick;
+      document.getElementById("staffRank").value = (item.ranks && item.ranks[0]) || "Бета";
+      document.getElementById("staffPosition").value = (item.positions && item.positions.join(", ")) || "";
       document.getElementById("staffVk").value = item.vk || "";
-      setSelected(document.getElementById("rankChips"), item.ranks || []);
-      setSelected(document.getElementById("posChips"), item.positions || []);
       pendingAvatar = item.avatar || null;
       document.getElementById("fileNameLabel").textContent = pendingAvatar ? "Загружен аватар" : "Не выбран";
       staffModal.classList.add("open");
@@ -600,7 +594,6 @@
       const permissions = getSelected(document.getElementById("accessChips"));
       if (!nick) return alert("Введите ник/логин соавтора");
 
-      // Генерация случайного пароля
       const password = Math.random().toString(36).slice(-6) + Math.floor(Math.random() * 899 + 100);
 
       coauthorsData.push({ login: nick, password, permissions });
