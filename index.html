@@ -2468,6 +2468,26 @@
 
           </div>
 
+          <div class="chip" data-value="rank_beta"
+            onclick="this.classList.toggle('selected')">
+            Бета
+          </div>
+
+          <div class="chip" data-value="rank_alpha"
+            onclick="this.classList.toggle('selected')">
+            Альфа
+          </div>
+
+          <div class="chip" data-value="rank_stazher"
+            onclick="this.classList.toggle('selected')">
+            Стажёр
+          </div>
+
+          <div class="chip" data-value="rank_metod"
+            onclick="this.classList.toggle('selected')">
+            Метод
+          </div>
+
         </div>
 
       </div>
@@ -2645,6 +2665,26 @@
 
             Мои выплаты
 
+          </div>
+
+          <div class="chip" data-value="rank_beta"
+            onclick="toggleEditChip(this)">
+            Бета
+          </div>
+
+          <div class="chip" data-value="rank_alpha"
+            onclick="toggleEditChip(this)">
+            Альфа
+          </div>
+
+          <div class="chip" data-value="rank_stazher"
+            onclick="toggleEditChip(this)">
+            Стажёр
+          </div>
+
+          <div class="chip" data-value="rank_metod"
+            onclick="toggleEditChip(this)">
+            Метод
           </div>
 
         </div>
@@ -3717,6 +3757,10 @@ async function showDashboard() {
   // Скрываем/показываем меню строго по загруженным правам.
   applySidebarVisibility();
 
+  applyRankVisibility();
+
+  renderStaff();
+
   renderArticles();
 
 
@@ -3726,6 +3770,115 @@ async function showDashboard() {
       "block";
   }
 
+}
+
+
+/* =========================================================
+   ДОСТУП К РАНГАМ
+   ========================================================= */
+
+const rankPermissionMap = {
+  "Бета": "rank_beta",
+  "Альфа": "rank_alpha",
+  "Стажёр": "rank_stazher",
+  "Стажер": "rank_stazher",
+  "Метод": "rank_metod"
+};
+
+
+function canSeeRank(rank) {
+
+  const role =
+    localStorage.getItem("ft_role") ||
+    "admin";
+
+  if (role === "admin") {
+    return true;
+  }
+
+  const permissions =
+    JSON.parse(
+      localStorage.getItem(
+        "ft_permissions"
+      ) || "[]"
+    );
+
+  const permission =
+    rankPermissionMap[rank];
+
+  if (!permission) {
+    return true;
+  }
+
+  return permissions.includes(
+    permission
+  );
+}
+
+
+function applyRankVisibility() {
+
+  const role =
+    localStorage.getItem("ft_role") ||
+    "admin";
+
+  const permissions =
+    JSON.parse(
+      localStorage.getItem(
+        "ft_permissions"
+      ) || "[]"
+    );
+
+  const filters = {
+    "Бета": "rank_beta",
+    "Альфа": "rank_alpha",
+    "Стажёр": "rank_stazher",
+    "Метод": "rank_metod"
+  };
+
+  document
+    .querySelectorAll(
+      ".tab[data-filter]"
+    )
+    .forEach(tab => {
+
+      const rank =
+        tab.dataset.filter;
+
+      if (
+        rank === "Все" ||
+        role === "admin"
+      ) {
+        tab.style.display =
+          "inline-flex";
+        return;
+      }
+
+      const permission =
+        filters[rank];
+
+      tab.style.display =
+        !permission ||
+        permissions.includes(permission)
+          ? "inline-flex"
+          : "none";
+    });
+
+  if (
+    currentFilter !== "Все" &&
+    !canSeeRank(currentFilter)
+  ) {
+    currentFilter = "Все";
+
+    document
+      .querySelectorAll(".tab")
+      .forEach(tab => {
+        tab.classList.toggle(
+          "active",
+          tab.dataset.filter === "Все"
+        );
+      });
+  }
 }
 
 
@@ -3797,6 +3950,8 @@ function applySidebarVisibility() {
         : "none";
 
   }
+
+  applyRankVisibility();
 
 }
 
@@ -4421,11 +4576,25 @@ function renderStaff() {
           );
 
 
-        const filterMatch =
-          currentFilter === "Все" ||
-          ranks.includes(
-            currentFilter
+        const rankAccessMatch =
+          ranks.length === 0 ||
+          ranks.some(
+            rank =>
+              canSeeRank(rank)
           );
+
+
+        const filterMatch =
+          currentFilter === "Все"
+            ? true
+            : (
+                canSeeRank(
+                  currentFilter
+                ) &&
+                ranks.includes(
+                  currentFilter
+                )
+              );
 
 
         const searchMatch =
@@ -4439,6 +4608,7 @@ function renderStaff() {
 
 
         return (
+          rankAccessMatch &&
           filterMatch &&
           searchMatch
         );
@@ -4759,7 +4929,19 @@ function renderCoauthors() {
       "Доступ",
 
     payments:
-      "Мои выплаты"
+      "Мои выплаты",
+
+    rank_beta:
+      "Бета",
+
+    rank_alpha:
+      "Альфа",
+
+    rank_stazher:
+      "Стажёр",
+
+    rank_metod:
+      "Метод"
 
   };
 
@@ -5837,6 +6019,10 @@ document
         );
 
         applySidebarVisibility();
+
+        applyRankVisibility();
+
+        renderStaff();
 
       }
 
