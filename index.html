@@ -3835,6 +3835,7 @@ document
         console.error(err);
 
         statusMsg.textContent =
+          err?.message ||
           "Ошибка соединения";
 
         statusMsg.className =
@@ -3854,15 +3855,26 @@ document
 
 function startPolling(sessionId) {
 
+  let attempts = 0;
+
+  const maxAttempts = 90;
+
+
   const pollInterval =
     setInterval(
       async () => {
+
+        attempts++;
+
 
         try {
 
           const res =
             await fetch(
-              `${WORKER_URL}/api/check-status?sessionId=${encodeURIComponent(sessionId)}`
+              `${WORKER_URL}/api/check-status?sessionId=${encodeURIComponent(sessionId)}&t=${Date.now()}`,
+              {
+                cache: "no-store"
+              }
             );
 
 
@@ -3871,7 +3883,8 @@ function startPolling(sessionId) {
 
 
           if (
-            data.status === "approved"
+            data.status === "approved" &&
+            data.authToken
           ) {
 
             clearInterval(
@@ -3885,20 +3898,28 @@ function startPolling(sessionId) {
             );
 
 
-            if (data.authToken) {
-              localStorage.setItem(
-                "ft_auth_token",
-                data.authToken
-              );
-            }
+            localStorage.setItem(
+              "ft_auth_token",
+              data.authToken
+            );
+
+
+            document
+              .getElementById(
+                "statusMsg"
+              )
+              .textContent =
+              "Вход подтверждён.";
 
 
             showDashboard();
 
+            return;
+
           }
 
 
-          else if (
+          if (
             data.status === "denied" ||
             data.status === "expired"
           ) {
@@ -3909,19 +3930,59 @@ function startPolling(sessionId) {
 
 
             document
-              .getElementById("statusMsg")
+              .getElementById(
+                "statusMsg"
+              )
               .textContent =
               "Вход отклонён или время истекло";
 
 
             document
-              .getElementById("statusMsg")
+              .getElementById(
+                "statusMsg"
+              )
               .className =
               "status-msg error";
 
 
             document
-              .getElementById("submitBtn")
+              .getElementById(
+                "submitBtn"
+              )
+              .disabled = false;
+
+            return;
+
+          }
+
+
+          if (attempts >= maxAttempts) {
+
+            clearInterval(
+              pollInterval
+            );
+
+
+            document
+              .getElementById(
+                "statusMsg"
+              )
+              .textContent =
+              "Не удалось получить подтверждение. Обновите страницу и попробуйте снова.";
+
+
+            document
+              .getElementById(
+                "statusMsg"
+              )
+              .className =
+              "status-msg error";
+
+
+            document
+              .getElementById(
+                "submitBtn"
+              )
               .disabled = false;
 
           }
@@ -3929,7 +3990,10 @@ function startPolling(sessionId) {
 
         } catch (e) {
 
-          console.error(e);
+          console.error(
+            "Polling error:",
+            e
+          );
 
         }
 
