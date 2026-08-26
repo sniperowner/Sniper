@@ -3604,15 +3604,46 @@ document
 
 async function loadServerData() {
 
+  // Локальная копия нужна как защита от старого Worker,
+  // который может вернуть articles: [] и затереть статьи после F5.
+  const localStaff =
+    JSON.parse(
+      localStorage.getItem(
+        "ft_staff_data"
+      ) || "[]"
+    );
+
+  const localCoauthors =
+    JSON.parse(
+      localStorage.getItem(
+        "ft_coauthors_data"
+      ) || "[]"
+    );
+
+  const localArticles =
+    JSON.parse(
+      localStorage.getItem(
+        "ft_articles_data"
+      ) || "[]"
+    );
+
+
   try {
 
     const res =
       await fetch(
-        `${WORKER_URL}/api/data`,
+        `${WORKER_URL}/api/data?t=${Date.now()}`,
         {
           cache: "no-store"
         }
       );
+
+
+    if (!res.ok) {
+      throw new Error(
+        `HTTP ${res.status}`
+      );
+    }
 
 
     const data =
@@ -3624,19 +3655,141 @@ async function loadServerData() {
       staffData =
         Array.isArray(data.staff)
           ? data.staff
-          : [];
+          : localStaff;
 
 
       coauthorsData =
         Array.isArray(data.coauthors)
           ? data.coauthors
-          : [];
+          : localCoauthors;
 
 
-      articlesData =
+      const serverArticles =
         Array.isArray(data.articles)
           ? data.articles
           : [];
+
+
+      // ВАЖНО:
+      // пустой ответ старого Worker не должен удалять
+      // уже сохранённые в браузере статьи.
+      if (
+        serverArticles.length === 0 &&
+        localArticles.length > 0
+      ) {
+
+        articlesData =
+          localArticles;
+
+      } else {
+
+        // Объединяем серверную и локальную копии по id.
+        // Более новая версия статьи побеждает.
+        const merged =
+          new Map();
+
+
+        [
+          ...serverArticles,
+          ...localArticles
+        ].forEach(article => {
+
+          if (
+            !article ||
+            !article.id
+          ) {
+            return;
+          }
+
+
+          const old =
+            merged.get(
+              article.id
+            );
+
+
+          if (!old) {
+
+            merged.set(
+              article.id,
+              article
+            );
+
+            return;
+
+          }
+
+
+          const oldTime =
+            new Date(
+              old.updatedAt ||
+              old.createdAt ||
+              0
+            ).getTime();
+
+
+          const newTime =
+            new Date(
+              article.updatedAt ||
+              article.createdAt ||
+              0
+            ).getTime();
+
+
+          if (
+            newTime >= oldTime
+          ) {
+
+            merged.set(
+              article.id,
+              article
+            );
+
+          }
+
+        });
+
+
+        articlesData =
+          Array.from(
+            merged.values()
+          );
+
+      }
+
+
+      // Всегда обновляем локальный кэш актуальной версией.
+      localStorage.setItem(
+        "ft_staff_data",
+        JSON.stringify(
+          staffData
+        )
+      );
+
+      localStorage.setItem(
+        "ft_coauthors_data",
+        JSON.stringify(
+          coauthorsData
+        )
+      );
+
+      localStorage.setItem(
+        "ft_articles_data",
+        JSON.stringify(
+          articlesData
+        )
+      );
+
+    } else {
+
+      staffData =
+        localStaff;
+
+      coauthorsData =
+        localCoauthors;
+
+      articlesData =
+        localArticles;
 
     }
 
@@ -3650,27 +3803,13 @@ async function loadServerData() {
 
 
     staffData =
-      JSON.parse(
-        localStorage.getItem(
-          "ft_staff_data"
-        ) || "[]"
-      );
-
+      localStaff;
 
     coauthorsData =
-      JSON.parse(
-        localStorage.getItem(
-          "ft_coauthors_data"
-        ) || "[]"
-      );
-
+      localCoauthors;
 
     articlesData =
-      JSON.parse(
-        localStorage.getItem(
-          "ft_articles_data"
-        ) || "[]"
-      );
+      localArticles;
 
   }
 
@@ -3724,7 +3863,6 @@ async function loadServerData() {
   renderArticles();
 
 }
-
 
 /* =========================================================
    СОХРАНЕНИЕ ДАННЫХ
