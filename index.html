@@ -1211,6 +1211,239 @@
       color: #fff;
     }
 
+
+    /* =========================
+       АНИМАЦИИ И УВЕДОМЛЕНИЯ
+       ========================= */
+
+    @keyframes ftFadeUp {
+      from {
+        opacity: 0;
+        transform: translateY(8px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes ftModalIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px) scale(.985);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    @keyframes ftToastIn {
+      from {
+        opacity: 0;
+        transform: translateX(22px) scale(.97);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0) scale(1);
+      }
+    }
+
+    @keyframes ftToastOut {
+      from {
+        opacity: 1;
+        transform: translateX(0) scale(1);
+      }
+      to {
+        opacity: 0;
+        transform: translateX(22px) scale(.97);
+      }
+    }
+
+    .page-view.active-page {
+      animation: ftFadeUp .22s ease both;
+    }
+
+    .modal-overlay.open .modal {
+      animation: ftModalIn .2s ease both;
+    }
+
+    .article-item,
+    tbody tr {
+      animation: ftFadeUp .18s ease both;
+    }
+
+    .btn,
+    .icon-btn,
+    .nav-item,
+    .chip,
+    .tag-chip,
+    .theme-toggle {
+      transition:
+        transform .14s ease,
+        background-color .2s ease,
+        color .2s ease,
+        border-color .2s ease,
+        box-shadow .2s ease;
+    }
+
+    .btn:active,
+    .icon-btn:active,
+    .nav-item:active,
+    .chip:active,
+    .tag-chip:active,
+    .theme-toggle:active {
+      transform: scale(.97);
+    }
+
+    .toast-container {
+      position: fixed;
+      top: 18px;
+      right: 18px;
+      z-index: 99999;
+      width: min(390px, calc(100vw - 36px));
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      pointer-events: none;
+    }
+
+    .ft-toast {
+      display: grid;
+      grid-template-columns: 34px 1fr auto;
+      align-items: start;
+      gap: 10px;
+      padding: 13px 14px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: var(--surface);
+      color: var(--text);
+      box-shadow: var(--shadow-md);
+      pointer-events: auto;
+      animation: ftToastIn .22s ease both;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .ft-toast.removing {
+      animation: ftToastOut .2s ease both;
+    }
+
+    .ft-toast-icon {
+      width: 34px;
+      height: 34px;
+      border-radius: 9px;
+      display: grid;
+      place-items: center;
+      font-size: 16px;
+      font-weight: 800;
+      background: var(--bg);
+    }
+
+    .ft-toast.success .ft-toast-icon {
+      background: #ECFDF3;
+      color: #15803D;
+    }
+
+    .ft-toast.error .ft-toast-icon {
+      background: #FEF2F2;
+      color: #DC2626;
+    }
+
+    .ft-toast.warning .ft-toast-icon {
+      background: #FFF7ED;
+      color: #C2410C;
+    }
+
+    .ft-toast.info .ft-toast-icon {
+      background: var(--accent-soft);
+      color: var(--accent-dark);
+    }
+
+    body.dark-theme .ft-toast.success .ft-toast-icon {
+      background: #103127;
+      color: #6EE7B7;
+    }
+
+    body.dark-theme .ft-toast.error .ft-toast-icon {
+      background: #351A1A;
+      color: #FCA5A5;
+    }
+
+    body.dark-theme .ft-toast.warning .ft-toast-icon {
+      background: #352512;
+      color: #FDBA74;
+    }
+
+    .ft-toast-title {
+      font-size: .86rem;
+      line-height: 1.25;
+      font-weight: 750;
+      margin-bottom: 3px;
+    }
+
+    .ft-toast-message {
+      font-size: .78rem;
+      line-height: 1.4;
+      color: var(--text-dim);
+      overflow-wrap: anywhere;
+    }
+
+    .ft-toast-close {
+      border: 0;
+      background: transparent;
+      color: var(--text-faint);
+      cursor: pointer;
+      padding: 2px 4px;
+      font-size: 15px;
+      line-height: 1;
+    }
+
+    .ft-toast-progress {
+      position: absolute;
+      left: 0;
+      bottom: 0;
+      height: 3px;
+      width: 100%;
+      background: var(--accent);
+      transform-origin: left;
+      animation: ftToastProgress 3.6s linear forwards;
+    }
+
+    @keyframes ftToastProgress {
+      from { transform: scaleX(1); }
+      to { transform: scaleX(0); }
+    }
+
+    @media (max-width: 600px) {
+      .toast-container {
+        top: 10px;
+        right: 10px;
+        width: calc(100vw - 20px);
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .page-view.active-page,
+      .modal-overlay.open .modal,
+      .article-item,
+      tbody tr,
+      .ft-toast,
+      .ft-toast.removing,
+      .ft-toast-progress {
+        animation: none !important;
+      }
+
+      .btn,
+      .icon-btn,
+      .nav-item,
+      .chip,
+      .tag-chip,
+      .theme-toggle {
+        transition: none !important;
+      }
+    }
+
   </style>
 </head>
 
@@ -2862,6 +3095,154 @@
 
 
 <script>
+
+
+/* =========================================================
+   УВЕДОМЛЕНИЯ
+   ========================================================= */
+
+function showToast(
+  message,
+  type = "success",
+  title = ""
+) {
+
+  let container =
+    document.getElementById(
+      "toastContainer"
+    );
+
+  if (!container) {
+
+    container =
+      document.createElement(
+        "div"
+      );
+
+    container.id =
+      "toastContainer";
+
+    container.className =
+      "toast-container";
+
+    container.setAttribute(
+      "aria-live",
+      "polite"
+    );
+
+    document.body.appendChild(
+      container
+    );
+
+  }
+
+
+  const icons = {
+    success: "✓",
+    error: "!",
+    warning: "!",
+    info: "i"
+  };
+
+
+  const titles = {
+    success: "Готово",
+    error: "Ошибка",
+    warning: "Внимание",
+    info: "Информация"
+  };
+
+
+  const toast =
+    document.createElement(
+      "div"
+    );
+
+  toast.className =
+    `ft-toast ${type}`;
+
+
+  toast.innerHTML = `
+    <div class="ft-toast-icon">
+      ${icons[type] || "i"}
+    </div>
+
+    <div>
+      <div class="ft-toast-title">
+        ${escapeHtml(
+          title ||
+          titles[type] ||
+          "Уведомление"
+        )}
+      </div>
+
+      <div class="ft-toast-message">
+        ${escapeHtml(message)}
+      </div>
+    </div>
+
+    <button
+      type="button"
+      class="ft-toast-close"
+      aria-label="Закрыть">
+      ✕
+    </button>
+
+    <div class="ft-toast-progress"></div>
+  `;
+
+
+  const closeToast = () => {
+
+    if (
+      toast.classList.contains(
+        "removing"
+      )
+    ) {
+      return;
+    }
+
+    toast.classList.add(
+      "removing"
+    );
+
+    setTimeout(
+      () => toast.remove(),
+      210
+    );
+
+  };
+
+
+  toast
+    .querySelector(
+      ".ft-toast-close"
+    )
+    .addEventListener(
+      "click",
+      closeToast
+    );
+
+
+  container.appendChild(
+    toast
+  );
+
+
+  while (
+    container.children.length > 4
+  ) {
+    container.firstElementChild?.remove();
+  }
+
+
+  setTimeout(
+    closeToast,
+    3600
+  );
+
+}
+
 
 /* =========================================================
    ТЕМА
@@ -4789,8 +5170,10 @@ document
 
       if (!nick) {
 
-        alert(
-          "Введите ник сотрудника"
+        showToast(
+          "Введите ник сотрудника.",
+          "warning",
+          "Не заполнено поле"
         );
 
         return;
@@ -4864,7 +5247,32 @@ document
       }
 
 
-      await saveServerData();
+      const saved =
+        await saveServerData();
+
+
+      if (!saved) {
+
+        showToast(
+          `Изменения для ${nick} не сохранены.`,
+          "error",
+          "Изменения отклонены"
+        );
+
+        return;
+
+      }
+
+
+      showToast(
+        editIndex === null
+          ? `Сотрудник ${nick} успешно добавлен.`
+          : `Изменения для ${nick} успешно сохранены.`,
+        "success",
+        editIndex === null
+          ? "Сотрудник добавлен"
+          : "Изменения сохранены"
+      );
 
 
       closeStaffModal();
@@ -4891,13 +5299,30 @@ window.deleteStaff =
     }
 
 
+    const removed =
+      staffData[index];
+
     staffData.splice(
       index,
       1
     );
 
 
-    await saveServerData();
+    const saved =
+      await saveServerData();
+
+
+    showToast(
+      saved
+        ? `Сотрудник ${removed?.nick || ""} удалён.`
+        : "Не удалось удалить сотрудника.",
+      saved
+        ? "success"
+        : "error",
+      saved
+        ? "Сотрудник удалён"
+        : "Удаление отклонено"
+    );
 
   };
 
@@ -5072,8 +5497,10 @@ document
 
       if (!nick) {
 
-        alert(
-          "Введите ник/логин соавтора"
+        showToast(
+          "Введите ник или логин соавтора.",
+          "warning",
+          "Не заполнено поле"
         );
 
         return;
@@ -5103,7 +5530,28 @@ document
       });
 
 
-      await saveServerData();
+      const saved =
+        await saveServerData();
+
+
+      if (!saved) {
+
+        showToast(
+          `Соавтор ${nick} не был создан.`,
+          "error",
+          "Создание отклонено"
+        );
+
+        return;
+
+      }
+
+
+      showToast(
+        `Соавтор ${nick} успешно создан.`,
+        "success",
+        "Соавтор добавлен"
+      );
 
 
       document
@@ -5298,8 +5746,10 @@ document
 
       if (!newLogin) {
 
-        alert(
-          "Логин не может быть пустым"
+        showToast(
+          "Логин не может быть пустым.",
+          "warning",
+          "Не заполнено поле"
         );
 
         return;
@@ -5333,7 +5783,28 @@ document
         );
 
 
-      await saveServerData();
+      const saved =
+        await saveServerData();
+
+
+      if (!saved) {
+
+        showToast(
+          `Изменения для ${newLogin} не сохранены.`,
+          "error",
+          "Изменения отклонены"
+        );
+
+        return;
+
+      }
+
+
+      showToast(
+        `Изменения для ${newLogin} успешно сохранены.`,
+        "success",
+        "Доступ обновлён"
+      );
 
 
       // Если изменяются права текущего вошедшего соавтора,
@@ -5387,7 +5858,16 @@ window.activateCoauthor =
       "active";
 
 
-    await saveServerData();
+    const saved =
+      await saveServerData();
+
+    showToast(
+      saved
+        ? `Аккаунт ${coauthorsData[index]?.login || ""} активирован.`
+        : "Не удалось активировать аккаунт.",
+      saved ? "success" : "error",
+      saved ? "Аккаунт активирован" : "Изменение отклонено"
+    );
 
   };
 
@@ -5401,7 +5881,16 @@ window.blockCoauthor =
       "blocked";
 
 
-    await saveServerData();
+    const saved =
+      await saveServerData();
+
+    showToast(
+      saved
+        ? `Аккаунт ${coauthorsData[index]?.login || ""} заблокирован.`
+        : "Не удалось заблокировать аккаунт.",
+      saved ? "success" : "error",
+      saved ? "Аккаунт заблокирован" : "Изменение отклонено"
+    );
 
   };
 
@@ -5420,13 +5909,25 @@ window.deleteCoauthor =
     }
 
 
+    const removed =
+      coauthorsData[index];
+
     coauthorsData.splice(
       index,
       1
     );
 
 
-    await saveServerData();
+    const saved =
+      await saveServerData();
+
+    showToast(
+      saved
+        ? `Соавтор ${removed?.login || ""} удалён.`
+        : "Не удалось удалить соавтора.",
+      saved ? "success" : "error",
+      saved ? "Соавтор удалён" : "Удаление отклонено"
+    );
 
   };
 
@@ -6185,8 +6686,10 @@ async function saveArticle(
 
   if (!isAdmin()) {
 
-    alert(
-      "Только администратор может изменять статьи."
+    showToast(
+      "У вас нет прав на изменение статей.",
+      "error",
+      "Доступ отклонён"
     );
 
     return;
@@ -6205,8 +6708,10 @@ async function saveArticle(
 
   if (!content) {
 
-    alert(
-      "Введите текст статьи."
+    showToast(
+      "Введите текст статьи перед сохранением.",
+      "warning",
+      "Статья пустая"
     );
 
     return;
@@ -6251,8 +6756,10 @@ async function saveArticle(
   const saved = await saveServerData();
 
   if (!saved) {
-    alert(
-      "Не удалось сохранить статью на сервере. Проверьте Worker и повторите публикацию."
+    showToast(
+      "Не удалось сохранить статью на сервере. Повторите попытку.",
+      "error",
+      "Сохранение отклонено"
     );
     return;
   }
@@ -6277,10 +6784,14 @@ async function saveArticle(
   renderArticles();
 
 
-  alert(
+  showToast(
     status === "draft"
       ? "Статья сохранена как черновик."
-      : "Статья опубликована."
+      : "Статья опубликована и доступна сотрудникам.",
+    "success",
+    status === "draft"
+      ? "Черновик сохранён"
+      : "Статья опубликована"
   );
 
 }
@@ -6395,8 +6906,10 @@ window.openArticle =
       !isAdmin()
     ) {
 
-      alert(
-        "Этот материал ещё не опубликован."
+      showToast(
+        "Этот материал ещё не опубликован.",
+        "warning",
+        "Материал недоступен"
       );
 
       return;
@@ -6502,8 +7015,10 @@ window.editArticle =
 
     if (!isAdmin()) {
 
-      alert(
-        "Только администратор может редактировать статьи."
+      showToast(
+        "У вас нет прав на редактирование статей.",
+        "error",
+        "Доступ отклонён"
       );
 
       return;
@@ -6572,8 +7087,10 @@ window.deleteArticle =
 
     if (!isAdmin()) {
 
-      alert(
-        "Только администратор может удалять статьи."
+      showToast(
+        "У вас нет прав на удаление статей.",
+        "error",
+        "Доступ отклонён"
       );
 
       return;
@@ -6598,10 +7115,20 @@ window.deleteArticle =
     );
 
 
-    await saveServerData();
+    const saved =
+      await saveServerData();
 
 
     renderArticles();
+
+
+    showToast(
+      saved
+        ? "Статья успешно удалена."
+        : "Не удалось удалить статью.",
+      saved ? "success" : "error",
+      saved ? "Статья удалена" : "Удаление отклонено"
+    );
 
   };
 
