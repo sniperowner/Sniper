@@ -3962,6 +3962,38 @@ async function showDashboard() {
   await loadServerData();
 
 
+  // Главный администратор всегда получает полный набор доступов,
+  // включая новый раздел "Логи".
+  if (
+    localStorage.getItem(
+      "ft_role"
+    ) === "admin"
+  ) {
+
+    localStorage.setItem(
+      "ft_permissions",
+      JSON.stringify([
+        "home",
+        "staff",
+        "staff_add",
+        "staff_actions",
+        "hydes",
+        "access",
+        "logs",
+        "payments",
+        "rank_beta",
+        "rank_alpha",
+        "rank_stazher",
+        "rank_metod"
+      ])
+    );
+
+  }
+
+
+  ensureLogsSection();
+
+
   // Скрываем/показываем меню строго по загруженным правам.
   applySidebarVisibility();
 
@@ -4093,10 +4125,318 @@ function applyRankVisibility() {
 
 
 /* =========================================================
+   ГАРАНТИРОВАННОЕ СОЗДАНИЕ РАЗДЕЛА "ЛОГИ"
+   ========================================================= */
+
+function ensureLogsSection() {
+
+  const sidebar =
+    document.querySelector(
+      ".sidebar"
+    );
+
+
+  if (!sidebar) {
+    return;
+  }
+
+
+  let logsNav =
+    document.getElementById(
+      "nav-logs"
+    );
+
+
+  // Если по какой-либо причине старый HTML не содержит
+  // пункта меню — создаём его автоматически.
+  if (!logsNav) {
+
+    const accessNav =
+      document.getElementById(
+        "nav-access"
+      );
+
+
+    logsNav =
+      document.createElement(
+        "a"
+      );
+
+    logsNav.className =
+      "nav-item";
+
+    logsNav.dataset.page =
+      "logs";
+
+    logsNav.id =
+      "nav-logs";
+
+    logsNav.innerHTML = `
+      <span class="ic">🧾</span>
+      Логи
+    `;
+
+
+    if (
+      accessNav &&
+      accessNav.parentNode
+    ) {
+
+      accessNav.insertAdjacentElement(
+        "afterend",
+        logsNav
+      );
+
+    } else {
+
+      sidebar.appendChild(
+        logsNav
+      );
+
+    }
+
+  }
+
+
+  // Если по какой-либо причине отсутствует сама страница —
+  // также создаём её.
+  let logsView =
+    document.getElementById(
+      "view-logs"
+    );
+
+
+  if (!logsView) {
+
+    const main =
+      document.querySelector(
+        ".main"
+      );
+
+
+    if (main) {
+
+      logsView =
+        document.createElement(
+          "div"
+        );
+
+      logsView.className =
+        "page-view";
+
+      logsView.id =
+        "view-logs";
+
+      logsView.innerHTML = `
+        <div class="card">
+
+          <div
+            style="
+              padding:20px;
+              display:flex;
+              justify-content:space-between;
+              align-items:center;
+              gap:15px;
+              border-bottom:1px solid var(--border);
+              flex-wrap:wrap;
+            ">
+
+            <div>
+              <h2
+                style="
+                  font-size:1.15rem;
+                  font-weight:800;
+                ">
+                Логи сотрудников
+              </h2>
+
+              <p
+                style="
+                  color:var(--text-dim);
+                  font-size:.84rem;
+                  margin-top:4px;
+                ">
+                Входы, разделы, IP-адреса и онлайн-статус.
+              </p>
+            </div>
+
+            <button
+              class="btn"
+              type="button"
+              id="refreshLogsBtnDynamic">
+              Обновить
+            </button>
+
+          </div>
+
+          <div
+            id="logsSummary"
+            class="logs-summary">
+          </div>
+
+          <div class="table-wrap">
+
+            <table>
+              <thead>
+                <tr>
+                  <th>Сотрудник</th>
+                  <th>Статус</th>
+                  <th>Действие</th>
+                  <th>Раздел</th>
+                  <th>IP</th>
+                  <th>Дата / время</th>
+                </tr>
+              </thead>
+
+              <tbody id="logsList">
+                <tr>
+                  <td
+                    colspan="6"
+                    style="
+                      text-align:center;
+                      padding:30px;
+                      color:var(--text-faint);
+                    ">
+                    Загрузка логов...
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+
+          </div>
+
+        </div>
+      `;
+
+
+      main.appendChild(
+        logsView
+      );
+
+
+      document
+        .getElementById(
+          "refreshLogsBtnDynamic"
+        )
+        ?.addEventListener(
+          "click",
+          loadLogs
+        );
+
+    }
+
+  }
+
+
+  // Подключаем навигацию для динамически созданного пункта,
+  // если основной listener ещё не был привязан.
+  if (
+    logsNav &&
+    !logsNav.dataset.logsReady
+  ) {
+
+    logsNav.dataset.logsReady =
+      "1";
+
+
+    logsNav.addEventListener(
+      "click",
+      () => {
+
+        const role =
+          localStorage.getItem(
+            "ft_role"
+          ) || "admin";
+
+
+        const permissions =
+          JSON.parse(
+            localStorage.getItem(
+              "ft_permissions"
+            ) || "[]"
+          );
+
+
+        if (
+          role !== "admin" &&
+          !permissions.includes(
+            "logs"
+          )
+        ) {
+
+          showToast(
+            "У вас нет доступа к разделу «Логи».",
+            "error",
+            "Доступ отклонён"
+          );
+
+          return;
+
+        }
+
+
+        document
+          .querySelectorAll(
+            ".nav-item"
+          )
+          .forEach(item =>
+            item.classList.remove(
+              "active"
+            )
+          );
+
+
+        logsNav.classList.add(
+          "active"
+        );
+
+
+        document
+          .querySelectorAll(
+            ".page-view"
+          )
+          .forEach(view =>
+            view.classList.remove(
+              "active-page"
+            )
+          );
+
+
+        document
+          .getElementById(
+            "view-logs"
+          )
+          ?.classList.add(
+            "active-page"
+          );
+
+
+        updateTopbar(
+          "logs"
+        );
+
+
+        loadLogs();
+
+        logPageVisit(
+          "logs"
+        );
+
+      }
+    );
+
+  }
+
+}
+
+
+/* =========================================================
    SIDEBAR
    ========================================================= */
 
 function applySidebarVisibility() {
+
+  ensureLogsSection();
 
   const role =
     localStorage.getItem("ft_role") ||
