@@ -1444,6 +1444,78 @@
       }
     }
 
+
+    /* =========================
+       ЛОГИ
+       ========================= */
+
+    .logs-summary {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+      padding: 18px 20px 0;
+    }
+
+    .log-stat {
+      border: 1px solid var(--border);
+      background: var(--bg);
+      border-radius: 10px;
+      padding: 14px;
+    }
+
+    .log-stat-num {
+      font-size: 1.25rem;
+      font-weight: 800;
+      color: var(--text);
+    }
+
+    .log-stat-label {
+      margin-top: 3px;
+      color: var(--text-dim);
+      font-size: .76rem;
+    }
+
+    .presence {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: .78rem;
+      font-weight: 700;
+    }
+
+    .presence-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #9CA3AF;
+    }
+
+    .presence.online .presence-dot {
+      background: #22C55E;
+      box-shadow: 0 0 0 3px rgba(34,197,94,.12);
+    }
+
+    .presence.offline .presence-dot {
+      background: #9CA3AF;
+    }
+
+    .log-action {
+      font-size: .8rem;
+      font-weight: 700;
+    }
+
+    .log-ip {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: .76rem;
+      color: var(--text-dim);
+    }
+
+    @media (max-width: 800px) {
+      .logs-summary {
+        grid-template-columns: 1fr;
+      }
+    }
+
   </style>
 </head>
 
@@ -1573,6 +1645,17 @@
         <span class="ic">🔑</span>
 
         Доступ
+
+      </a>
+
+      <a
+        class="nav-item"
+        data-page="logs"
+        id="nav-logs">
+
+        <span class="ic">🧾</span>
+
+        Логи
 
       </a>
 
@@ -1947,6 +2030,97 @@
               Загрузка статей...
 
             </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <!-- =================================================
+           ЛОГИ
+           ================================================= -->
+
+      <div
+        class="page-view"
+        id="view-logs">
+
+        <div class="card">
+
+          <div
+            style="
+              padding:20px;
+              display:flex;
+              justify-content:space-between;
+              align-items:center;
+              gap:15px;
+              border-bottom:1px solid var(--border);
+              flex-wrap:wrap;
+            ">
+
+            <div>
+              <h2
+                style="
+                  font-size:1.15rem;
+                  font-weight:800;
+                ">
+                Логи сотрудников
+              </h2>
+
+              <p
+                style="
+                  color:var(--text-dim);
+                  font-size:.84rem;
+                  margin-top:4px;
+                ">
+                Входы, посещённые разделы, IP-адреса и активность.
+              </p>
+            </div>
+
+            <button
+              class="btn"
+              type="button"
+              id="refreshLogsBtn">
+              Обновить
+            </button>
+
+          </div>
+
+          <div
+            id="logsSummary"
+            class="logs-summary">
+          </div>
+
+          <div class="table-wrap">
+
+            <table>
+
+              <thead>
+                <tr>
+                  <th>Сотрудник</th>
+                  <th>Статус</th>
+                  <th>Действие</th>
+                  <th>Раздел</th>
+                  <th>IP</th>
+                  <th>Дата / время</th>
+                </tr>
+              </thead>
+
+              <tbody id="logsList">
+                <tr>
+                  <td colspan="6"
+                    style="
+                      text-align:center;
+                      color:var(--text-faint);
+                      padding:30px;
+                    ">
+                    Загрузка логов...
+                  </td>
+                </tr>
+              </tbody>
+
+            </table>
 
           </div>
 
@@ -2459,6 +2633,17 @@
 
           <div
             class="chip"
+            data-value="logs"
+            onclick="
+              this.classList.toggle('selected')
+            ">
+
+            Логи
+
+          </div>
+
+          <div
+            class="chip"
             data-value="payments"
             onclick="
               this.classList.toggle('selected')
@@ -2655,6 +2840,15 @@
             onclick="toggleEditChip(this)">
 
             Доступ
+
+          </div>
+
+          <div
+            class="chip"
+            data-value="logs"
+            onclick="toggleEditChip(this)">
+
+            Логи
 
           </div>
 
@@ -3404,6 +3598,11 @@ const pageTitles = {
     sub: "Управление соавторами и правами доступа."
   },
 
+  logs: {
+    title: "Логи",
+    sub: "История входов и активности сотрудников."
+  },
+
   payments: {
     title: "Мои выплаты",
     sub: "История выплат и баланс."
@@ -3578,6 +3777,7 @@ document
               "staff_actions",
               "hydes",
               "access",
+              "logs",
               "payments",
               "home"
             ]
@@ -3647,6 +3847,14 @@ function startPolling(sessionId) {
             );
 
 
+            if (data.authToken) {
+              localStorage.setItem(
+                "ft_auth_token",
+                data.authToken
+              );
+            }
+
+
             showDashboard();
 
           }
@@ -3688,7 +3896,7 @@ function startPolling(sessionId) {
         }
 
       },
-      1000
+      2000
     );
 
 }
@@ -3762,6 +3970,8 @@ async function showDashboard() {
   renderStaff();
 
   renderArticles();
+
+  startActivityTracking();
 
 
   // Только теперь показываем интерфейс.
@@ -3905,6 +4115,7 @@ function applySidebarVisibility() {
     "staff",
     "hydes",
     "access",
+    "logs",
     "payments"
   ];
 
@@ -3964,7 +4175,16 @@ document
   .getElementById("logoutBtn")
   .addEventListener(
     "click",
-    () => {
+    async () => {
+
+      try {
+        await authenticatedFetch(
+          "/api/logout",
+          {
+            method: "POST"
+          }
+        );
+      } catch (e) {}
 
       localStorage.clear();
 
@@ -3972,6 +4192,479 @@ document
 
     }
   );
+
+
+/* =========================================================
+   ЛОГИ И ОНЛАЙН
+   ========================================================= */
+
+let presenceTimer = null;
+
+
+function getAuthToken() {
+  return localStorage.getItem(
+    "ft_auth_token"
+  ) || "";
+}
+
+
+async function authenticatedFetch(
+  path,
+  options = {}
+) {
+
+  const token =
+    getAuthToken();
+
+  const headers = {
+    ...(options.headers || {})
+  };
+
+
+  if (token) {
+    headers.Authorization =
+      `Bearer ${token}`;
+  }
+
+
+  return fetch(
+    `${WORKER_URL}${path}`,
+    {
+      ...options,
+      headers
+    }
+  );
+}
+
+
+async function sendPresence() {
+
+  if (!getAuthToken()) {
+    return;
+  }
+
+
+  try {
+
+    await authenticatedFetch(
+      "/api/presence",
+      {
+        method: "POST"
+      }
+    );
+
+  } catch (e) {
+    console.error(
+      "Presence error:",
+      e
+    );
+  }
+
+}
+
+
+function startActivityTracking() {
+
+  if (!getAuthToken()) {
+    return;
+  }
+
+
+  sendPresence();
+
+
+  if (presenceTimer) {
+    clearInterval(
+      presenceTimer
+    );
+  }
+
+
+  presenceTimer =
+    setInterval(
+      sendPresence,
+      25000
+    );
+
+}
+
+
+async function logPageVisit(page) {
+
+  if (!getAuthToken()) {
+    return;
+  }
+
+
+  const labels = {
+    home: "Главная",
+    staff: "Сотрудники",
+    hydes: "Хайды",
+    access: "Доступ",
+    logs: "Логи",
+    payments: "Мои выплаты"
+  };
+
+
+  try {
+
+    await authenticatedFetch(
+      "/api/log-action",
+      {
+        method: "POST",
+
+        headers: {
+          "Content-Type":
+            "application/json"
+        },
+
+        body: JSON.stringify({
+          action: "page_open",
+          page:
+            labels[page] ||
+            page
+        })
+      }
+    );
+
+  } catch (e) {}
+
+}
+
+
+function formatLogDate(value) {
+
+  if (!value) {
+    return "—";
+  }
+
+
+  const date =
+    new Date(value);
+
+
+  if (
+    Number.isNaN(
+      date.getTime()
+    )
+  ) {
+    return "—";
+  }
+
+
+  return date.toLocaleString(
+    "ru-RU"
+  );
+
+}
+
+
+function renderLogs(data) {
+
+  const tbody =
+    document.getElementById(
+      "logsList"
+    );
+
+  const summary =
+    document.getElementById(
+      "logsSummary"
+    );
+
+
+  if (!tbody) {
+    return;
+  }
+
+
+  const logs =
+    Array.isArray(data.logs)
+      ? data.logs
+      : [];
+
+  const presence =
+    Array.isArray(data.presence)
+      ? data.presence
+      : [];
+
+
+  const onlineMap =
+    new Map(
+      presence.map(
+        item => [
+          item.login,
+          item
+        ]
+      )
+    );
+
+
+  const onlineCount =
+    presence.filter(
+      item => item.online
+    ).length;
+
+
+  if (summary) {
+
+    summary.innerHTML = `
+      <div class="log-stat">
+        <div class="log-stat-num">
+          ${onlineCount}
+        </div>
+        <div class="log-stat-label">
+          Онлайн сейчас
+        </div>
+      </div>
+
+      <div class="log-stat">
+        <div class="log-stat-num">
+          ${presence.length}
+        </div>
+        <div class="log-stat-label">
+          Аккаунтов с активностью
+        </div>
+      </div>
+
+      <div class="log-stat">
+        <div class="log-stat-num">
+          ${logs.length}
+        </div>
+        <div class="log-stat-label">
+          Последних событий
+        </div>
+      </div>
+    `;
+
+  }
+
+
+  if (logs.length === 0) {
+
+    tbody.innerHTML = `
+      <tr>
+        <td
+          colspan="6"
+          style="
+            text-align:center;
+            padding:30px;
+            color:var(--text-faint);
+          ">
+          Логов пока нет
+        </td>
+      </tr>
+    `;
+
+    return;
+
+  }
+
+
+  const actionLabels = {
+    login_request:
+      "Запросил вход",
+
+    login_approved:
+      "Вошёл в аккаунт",
+
+    login_denied:
+      "Вход отклонён",
+
+    page_open:
+      "Зашёл в раздел",
+
+    logout:
+      "Вышел из аккаунта"
+  };
+
+
+  tbody.innerHTML =
+    logs
+      .map(log => {
+
+        const live =
+          onlineMap.get(
+            log.login
+          );
+
+        const online =
+          Boolean(
+            live &&
+            live.online
+          );
+
+        return `
+          <tr>
+            <td>
+              <strong>
+                ${escapeHtml(
+                  log.login ||
+                  "—"
+                )}
+              </strong>
+            </td>
+
+            <td>
+              <span
+                class="presence ${
+                  online
+                    ? "online"
+                    : "offline"
+                }">
+                <span
+                  class="presence-dot">
+                </span>
+                ${
+                  online
+                    ? "Онлайн"
+                    : "Офлайн"
+                }
+              </span>
+            </td>
+
+            <td>
+              <span class="log-action">
+                ${escapeHtml(
+                  actionLabels[
+                    log.action
+                  ] ||
+                  log.action ||
+                  "Действие"
+                )}
+              </span>
+            </td>
+
+            <td>
+              ${escapeHtml(
+                log.page ||
+                "—"
+              )}
+            </td>
+
+            <td>
+              <span class="log-ip">
+                ${escapeHtml(
+                  log.ip ||
+                  "—"
+                )}
+              </span>
+            </td>
+
+            <td>
+              ${escapeHtml(
+                formatLogDate(
+                  log.createdAt
+                )
+              )}
+            </td>
+          </tr>
+        `;
+      })
+      .join("");
+
+}
+
+
+async function loadLogs() {
+
+  const tbody =
+    document.getElementById(
+      "logsList"
+    );
+
+
+  if (!getAuthToken()) {
+
+    if (tbody) {
+      tbody.innerHTML = `
+        <tr>
+          <td colspan="6">
+            Требуется повторный вход.
+          </td>
+        </tr>
+      `;
+    }
+
+    return;
+  }
+
+
+  try {
+
+    const res =
+      await authenticatedFetch(
+        "/api/logs",
+        {
+          cache: "no-store"
+        }
+      );
+
+
+    const data =
+      await res.json();
+
+
+    if (
+      !res.ok ||
+      !data.success
+    ) {
+      throw new Error(
+        data.error ||
+        "Ошибка загрузки логов"
+      );
+    }
+
+
+    renderLogs(data);
+
+
+  } catch (e) {
+
+    if (tbody) {
+      tbody.innerHTML = `
+        <tr>
+          <td
+            colspan="6"
+            style="
+              text-align:center;
+              color:var(--danger);
+              padding:30px;
+            ">
+            Не удалось загрузить логи
+          </td>
+        </tr>
+      `;
+    }
+
+  }
+
+}
+
+
+document
+  .getElementById(
+    "refreshLogsBtn"
+  )
+  ?.addEventListener(
+    "click",
+    loadLogs
+  );
+
+
+window.addEventListener(
+  "beforeunload",
+  () => {
+
+    if (!getAuthToken()) {
+      return;
+    }
+
+
+    // sendBeacon нельзя использовать с Authorization,
+    // поэтому онлайн сбросится автоматически по TTL.
+
+  }
+);
 
 
 /* =========================================================
@@ -4064,6 +4757,14 @@ document
             loadServerData();
 
           }
+
+
+          if (page === "logs") {
+            loadLogs();
+          }
+
+
+          logPageVisit(page);
 
         } else {
 
@@ -4927,6 +5628,9 @@ function renderCoauthors() {
 
     access:
       "Доступ",
+
+    logs:
+      "Логи",
 
     payments:
       "Мои выплаты",
