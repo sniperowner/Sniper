@@ -1001,6 +1001,155 @@
         min-width: 800px;
       }
     }
+
+    /* =========================
+       ТЕМА САЙТА
+       ========================= */
+
+    body,
+    .login-card,
+    .sidebar,
+    .main,
+    .card,
+    .modal,
+    .user-pill,
+    .tab,
+    .icon-btn,
+    .article-item,
+    .article-open-btn,
+    .file-btn,
+    .chip,
+    #articleEditor,
+    .editor-toolbar,
+    .search-box input,
+    .form-group input,
+    .form-group select,
+    textarea {
+      transition:
+        background-color .2s ease,
+        color .2s ease,
+        border-color .2s ease,
+        box-shadow .2s ease;
+    }
+
+    /* Чёрная тема */
+    body.dark-theme {
+      --bg: #0B0D12;
+      --surface: #151820;
+      --border: #292E39;
+      --text: #F3F4F6;
+      --text-dim: #A1A7B3;
+      --text-faint: #737A88;
+      --accent: #6366F1;
+      --accent-dark: #818CF8;
+      --accent-soft: #202348;
+      --danger: #F87171;
+      --danger-soft: #351A1A;
+      --warning: #F59E0B;
+      --warning-soft: #33250F;
+      --shadow-sm: 0 1px 2px rgba(0, 0, 0, .25);
+      --shadow-md: 0 12px 30px rgba(0, 0, 0, .35);
+    }
+
+    body.dark-theme .login-card,
+    body.dark-theme #articleEditor {
+      background: var(--surface);
+    }
+
+    body.dark-theme .form-group input,
+    body.dark-theme .form-group select,
+    body.dark-theme .search-box input,
+    body.dark-theme textarea {
+      background-color: #101319;
+      color: var(--text);
+    }
+
+    body.dark-theme .form-group input:focus,
+    body.dark-theme .form-group select:focus {
+      background-color: #101319;
+    }
+
+    body.dark-theme .article-item:hover {
+      border-color: #3A4150;
+    }
+
+    body.dark-theme .r-beta,
+    body.dark-theme .tag-chip[data-value="Бета"],
+    body.dark-theme .status-pill.active,
+    body.dark-theme .article-status.published {
+      background: #103127;
+      color: #6EE7B7;
+    }
+
+    body.dark-theme .r-alpha,
+    body.dark-theme .tag-chip[data-value="Альфа"],
+    body.dark-theme .article-status.draft {
+      background: #352512;
+      color: #FDBA74;
+    }
+
+    body.dark-theme .r-stazher,
+    body.dark-theme .tag-chip[data-value="Стажёр"] {
+      background: #162A4A;
+      color: #93C5FD;
+    }
+
+    body.dark-theme .r-metod,
+    body.dark-theme .tag-chip[data-value="Метод"] {
+      background: #2B1A46;
+      color: #C4B5FD;
+    }
+
+    body.dark-theme .r-default,
+    body.dark-theme .role-badge {
+      background: #242933;
+      color: #B8BEC9;
+    }
+
+    body.dark-theme .status-pill.blocked {
+      background: #351A1A;
+      color: #FCA5A5;
+    }
+
+    body.dark-theme .icon-btn.warn {
+      border-color: #594710;
+    }
+
+    body.dark-theme .icon-btn.del {
+      border-color: #5A2525;
+    }
+
+    body.dark-theme .icon-btn.success {
+      border-color: #205332;
+    }
+
+    body.dark-theme .modal-overlay {
+      background: rgba(0, 0, 0, .65);
+    }
+
+    /* Кнопка переключения темы */
+    .theme-toggle {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: .55rem .65rem;
+      margin-bottom: 8px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text);
+      font-size: .84rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all .2s;
+    }
+
+    .theme-toggle:hover {
+      background: var(--bg);
+    }
+
   </style>
 </head>
 
@@ -1149,6 +1298,14 @@
       </a>
 
       <div class="sidebar-footer">
+
+        <button
+          type="button"
+          class="theme-toggle"
+          id="themeToggle"
+          title="Переключить тему">
+          ☀️ Светлая тема
+        </button>
 
         <a
           class="nav-item danger"
@@ -2656,6 +2813,56 @@
 
 
 <script>
+
+/* =========================================================
+   ТЕМА
+   ========================================================= */
+
+(function () {
+  const THEME_KEY = "ft-owner-theme";
+  const body = document.body;
+  const toggle = document.getElementById("themeToggle");
+
+  function applyTheme(theme) {
+    const dark = theme === "dark";
+
+    body.classList.toggle("dark-theme", dark);
+
+    if (toggle) {
+      toggle.innerHTML = dark
+        ? "☀️ Светлая тема"
+        : "🌙 Тёмная тема";
+
+      toggle.title = dark
+        ? "Переключить на светлую тему"
+        : "Переключить на тёмную тему";
+    }
+  }
+
+  let savedTheme = "light";
+
+  try {
+    savedTheme = localStorage.getItem(THEME_KEY) || "light";
+  } catch (e) {
+    savedTheme = "light";
+  }
+
+  applyTheme(savedTheme === "dark" ? "dark" : "light");
+
+  if (toggle) {
+    toggle.addEventListener("click", function () {
+      const nextTheme = body.classList.contains("dark-theme")
+        ? "light"
+        : "dark";
+
+      applyTheme(nextTheme);
+
+      try {
+        localStorage.setItem(THEME_KEY, nextTheme);
+      } catch (e) {}
+    });
+  }
+})();
 
 /* =========================================================
    НАСТРОЙКИ
