@@ -3279,37 +3279,71 @@ function startPolling(sessionId) {
 
 async function showDashboard() {
 
-  document
-    .getElementById("authSection")
-    .style.display = "none";
+  const authSection =
+    document.getElementById(
+      "authSection"
+    );
+
+  const dashboardSection =
+    document.getElementById(
+      "dashboardSection"
+    );
 
 
-  document
-    .getElementById("dashboardSection")
-    .style.display = "block";
+  // Сначала скрываем обе области.
+  // Dashboard появится только после загрузки актуальных прав,
+  // поэтому закрытые разделы больше не мигают при F5.
+  if (authSection) {
+    authSection.style.display =
+      "none";
+  }
+
+  if (dashboardSection) {
+    dashboardSection.style.display =
+      "none";
+  }
 
 
   const name =
-    localStorage.getItem("ft_username") ||
+    localStorage.getItem(
+      "ft_username"
+    ) ||
     "Пользователь";
 
 
   document
-    .getElementById("userNameLabel")
-    .textContent = name;
+    .getElementById(
+      "userNameLabel"
+    )
+    .textContent =
+    name;
 
 
   document
-    .getElementById("userInitial")
+    .getElementById(
+      "userInitial"
+    )
     .textContent =
-    name.charAt(0).toUpperCase();
+    name
+      .charAt(0)
+      .toUpperCase();
 
 
+  // Получаем актуальные permissions с Worker.
   await loadServerData();
 
+
+  // Скрываем/показываем меню строго по загруженным правам.
   applySidebarVisibility();
 
   renderArticles();
+
+
+  // Только теперь показываем интерфейс.
+  if (dashboardSection) {
+    dashboardSection.style.display =
+      "block";
+  }
 
 }
 
@@ -3354,7 +3388,6 @@ function applySidebarVisibility() {
 
     if (
       role === "admin" ||
-      page === "hydes" ||
       permissions.includes(page)
     ) {
 
@@ -3466,7 +3499,6 @@ document
 
         if (
           role === "admin" ||
-          page === "hydes" ||
           permissions.includes(page) ||
           page === "home"
         ) {
@@ -5302,6 +5334,40 @@ document
 
 
       await saveServerData();
+
+
+      // Если изменяются права текущего вошедшего соавтора,
+      // сразу обновляем localStorage и интерфейс.
+      const currentLogin =
+        localStorage.getItem(
+          "ft_username"
+        );
+
+      const currentRole =
+        localStorage.getItem(
+          "ft_role"
+        );
+
+      if (
+        currentRole !== "admin" &&
+        currentLogin ===
+          coauthorsData[
+            editCoauthorIdx
+          ].login
+      ) {
+
+        localStorage.setItem(
+          "ft_permissions",
+          JSON.stringify(
+            coauthorsData[
+              editCoauthorIdx
+            ].permissions || []
+          )
+        );
+
+        applySidebarVisibility();
+
+      }
 
 
       editCoauthorModal.classList.remove(
