@@ -7165,6 +7165,18 @@ document
       );
 
 
+      const siteLink =
+        window.location.origin +
+        window.location.pathname;
+
+
+      const inviteText =
+`Привет! Вам выдали доступ на сайт:
+Ссылка: ${siteLink}
+Пароль: ${password}
+Логин: ${nick}`;
+
+
       document
         .getElementById(
           "newCredsResult"
@@ -7179,17 +7191,30 @@ document
 
             <br><br>
 
-            Логин:
-            <code>
-              ${escapeHtml(nick)}
-            </code>
+            <div
+              style="
+                white-space:pre-wrap;
+                line-height:1.65;
+                padding:12px;
+                border:1px solid var(--border);
+                border-radius:8px;
+                background:var(--surface);
+                color:var(--text);
+              "
+            >Привет! Вам выдали доступ на сайт:
+Ссылка: ${escapeHtml(siteLink)}
+Пароль: ${escapeHtml(password)}
+Логин: ${escapeHtml(nick)}</div>
 
             <br>
 
-            Пароль:
-            <code>
-              ${escapeHtml(password)}
-            </code>
+            <button
+              type="button"
+              class="btn"
+              id="copyCoauthorInviteBtn"
+            >
+              Копировать приглашение
+            </button>
 
             <br><br>
 
@@ -7199,14 +7224,74 @@ document
                 color:var(--danger);
               ">
 
-              Скопируйте пароль.
+              Скопируйте приглашение.
               После закрытия окна
-              он скрывается.
+              пароль скрывается.
 
             </span>
 
           </div>
         `;
+
+
+      document
+        .getElementById(
+          "copyCoauthorInviteBtn"
+        )
+        .addEventListener(
+          "click",
+          async () => {
+
+            try {
+
+              await navigator.clipboard.writeText(
+                inviteText
+              );
+
+              showToast(
+                "Приглашение скопировано.",
+                "success",
+                "Готово"
+              );
+
+            } catch (e) {
+
+              const area =
+                document.createElement(
+                  "textarea"
+                );
+
+              area.value =
+                inviteText;
+
+              area.style.position =
+                "fixed";
+
+              area.style.opacity =
+                "0";
+
+              document.body.appendChild(
+                area
+              );
+
+              area.select();
+
+              document.execCommand(
+                "copy"
+              );
+
+              area.remove();
+
+              showToast(
+                "Приглашение скопировано.",
+                "success",
+                "Готово"
+              );
+
+            }
+
+          }
+        );
 
 
       document
