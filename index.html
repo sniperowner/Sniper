@@ -2445,13 +2445,49 @@
 
         </div>
 
+        <input
+          type="text"
+          id="staffAvatarUrl"
+          placeholder="https://example.com/avatar.png"
+          style="margin-bottom:10px;">
+
+        <div
+          id="staffAvatarPreviewWrap"
+          style="
+            display:none;
+            margin-bottom:10px;
+            align-items:center;
+            gap:10px;
+          ">
+
+          <img
+            id="staffAvatarPreview"
+            alt="Предпросмотр аватара"
+            style="
+              width:48px;
+              height:48px;
+              border-radius:8px;
+              object-fit:cover;
+              border:1px solid var(--border);
+            ">
+
+          <span
+            style="
+              color:var(--text-dim);
+              font-size:.78rem;
+            ">
+            Предпросмотр по ссылке
+          </span>
+
+        </div>
+
         <div class="file-input-wrapper">
 
           <label
             class="file-btn"
             for="staffAvatarFile">
 
-            Выберите файл
+            Или выберите файл
 
           </label>
 
@@ -6307,6 +6343,21 @@ document
         "Файл не выбран";
 
 
+      document
+        .getElementById(
+          "staffAvatarUrl"
+        )
+        .value = "";
+
+
+      document
+        .getElementById(
+          "staffAvatarPreviewWrap"
+        )
+        .style.display =
+        "none";
+
+
       pendingAvatar = null;
 
 
@@ -6361,6 +6412,69 @@ document
 
 document
   .getElementById(
+    "staffAvatarUrl"
+  )
+  .addEventListener(
+    "input",
+    e => {
+
+      const value =
+        e.target.value.trim();
+
+
+      const wrap =
+        document.getElementById(
+          "staffAvatarPreviewWrap"
+        );
+
+
+      const preview =
+        document.getElementById(
+          "staffAvatarPreview"
+        );
+
+
+      if (!value) {
+
+        wrap.style.display =
+          "none";
+
+        preview.removeAttribute(
+          "src"
+        );
+
+        return;
+
+      }
+
+
+      preview.src =
+        value;
+
+
+      preview.onload =
+        () => {
+
+          wrap.style.display =
+            "flex";
+
+        };
+
+
+      preview.onerror =
+        () => {
+
+          wrap.style.display =
+            "none";
+
+        };
+
+    }
+  );
+
+
+document
+  .getElementById(
     "staffAvatarFile"
   )
   .addEventListener(
@@ -6380,6 +6494,21 @@ document
         )
         .textContent =
         file.name;
+
+
+      document
+        .getElementById(
+          "staffAvatarUrl"
+        )
+        .value = "";
+
+
+      document
+        .getElementById(
+          "staffAvatarPreviewWrap"
+        )
+        .style.display =
+        "none";
 
 
       const reader =
@@ -6466,6 +6595,21 @@ document
           .trim();
 
 
+      const avatarUrl =
+        document
+          .getElementById(
+            "staffAvatarUrl"
+          )
+          .value
+          .trim();
+
+
+      const avatar =
+        avatarUrl ||
+        pendingAvatar ||
+        null;
+
+
       const record = {
 
         nick,
@@ -6476,8 +6620,7 @@ document
 
         vk,
 
-        avatar:
-          pendingAvatar
+        avatar
 
       };
 
@@ -6617,8 +6760,64 @@ window.editStaff =
       item.vk || "";
 
 
-    pendingAvatar =
+    const currentAvatar =
       item.avatar || null;
+
+
+    const isAvatarUrl =
+      typeof currentAvatar === "string" &&
+      (
+        currentAvatar.startsWith("http://") ||
+        currentAvatar.startsWith("https://")
+      );
+
+
+    document
+      .getElementById(
+        "staffAvatarUrl"
+      )
+      .value =
+      isAvatarUrl
+        ? currentAvatar
+        : "";
+
+
+    pendingAvatar =
+      isAvatarUrl
+        ? null
+        : currentAvatar;
+
+
+    const previewWrap =
+      document.getElementById(
+        "staffAvatarPreviewWrap"
+      );
+
+
+    const preview =
+      document.getElementById(
+        "staffAvatarPreview"
+      );
+
+
+    if (isAvatarUrl) {
+
+      preview.src =
+        currentAvatar;
+
+      previewWrap.style.display =
+        "flex";
+
+    } else {
+
+      preview.removeAttribute(
+        "src"
+      );
+
+      previewWrap.style.display =
+        "none";
+
+    }
 
 
     document
