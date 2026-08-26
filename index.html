@@ -5251,194 +5251,104 @@ document
 
 async function loadServerData() {
 
-  // Локальная копия нужна как защита от старого Worker,
-  // который может вернуть articles: [] и затереть статьи после F5.
-  const localStaff =
-    JSON.parse(
-      localStorage.getItem(
-        "ft_staff_data"
-      ) || "[]"
-    );
-
-  const localCoauthors =
-    JSON.parse(
-      localStorage.getItem(
-        "ft_coauthors_data"
-      ) || "[]"
-    );
-
-  const localArticles =
-    JSON.parse(
-      localStorage.getItem(
-        "ft_articles_data"
-      ) || "[]"
-    );
-
-
   try {
 
     const res =
-      await fetch(
-        `${WORKER_URL}/api/data?t=${Date.now()}`,
+      await authenticatedFetch(
+        `/api/data?t=${Date.now()}`,
         {
           cache: "no-store"
         }
       );
 
 
-    if (!res.ok) {
-      throw new Error(
-        `HTTP ${res.status}`
-      );
-    }
-
-
     const data =
       await res.json();
 
 
-    if (data.success) {
+    if (
+      !res.ok ||
+      !data.success
+    ) {
 
-      staffData =
-        Array.isArray(data.staff)
-          ? data.staff
-          : localStaff;
-
-
-      coauthorsData =
-        Array.isArray(data.coauthors)
-          ? data.coauthors
-          : localCoauthors;
-
-
-      const serverArticles =
-        Array.isArray(data.articles)
-          ? data.articles
-          : [];
-
-
-      // ВАЖНО:
-      // пустой ответ старого Worker не должен удалять
-      // уже сохранённые в браузере статьи.
       if (
-        serverArticles.length === 0 &&
-        localArticles.length > 0
+        res.status === 401
       ) {
 
-        articlesData =
-          localArticles;
+        localStorage.removeItem(
+          "ft_authenticated"
+        );
 
-      } else {
-
-        // Объединяем серверную и локальную копии по id.
-        // Более новая версия статьи побеждает.
-        const merged =
-          new Map();
-
-
-        [
-          ...serverArticles,
-          ...localArticles
-        ].forEach(article => {
-
-          if (
-            !article ||
-            !article.id
-          ) {
-            return;
-          }
-
-
-          const old =
-            merged.get(
-              article.id
-            );
-
-
-          if (!old) {
-
-            merged.set(
-              article.id,
-              article
-            );
-
-            return;
-
-          }
-
-
-          const oldTime =
-            new Date(
-              old.updatedAt ||
-              old.createdAt ||
-              0
-            ).getTime();
-
-
-          const newTime =
-            new Date(
-              article.updatedAt ||
-              article.createdAt ||
-              0
-            ).getTime();
-
-
-          if (
-            newTime >= oldTime
-          ) {
-
-            merged.set(
-              article.id,
-              article
-            );
-
-          }
-
-        });
-
-
-        articlesData =
-          Array.from(
-            merged.values()
-          );
+        localStorage.removeItem(
+          "ft_auth_token"
+        );
 
       }
 
 
-      // Всегда обновляем локальный кэш актуальной версией.
-      localStorage.setItem(
-        "ft_staff_data",
-        JSON.stringify(
-          staffData
-        )
+      throw new Error(
+        data.error ||
+        "Не удалось загрузить данные"
       );
-
-      localStorage.setItem(
-        "ft_coauthors_data",
-        JSON.stringify(
-          coauthorsData
-        )
-      );
-
-      localStorage.setItem(
-        "ft_articles_data",
-        JSON.stringify(
-          articlesData
-        )
-      );
-
-    } else {
-
-      staffData =
-        localStaff;
-
-      coauthorsData =
-        localCoauthors;
-
-      articlesData =
-        localArticles;
 
     }
+
+
+    staffData =
+      Array.isArray(data.staff)
+        ? data.staff
+        : [];
+
+
+    coauthorsData =
+      Array.isArray(data.coauthors)
+        ? data.coauthors
+        : [];
+
+
+    articlesData =
+      Array.isArray(data.articles)
+        ? data.articles
+        : [];
+
+
+    if (
+      data.me &&
+      Array.isArray(
+        data.me.permissions
+      )
+    ) {
+
+      localStorage.setItem(
+        "ft_permissions",
+        JSON.stringify(
+          data.me.permissions
+        )
+      );
+
+    }
+
+
+    localStorage.setItem(
+      "ft_staff_data",
+      JSON.stringify(
+        staffData
+      )
+    );
+
+    localStorage.setItem(
+      "ft_coauthors_data",
+      JSON.stringify(
+        coauthorsData
+      )
+    );
+
+    localStorage.setItem(
+      "ft_articles_data",
+      JSON.stringify(
+        articlesData
+      )
+    );
 
 
   } catch (e) {
@@ -5449,64 +5359,23 @@ async function loadServerData() {
     );
 
 
-    staffData =
-      localStaff;
-
-    coauthorsData =
-      localCoauthors;
-
-    articlesData =
-      localArticles;
-
-  }
+    staffData = [];
+    coauthorsData = [];
+    articlesData = [];
 
 
-  const currentLogin =
-    localStorage.getItem(
-      "ft_username"
+    showToast(
+      e.message ||
+      "Не удалось загрузить данные.",
+      "error",
+      "Ошибка загрузки"
     );
-
-
-  const role =
-    localStorage.getItem(
-      "ft_role"
-    );
-
-
-  if (
-    role !== "admin" &&
-    currentLogin
-  ) {
-
-    const me =
-      coauthorsData.find(
-        c =>
-          c.login ===
-          currentLogin
-      );
-
-
-    if (me) {
-
-      localStorage.setItem(
-        "ft_permissions",
-        JSON.stringify(
-          me.permissions || []
-        )
-      );
-
-
-      applySidebarVisibility();
-
-    }
 
   }
 
 
   renderStaff();
-
   renderCoauthors();
-
   renderArticles();
 
 }
@@ -5517,35 +5386,11 @@ async function loadServerData() {
 
 async function saveServerData() {
 
-  localStorage.setItem(
-    "ft_staff_data",
-    JSON.stringify(
-      staffData
-    )
-  );
-
-
-  localStorage.setItem(
-    "ft_coauthors_data",
-    JSON.stringify(
-      coauthorsData
-    )
-  );
-
-
-  localStorage.setItem(
-    "ft_articles_data",
-    JSON.stringify(
-      articlesData
-    )
-  );
-
-
   try {
 
     const res =
-      await fetch(
-        `${WORKER_URL}/api/data`,
+      await authenticatedFetch(
+        "/api/data",
         {
           method: "POST",
 
@@ -5555,46 +5400,89 @@ async function saveServerData() {
           },
 
           body: JSON.stringify({
-
             staff:
               staffData,
-
             coauthors:
               coauthorsData,
-
             articles:
               articlesData
-
           })
-
         }
       );
 
 
-    if (!res.ok) {
+    const result =
+      await res.json();
 
-      console.error(
-        "Worker вернул ошибку:",
-        res.status
+
+    if (
+      !res.ok ||
+      !result.success
+    ) {
+
+      showToast(
+        result.error ||
+        "Worker отклонил сохранение.",
+        "error",
+        "Изменение отклонено"
       );
+
 
       return false;
 
     }
 
-    try {
-      const result = await res.json();
 
-      if (result && result.success === false) {
-        console.error(
-          "Worker отклонил сохранение:",
-          result
-        );
-        return false;
-      }
-    } catch (_) {
-      // Если Worker отвечает без JSON, HTTP 2xx всё равно считаем успехом.
+    if (
+      Array.isArray(
+        result.staff
+      )
+    ) {
+      staffData =
+        result.staff;
     }
+
+
+    if (
+      Array.isArray(
+        result.coauthors
+      )
+    ) {
+      coauthorsData =
+        result.coauthors;
+    }
+
+
+    if (
+      Array.isArray(
+        result.articles
+      )
+    ) {
+      articlesData =
+        result.articles;
+    }
+
+
+    localStorage.setItem(
+      "ft_staff_data",
+      JSON.stringify(
+        staffData
+      )
+    );
+
+    localStorage.setItem(
+      "ft_coauthors_data",
+      JSON.stringify(
+        coauthorsData
+      )
+    );
+
+    localStorage.setItem(
+      "ft_articles_data",
+      JSON.stringify(
+        articlesData
+      )
+    );
 
 
   } catch (e) {
@@ -5604,21 +5492,26 @@ async function saveServerData() {
       e
     );
 
+
+    showToast(
+      "Не удалось связаться с сервером.",
+      "error",
+      "Ошибка сети"
+    );
+
+
     return false;
 
   }
 
 
   renderStaff();
-
   renderCoauthors();
-
   renderArticles();
 
   return true;
 
 }
-
 
 /* =========================================================
    СОТРУДНИКИ
@@ -5949,6 +5842,37 @@ function renderStaff() {
 
       })
       .join("");
+
+}
+
+
+/* =========================================================
+   БЕЗОПАСНЫЙ ПАРОЛЬ
+   ========================================================= */
+
+function generateSecurePassword() {
+
+  const chars =
+    "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789!@#$%";
+
+
+  const random =
+    new Uint32Array(18);
+
+
+  crypto.getRandomValues(
+    random
+  );
+
+
+  return Array.from(
+    random,
+    value =>
+      chars[
+        value %
+        chars.length
+      ]
+  ).join("");
 
 }
 
@@ -6773,12 +6697,7 @@ document
 
 
       const password =
-        Math.random()
-          .toString(36)
-          .slice(-6) +
-        Math.floor(
-          Math.random() * 899 + 100
-        );
+        generateSecurePassword();
 
 
       coauthorsData.push({
