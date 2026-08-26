@@ -2679,7 +2679,7 @@
           class="icon-btn"
           onclick="insertArticleButton()">
 
-          🔗 Добавить кнопку
+          📋 Кнопка для копирования
 
         </button>
 
@@ -2703,9 +2703,9 @@
           font-size:.78rem;
         ">
 
-        💡 Кнопка может содержать ссылку.
-        При нажатии также будет копироваться
-        заданный тобой текст.
+        💡 Кнопка для копирования не открывает ссылки.
+        При нажатии она только копирует заданный текст
+        в буфер обмена.
 
       </div>
 
@@ -2759,11 +2759,11 @@
       <div>
 
         <h3>
-          Добавить кнопку
+          Кнопка для копирования
         </h3>
 
         <p>
-          Настройте кнопку статьи.
+          Укажите название кнопки и текст, который она будет копировать.
         </p>
 
       </div>
@@ -2801,18 +2801,6 @@
       </div>
 
 
-      <div class="form-group">
-
-        <label>
-          Ссылка
-        </label>
-
-        <input
-          type="url"
-          id="articleButtonUrl"
-          placeholder="https://example.com">
-
-      </div>
 
 
       <div class="form-group">
@@ -5731,13 +5719,6 @@ window.insertArticleButton =
 
     document
       .getElementById(
-        "articleButtonUrl"
-      )
-      .value = "";
-
-
-    document
-      .getElementById(
         "articleButtonCopyText"
       )
       .value = "";
@@ -5802,19 +5783,10 @@ document
     "click",
     () => {
 
-      const text =
+      const buttonText =
         document
           .getElementById(
             "articleButtonText"
-          )
-          .value
-          .trim();
-
-
-      const url =
-        document
-          .getElementById(
-            "articleButtonUrl"
           )
           .value
           .trim();
@@ -5828,7 +5800,7 @@ document
           .value;
 
 
-      if (!text) {
+      if (!buttonText) {
 
         alert(
           "Введите текст кнопки."
@@ -5839,52 +5811,10 @@ document
       }
 
 
-      if (!url) {
-
-        alert(
-          "Введите ссылку."
-        );
-
-        return;
-
-      }
-
-
-      if (!copyText) {
+      if (!copyText.trim()) {
 
         alert(
           "Введите текст для копирования."
-        );
-
-        return;
-
-      }
-
-
-      let parsedUrl;
-
-
-      try {
-
-        parsedUrl =
-          new URL(url);
-
-
-        if (
-          parsedUrl.protocol !==
-            "http:" &&
-          parsedUrl.protocol !==
-            "https:"
-        ) {
-
-          throw new Error();
-
-        }
-
-      } catch {
-
-        alert(
-          "Введите корректную ссылку, например https://example.com"
         );
 
         return;
@@ -5903,11 +5833,9 @@ document
 
       const html = `
 
-        <a
-          href="${escapeHtml(url)}"
-          target="_blank"
-          rel="noopener noreferrer"
-          class="link-button"
+        <button
+          type="button"
+          class="copy-button"
           data-copy-text="${escapeHtml(
             copyText
           )}"
@@ -5918,9 +5846,9 @@ document
             )
           ">
 
-          ${escapeHtml(text)}
+          ${escapeHtml(buttonText)}
 
-        </a>
+        </button>
 
       `;
 
@@ -5943,7 +5871,6 @@ document
     }
   );
 
-
 /* =========================================================
    КОПИРОВАНИЕ
    ========================================================= */
@@ -5955,6 +5882,7 @@ window.copyArticleButton =
   ) {
 
     event.preventDefault();
+    event.stopPropagation();
 
 
     const text =
@@ -5991,31 +5919,50 @@ window.copyArticleButton =
 
     } catch (error) {
 
-      alert(
-        "Не удалось скопировать текст."
+      const textarea =
+        document.createElement(
+          "textarea"
+        );
+
+      textarea.value = text;
+      textarea.style.position = "fixed";
+      textarea.style.opacity = "0";
+
+      document.body.appendChild(
+        textarea
       );
 
-    }
+      textarea.select();
 
+      try {
 
-    const url =
-      element.getAttribute(
-        "href"
-      );
+        document.execCommand(
+          "copy"
+        );
 
+        const oldText =
+          element.textContent;
 
-    if (url) {
+        element.textContent =
+          "✓ Скопировано";
 
-      window.open(
-        url,
-        "_blank",
-        "noopener,noreferrer"
-      );
+        setTimeout(
+          () => {
+            element.textContent =
+              oldText;
+          },
+          1500
+        );
+
+      } finally {
+
+        textarea.remove();
+
+      }
 
     }
 
   };
-
 
 /* =========================================================
    СОХРАНЕНИЕ СТАТЬИ
@@ -6106,8 +6053,9 @@ async function saveArticle(
     return;
   }
 
-  // Перечитываем общие данные после сохранения.
-  await loadServerData();
+  // Данные уже успешно отправлены Worker.
+  // Не перечитываем их немедленно, чтобы серверная задержка
+  // не затирала только что опубликованную статью.
 
 
   document
