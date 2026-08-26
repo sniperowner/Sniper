@@ -3366,6 +3366,7 @@ function applySidebarVisibility() {
 
     if (
       role === "admin" ||
+      page === "hydes" ||
       permissions.includes(page)
     ) {
 
@@ -3477,6 +3478,7 @@ document
 
         if (
           role === "admin" ||
+          page === "hydes" ||
           permissions.includes(page) ||
           page === "home"
         ) {
@@ -3501,7 +3503,9 @@ document
 
           if (page === "hydes") {
 
-            renderArticles();
+            // Всегда забираем свежие статьи с сервера,
+            // чтобы сотрудники сразу видели публикации администратора.
+            loadServerData();
 
           }
 
@@ -3801,6 +3805,22 @@ async function saveServerData() {
         res.status
       );
 
+      return false;
+
+    }
+
+    try {
+      const result = await res.json();
+
+      if (result && result.success === false) {
+        console.error(
+          "Worker отклонил сохранение:",
+          result
+        );
+        return false;
+      }
+    } catch (_) {
+      // Если Worker отвечает без JSON, HTTP 2xx всё равно считаем успехом.
     }
 
 
@@ -3811,6 +3831,8 @@ async function saveServerData() {
       e
     );
 
+    return false;
+
   }
 
 
@@ -3819,6 +3841,8 @@ async function saveServerData() {
   renderCoauthors();
 
   renderArticles();
+
+  return true;
 
 }
 
@@ -6073,7 +6097,17 @@ async function saveArticle(
   }
 
 
-  await saveServerData();
+  const saved = await saveServerData();
+
+  if (!saved) {
+    alert(
+      "Не удалось сохранить статью на сервере. Проверьте Worker и повторите публикацию."
+    );
+    return;
+  }
+
+  // Перечитываем общие данные после сохранения.
+  await loadServerData();
 
 
   document
