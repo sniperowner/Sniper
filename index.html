@@ -3785,11 +3785,49 @@ document
         );
 
 
+        // Для соавторов Telegram-подтверждение не требуется.
+        // Главный администратор по-прежнему подтверждает вход через Telegram.
+        if (
+          data.requiresTelegram === false
+        ) {
+
+          localStorage.setItem(
+            "ft_authenticated",
+            "true"
+          );
+
+
+          if (data.authToken) {
+
+            localStorage.setItem(
+              "ft_auth_token",
+              data.authToken
+            );
+
+          }
+
+
+          statusMsg.textContent =
+            "Вход выполнен.";
+
+          statusMsg.className =
+            "status-msg success";
+
+
+          showDashboard();
+
+          return;
+
+        }
+
+
         statusMsg.textContent =
           "Подтвердите вход в Telegram...";
 
 
-        startPolling(data.sessionId);
+        startPolling(
+          data.sessionId
+        );
 
 
       } catch (err) {
