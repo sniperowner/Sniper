@@ -451,6 +451,80 @@
       color: #4B5563;
     }
 
+    /* =========================
+       ЦВЕТА ДОЛЖНОСТЕЙ
+       ========================= */
+
+    .tag-chip[data-value="Обычный сотрудник"],
+    .role-badge[data-position="Обычный сотрудник"] {
+      background: #F3F4F6;
+      color: #4B5563;
+      border-color: #D1D5DB;
+    }
+
+    .tag-chip[data-value="Руководитель Активной модерации"],
+    .role-badge[data-position="Руководитель Активной модерации"] {
+      background: #FEF2F2;
+      color: #B91C1C;
+      border-color: #FECACA;
+    }
+
+    .tag-chip[data-value="Руководитель медиа"],
+    .role-badge[data-position="Руководитель медиа"] {
+      background: #FFF7ED;
+      color: #C2410C;
+      border-color: #FED7AA;
+    }
+
+    .tag-chip[data-value="Руководитель репортов"],
+    .role-badge[data-position="Руководитель репортов"] {
+      background: #EFF6FF;
+      color: #1D4ED8;
+      border-color: #BFDBFE;
+    }
+
+    .tag-chip[data-value="Заместитель репортов"],
+    .role-badge[data-position="Заместитель репортов"] {
+      background: #ECFEFF;
+      color: #0E7490;
+      border-color: #A5F3FC;
+    }
+
+    .tag-chip[data-value="Заместитель Активной модерации"],
+    .role-badge[data-position="Заместитель Активной модерации"] {
+      background: #FDF2F8;
+      color: #BE185D;
+      border-color: #FBCFE8;
+    }
+
+    .tag-chip[data-value="Руководитель ОМЧ"],
+    .role-badge[data-position="Руководитель ОМЧ"] {
+      background: #F5F3FF;
+      color: #6D28D9;
+      border-color: #DDD6FE;
+    }
+
+    .tag-chip[data-value="Заместитель ОМЧ"],
+    .role-badge[data-position="Заместитель ОМЧ"] {
+      background: #F0FDFA;
+      color: #0F766E;
+      border-color: #99F6E4;
+    }
+
+    .tag-chip[data-value="Руководитель Отделение проверок"],
+    .role-badge[data-position="Руководитель Отделение проверок"] {
+      background: #F7FEE7;
+      color: #4D7C0F;
+      border-color: #D9F99D;
+    }
+
+    .tag-chip[data-value="Руководитель Отделение апелляций"],
+    .role-badge[data-position="Руководитель Отделение апелляций"] {
+      background: #FFF1F2;
+      color: #BE123C;
+      border-color: #FECDD3;
+    }
+
     .vk-link {
       color: var(--accent);
       text-decoration: none;
@@ -1100,10 +1174,79 @@
       color: #C4B5FD;
     }
 
-    body.dark-theme .r-default,
-    body.dark-theme .role-badge {
+    body.dark-theme .r-default {
       background: #242933;
       color: #B8BEC9;
+    }
+
+    body.dark-theme .tag-chip[data-value="Обычный сотрудник"],
+    body.dark-theme .role-badge[data-position="Обычный сотрудник"] {
+      background: #242933;
+      color: #D1D5DB;
+      border-color: #4B5563;
+    }
+
+    body.dark-theme .tag-chip[data-value="Руководитель Активной модерации"],
+    body.dark-theme .role-badge[data-position="Руководитель Активной модерации"] {
+      background: #3A1D22;
+      color: #FCA5A5;
+      border-color: #7F1D1D;
+    }
+
+    body.dark-theme .tag-chip[data-value="Руководитель медиа"],
+    body.dark-theme .role-badge[data-position="Руководитель медиа"] {
+      background: #3A2718;
+      color: #FDBA74;
+      border-color: #9A3412;
+    }
+
+    body.dark-theme .tag-chip[data-value="Руководитель репортов"],
+    body.dark-theme .role-badge[data-position="Руководитель репортов"] {
+      background: #172554;
+      color: #93C5FD;
+      border-color: #1D4ED8;
+    }
+
+    body.dark-theme .tag-chip[data-value="Заместитель репортов"],
+    body.dark-theme .role-badge[data-position="Заместитель репортов"] {
+      background: #16333A;
+      color: #67E8F9;
+      border-color: #0E7490;
+    }
+
+    body.dark-theme .tag-chip[data-value="Заместитель Активной модерации"],
+    body.dark-theme .role-badge[data-position="Заместитель Активной модерации"] {
+      background: #3B1830;
+      color: #F9A8D4;
+      border-color: #9D174D;
+    }
+
+    body.dark-theme .tag-chip[data-value="Руководитель ОМЧ"],
+    body.dark-theme .role-badge[data-position="Руководитель ОМЧ"] {
+      background: #2E1A47;
+      color: #C4B5FD;
+      border-color: #6D28D9;
+    }
+
+    body.dark-theme .tag-chip[data-value="Заместитель ОМЧ"],
+    body.dark-theme .role-badge[data-position="Заместитель ОМЧ"] {
+      background: #173936;
+      color: #5EEAD4;
+      border-color: #0F766E;
+    }
+
+    body.dark-theme .tag-chip[data-value="Руководитель Отделение проверок"],
+    body.dark-theme .role-badge[data-position="Руководитель Отделение проверок"] {
+      background: #293718;
+      color: #BEF264;
+      border-color: #4D7C0F;
+    }
+
+    body.dark-theme .tag-chip[data-value="Руководитель Отделение апелляций"],
+    body.dark-theme .role-badge[data-position="Руководитель Отделение апелляций"] {
+      background: #3C1720;
+      color: #FDA4AF;
+      border-color: #9F1239;
     }
 
     body.dark-theme .status-pill.blocked {
@@ -2409,6 +2552,26 @@
             onclick="toggleTag(this)">
 
             Заместитель ОМЧ
+
+          </button>
+
+          <button
+            type="button"
+            class="tag-chip"
+            data-value="Руководитель Отделение проверок"
+            onclick="toggleTag(this)">
+
+            Руководитель Отделение проверок
+
+          </button>
+
+          <button
+            type="button"
+            class="tag-chip"
+            data-value="Руководитель Отделение апелляций"
+            onclick="toggleTag(this)">
+
+            Руководитель Отделение апелляций
 
           </button>
 
@@ -5820,7 +5983,9 @@ function renderStaff() {
                 .map(
                   position =>
                     `
-                      <span class="role-badge">
+                      <span
+                        class="role-badge"
+                        data-position="${escapeHtml(position)}">
 
                         ${escapeHtml(
                           position
