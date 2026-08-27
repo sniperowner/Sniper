@@ -4459,6 +4459,129 @@ function escapeHtml(value) {
 }
 
 
+function normalizeQuestionImageUrl(value) {
+  let url = String(value || "").trim();
+
+  if (!url) return "";
+
+  // Разрешаем data:image для загруженных файлов.
+  if (/^data:image\//i.test(url)) {
+    return url;
+  }
+
+  // Если пользователь вставил адрес без протокола.
+  if (/^www\./i.test(url)) {
+    url = "https://" + url;
+  }
+
+  try {
+    const parsed = new URL(url);
+
+    if (!["http:", "https:"].includes(parsed.protocol)) {
+      return "";
+    }
+
+    const host = parsed.hostname.toLowerCase();
+
+    // Google Drive: обычная ссылка на файл -> прямая ссылка для изображения.
+    if (
+      host === "drive.google.com" ||
+      host.endsWith(".drive.google.com")
+    ) {
+      const fileMatch = parsed.pathname.match(/\/file\/d\/([^/]+)/);
+      const id = fileMatch?.[1] || parsed.searchParams.get("id");
+
+      if (id) {
+        return `https://drive.google.com/uc?export=view&id=${encodeURIComponent(id)}`;
+      }
+    }
+
+    // Dropbox: ссылка на страницу -> raw-изображение.
+    if (
+      host === "www.dropbox.com" ||
+      host === "dropbox.com"
+    ) {
+      parsed.hostname = "dl.dropboxusercontent.com";
+      parsed.searchParams.delete("dl");
+      parsed.searchParams.delete("raw");
+      return parsed.toString();
+    }
+
+    // GitHub blob -> raw.githubusercontent.com
+    if (
+      host === "github.com" &&
+      parsed.pathname.includes("/blob/")
+    ) {
+      const parts = parsed.pathname.split("/").filter(Boolean);
+      const blobIndex = parts.indexOf("blob");
+
+      if (blobIndex >= 2 && parts.length > blobIndex + 2) {
+        const owner = parts[0];
+        const repo = parts[1];
+        const branch = parts[blobIndex + 1];
+        const filePath = parts.slice(blobIndex + 2).join("/");
+
+        return `https://raw.githubusercontent.com/${owner}/${repo}/${branch}/${filePath}`;
+      }
+    }
+
+    // Imgur: https://imgur.com/abc123 -> https://i.imgur.com/abc123.jpg
+    if (
+      (host === "imgur.com" || host === "www.imgur.com") &&
+      !/\.[a-z0-9]{2,5}$/i.test(parsed.pathname)
+    ) {
+      const id = parsed.pathname.split("/").filter(Boolean).pop();
+
+      if (id && !["a", "gallery"].includes(id)) {
+        return `https://i.imgur.com/${id}.jpg`;
+      }
+    }
+
+    return parsed.toString();
+  } catch (_) {
+    return "";
+  }
+}
+
+
+function questionImageHtml(value, extraClass = "") {
+  const url = normalizeQuestionImageUrl(value);
+
+  if (!url) return "";
+
+  return `
+    <div class="test-question-image-wrap">
+      <img
+        class="test-image-preview ${escapeHtml(extraClass)}"
+        src="${escapeHtml(url)}"
+        alt="Изображение к вопросу"
+        loading="lazy"
+        referrerpolicy="no-referrer"
+        onerror="
+          this.style.display='none';
+          const msg=this.nextElementSibling;
+          if(msg)msg.style.display='block';
+        "
+      >
+      <div
+        class="test-image-error"
+        style="
+          display:none;
+          margin-top:8px;
+          padding:9px 11px;
+          border:1px dashed var(--border);
+          border-radius:8px;
+          color:var(--danger);
+          font-size:.78rem;
+        "
+      >
+        Не удалось загрузить фото. Проверьте, что ссылка открывает само изображение и доступна без авторизации.
+      </div>
+    </div>
+  `;
+}
+
+
 /* =========================================================
    ПРОВЕРКА РОЛИ
    ========================================================= */
@@ -9794,7 +9917,56 @@ window.editPublishedTest=async id=>{try{const r=await authenticatedFetch(`/api/t
 document.getElementById("nextTestBuilderBtn")?.addEventListener("click",()=>{const title=document.getElementById("testTitleInput").value.trim();if(!title){showToast("Введите название теста.","warning","Не заполнено поле");return}testDraft.title=title;testDraft.description=document.getElementById("testDescriptionInput").value.trim();if(!testDraft.questions.length)testDraft.questions.push(emptyQ());document.getElementById("testBuilderHeading").textContent=`${testEditId?"Редактирование":"Конструктор"}: ${title}`;closeSimpleOverlay("testMetaOverlay");renderBuilder();openSimpleOverlay("testBuilderOverlay")});
 document.getElementById("backToTestMetaBtn")?.addEventListener("click",()=>{captureBuilder();closeSimpleOverlay("testBuilderOverlay");document.getElementById("testTitleInput").value=testDraft.title;document.getElementById("testDescriptionInput").value=testDraft.description;openSimpleOverlay("testMetaOverlay")});document.getElementById("closeTestBuilderBtn")?.addEventListener("click",()=>closeSimpleOverlay("testBuilderOverlay"));document.getElementById("addTestQuestionBtn")?.addEventListener("click",()=>{captureBuilder();testDraft.questions.push(emptyQ());renderBuilder()});
 function emptyQ(){return{id:crypto.randomUUID(),text:"",type:"single",image:"",points:1,adminAnswer:"",options:[{id:crypto.randomUUID(),text:"",correct:true},{id:crypto.randomUUID(),text:"",correct:false}]}}
-function renderBuilder(){const root=document.getElementById("testQuestionsBuilder");root.innerHTML=testDraft.questions.map((q,i)=>qHtml(q,i)).join("");root.querySelectorAll(".test-question-type").forEach(x=>x.addEventListener("change",()=>{captureBuilder();renderBuilder()}));root.querySelectorAll(".test-image-file").forEach(x=>x.addEventListener("change",async()=>{const f=x.files?.[0];if(!f)return;if(f.size>300*1024){showToast("Фото должно быть меньше 300 КБ.","warning","Слишком большой файл");return}captureBuilder();testDraft.questions[Number(x.dataset.index)].image=await fileDataUrl(f);renderBuilder()}))}
+function renderBuilder(){
+  const root=document.getElementById("testQuestionsBuilder");
+  root.innerHTML=testDraft.questions.map((q,i)=>qHtml(q,i)).join("");
+
+  root.querySelectorAll(".test-question-type").forEach(x=>{
+    x.addEventListener("change",()=>{
+      captureBuilder();
+      renderBuilder();
+    });
+  });
+
+  root.querySelectorAll(".test-image-file").forEach(x=>{
+    x.addEventListener("change",async()=>{
+      const f=x.files?.[0];
+      if(!f)return;
+
+      if(f.size>300*1024){
+        showToast("Фото должно быть меньше 300 КБ.","warning","Слишком большой файл");
+        return;
+      }
+
+      captureBuilder();
+      testDraft.questions[Number(x.dataset.index)].image=await fileDataUrl(f);
+      renderBuilder();
+    });
+  });
+
+  root.querySelectorAll(".test-question-image-url").forEach(input=>{
+    input.addEventListener("change",()=>{
+      const card=input.closest(".test-question-card");
+      const i=Number(card?.dataset.questionIndex);
+
+      if(!Number.isFinite(i)||!testDraft.questions[i])return;
+
+      const normalized=normalizeQuestionImageUrl(input.value);
+
+      if(input.value.trim()&&!normalized){
+        showToast("Ссылка на фото имеет неверный формат.","warning","Фото");
+        return;
+      }
+
+      testDraft.questions[i].image=normalized;
+      renderBuilder();
+    });
+
+    input.addEventListener("paste",()=>{
+      setTimeout(()=>input.dispatchEvent(new Event("change")),0);
+    });
+  });
+}
 function qHtml(q,i){
   const type=q.type||"single";
   const options=type==="written"
@@ -9815,17 +9987,31 @@ function qHtml(q,i){
       <div class="form-group"><label>Баллы</label><input type="number" min="1" max="100" class="test-question-points" value="${Number(q.points||1)}"></div>
     </div>
     <div class="form-group"><label>Тип ответа</label><select class="test-question-type"><option value="single" ${type==="single"?"selected":""}>Один вариант</option><option value="multiple" ${type==="multiple"?"selected":""}>Несколько вариантов</option><option value="written" ${type==="written"?"selected":""}>Письменный ответ</option></select></div>
-    <div class="form-group"><label>Фото по ссылке</label><input class="test-question-image-url" value="${q.image&&!q.image.startsWith("data:")?escapeHtml(q.image):""}" placeholder="https://..."><div style="font-size:.76rem;color:var(--text-faint);margin:7px 0;">или загрузить</div><input type="file" class="test-image-file" data-index="${i}" accept="image/*">${q.image?`<img class="test-image-preview" src="${escapeHtml(q.image)}">`:""}</div>
+    <div class="form-group">
+      <label>Фото по ссылке</label>
+      <input class="test-question-image-url" value="${q.image&&!q.image.startsWith("data:")?escapeHtml(q.image):""}" placeholder="https://...">
+      <div style="font-size:.74rem;color:var(--text-faint);margin-top:6px;">После вставки ссылки фото появится ниже. Поддерживаются прямые ссылки, Google Drive, Dropbox, GitHub и Imgur.</div>
+      <div style="font-size:.76rem;color:var(--text-faint);margin:7px 0;">или загрузить</div>
+      <input type="file" class="test-image-file" data-index="${i}" accept="image/*">
+      ${questionImageHtml(q.image)}
+    </div>
     ${options}
   </div>`;
 }
-function captureBuilder(){document.querySelectorAll(".test-question-card[data-question-index]").forEach(card=>{const i=Number(card.dataset.questionIndex),q=testDraft.questions[i];q.text=card.querySelector(".test-question-text").value.trim();q.type=card.querySelector(".test-question-type").value;q.points=Math.max(1,Math.min(100,Math.round(Number(card.querySelector(".test-question-points").value||1))));const url=card.querySelector(".test-question-image-url").value.trim();if(url)q.image=url;if(q.type==="written"){q.adminAnswer=card.querySelector(".test-admin-answer")?.value.trim()||"";q.options=[];return}const texts=[...card.querySelectorAll(".test-option-text")],checks=[...card.querySelectorAll(".test-correct-input")];q.options=texts.map((x,j)=>({id:q.options?.[j]?.id||crypto.randomUUID(),text:x.value.trim(),correct:!!checks[j]?.checked}))})}
+function captureBuilder(){document.querySelectorAll(".test-question-card[data-question-index]").forEach(card=>{const i=Number(card.dataset.questionIndex),q=testDraft.questions[i];q.text=card.querySelector(".test-question-text").value.trim();q.type=card.querySelector(".test-question-type").value;q.points=Math.max(1,Math.min(100,Math.round(Number(card.querySelector(".test-question-points").value||1))));const imageInput=card.querySelector(".test-question-image-url");
+const rawUrl=imageInput?.value.trim()||"";
+if(rawUrl){
+  const normalized=normalizeQuestionImageUrl(rawUrl);
+  if(normalized)q.image=normalized;
+}else if(q.image&&!String(q.image).startsWith("data:image/")){
+  q.image="";
+}if(q.type==="written"){q.adminAnswer=card.querySelector(".test-admin-answer")?.value.trim()||"";q.options=[];return}const texts=[...card.querySelectorAll(".test-option-text")],checks=[...card.querySelectorAll(".test-correct-input")];q.options=texts.map((x,j)=>({id:q.options?.[j]?.id||crypto.randomUUID(),text:x.value.trim(),correct:!!checks[j]?.checked}))})}
 window.addTestOption=i=>{captureBuilder();testDraft.questions[i].options.push({id:crypto.randomUUID(),text:"",correct:false});renderBuilder()};window.removeTestOption=(i,j)=>{captureBuilder();if(testDraft.questions[i].options.length<=2){showToast("Минимум два варианта.","warning","Нельзя удалить");return}testDraft.questions[i].options.splice(j,1);renderBuilder()};window.removeTestQuestion=i=>{captureBuilder();if(testDraft.questions.length<=1)return;testDraft.questions.splice(i,1);renderBuilder()};
 function validateDraft(){captureBuilder();for(let i=0;i<testDraft.questions.length;i++){const q=testDraft.questions[i];if(!q.text)return`Заполните вопрос ${i+1}.`;if(q.type!=="written"){if((q.options||[]).length<2||q.options.some(o=>!o.text))return`Заполните варианты в вопросе ${i+1}.`;const c=q.options.filter(o=>o.correct).length;if(!c)return`Выберите правильный ответ в вопросе ${i+1}.`;if(q.type==="single"&&c!==1)return`В вопросе ${i+1} нужен один правильный ответ.`}}return""}
 document.getElementById("openTestPublishBtn")?.addEventListener("click",()=>{const e=validateDraft();if(e){showToast(e,"warning","Проверьте тест");return}const written=testDraft.questions.some(q=>q.type==="written");document.getElementById("testRequireReviewInput").disabled=written;if(written)document.getElementById("testRequireReviewInput").checked=true;else document.getElementById("testRequireReviewInput").checked=!!testDraft.requireReview;closeSimpleOverlay("testBuilderOverlay");openSimpleOverlay("testPublishOverlay")});document.getElementById("cancelTestPublishBtn")?.addEventListener("click",()=>{closeSimpleOverlay("testPublishOverlay");openSimpleOverlay("testBuilderOverlay")});
 document.getElementById("confirmTestPublishBtn")?.addEventListener("click",async()=>{const b=document.getElementById("confirmTestPublishBtn"),duration=Number(document.getElementById("testDurationInput").value);if(duration<10||duration>60)return showToast("Время от 10 до 60 минут.","warning","Неверное время");testDraft.requireReview=testDraft.questions.some(q=>q.type==="written")||document.getElementById("testRequireReviewInput").checked;b.disabled=true;try{const r=await authenticatedFetch(testEditId?`/api/tests/${encodeURIComponent(testEditId)}`:"/api/tests",{method:testEditId?"PUT":"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({...testDraft,durationMinutes:Math.round(duration)})});const d=await r.json();if(!r.ok||!d.success)throw new Error(d.error||"Ошибка");closeSimpleOverlay("testPublishOverlay");showToast(testEditId?"Тест изменён.":"Тест опубликован.","success",testEditId?"Готово":"Опубликовано");testDraft=null;testEditId=null;await loadTests()}catch(e){showToast(e.message,"error","Ошибка")}finally{b.disabled=false}});
 function fileDataUrl(file){return new Promise((res,rej)=>{const r=new FileReader;r.onload=()=>res(String(r.result||""));r.onerror=rej;r.readAsDataURL(file)})}
-window.startPublishedTest=id=>{const t=testsData.find(x=>x.id===id);if(!t)return;if(t.mySubmission){showToast(t.mySubmission.status==="approved"?`Результат: ${t.mySubmission.percent}% — ${t.mySubmission.points}/${t.mySubmission.maxPoints} баллов.`:"Ответы ожидают проверки администрации.","info","Результат");return}activeTest=t;activeTestStartedAt=Date.now();document.getElementById("takeTestTitle").textContent=t.title;document.getElementById("takeTestDescription").textContent=t.description||"";document.getElementById("takeTestQuestions").innerHTML=(t.questions||[]).map((q,i)=>`<div class="test-question-card"><div style="display:flex;justify-content:space-between;gap:10px;"><strong>${i+1}. ${escapeHtml(q.text)}</strong><span class="test-pill">${q.points} б.</span></div>${q.image?`<img class="test-image-preview" src="${escapeHtml(q.image)}">`:""}<div style="margin-top:12px;">${q.type==="written"?`<textarea class="test-written-answer test-user-written" data-question-id="${escapeHtml(q.id)}" placeholder="Введите письменный ответ"></textarea>`:(q.options||[]).map(o=>`<label class="test-take-answer"><input type="${q.type==="multiple"?"checkbox":"radio"}" name="a_${escapeHtml(q.id)}" value="${escapeHtml(o.id)}" data-question-id="${escapeHtml(q.id)}"><span>${escapeHtml(o.text)}</span></label>`).join("")}</div></div>`).join("");startTimer(t.durationMinutes);openSimpleOverlay("takeTestOverlay")};
+window.startPublishedTest=id=>{const t=testsData.find(x=>x.id===id);if(!t)return;if(t.mySubmission){showToast(t.mySubmission.status==="approved"?`Результат: ${t.mySubmission.percent}% — ${t.mySubmission.points}/${t.mySubmission.maxPoints} баллов.`:"Ответы ожидают проверки администрации.","info","Результат");return}activeTest=t;activeTestStartedAt=Date.now();document.getElementById("takeTestTitle").textContent=t.title;document.getElementById("takeTestDescription").textContent=t.description||"";document.getElementById("takeTestQuestions").innerHTML=(t.questions||[]).map((q,i)=>`<div class="test-question-card"><div style="display:flex;justify-content:space-between;gap:10px;"><strong>${i+1}. ${escapeHtml(q.text)}</strong><span class="test-pill">${q.points} б.</span></div>${questionImageHtml(q.image)}<div style="margin-top:12px;">${q.type==="written"?`<textarea class="test-written-answer test-user-written" data-question-id="${escapeHtml(q.id)}" placeholder="Введите письменный ответ"></textarea>`:(q.options||[]).map(o=>`<label class="test-take-answer"><input type="${q.type==="multiple"?"checkbox":"radio"}" name="a_${escapeHtml(q.id)}" value="${escapeHtml(o.id)}" data-question-id="${escapeHtml(q.id)}"><span>${escapeHtml(o.text)}</span></label>`).join("")}</div></div>`).join("");startTimer(t.durationMinutes);openSimpleOverlay("takeTestOverlay")};
 function startTimer(min){if(activeTestTimer)clearInterval(activeTestTimer);const end=activeTestStartedAt+min*60000;const tick=()=>{const left=Math.max(0,end-Date.now()),sec=Math.ceil(left/1000);document.getElementById("takeTestTimer").textContent=`${String(Math.floor(sec/60)).padStart(2,"0")}:${String(sec%60).padStart(2,"0")}`;if(!left){clearInterval(activeTestTimer);activeTestTimer=null;submitActiveTest(true)}};tick();activeTestTimer=setInterval(tick,1000)}
 function collectAnswers(){return(activeTest.questions||[]).map(q=>q.type==="written"?{questionId:q.id,type:"written",text:document.querySelector(`.test-user-written[data-question-id="${CSS.escape(q.id)}"]`)?.value.trim()||""}:{questionId:q.id,type:q.type,optionIds:[...document.querySelectorAll(`input[data-question-id="${CSS.escape(q.id)}"]:checked`)].map(x=>x.value)})}
 document.getElementById("submitTakeTestBtn")?.addEventListener("click",()=>submitActiveTest(false));document.getElementById("closeTakeTestBtn")?.addEventListener("click",()=>closeSimpleOverlay("takeTestOverlay"));
