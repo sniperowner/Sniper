@@ -1827,6 +1827,70 @@
     .test-score-pill.pending{background:rgba(245,158,11,.10);border-color:rgba(245,158,11,.28);color:#b45309}.test-score-pill.approved{background:rgba(34,197,94,.10);border-color:rgba(34,197,94,.28);color:#15803d}
     body.dark-theme .test-score-pill.pending{color:#fbbf24}body.dark-theme .test-score-pill.approved{color:#86efac}
     .test-admin-actions{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}.test-points-row{display:grid;grid-template-columns:minmax(0,1fr) 150px;gap:10px;align-items:end}
+    .test-delete-btn{
+      background:#dc3545 !important;
+      color:#fff !important;
+      border-color:#dc3545 !important;
+      width:100%;
+    }
+    .test-delete-btn:hover{
+      background:#b92d3a !important;
+      border-color:#b92d3a !important;
+      transform:translateY(-1px);
+    }
+    .test-roulette{
+      margin-bottom:16px;
+      border:1px solid var(--border);
+      border-radius:14px;
+      background:var(--surface);
+      padding:18px;
+      overflow:hidden;
+    }
+    .test-roulette-top{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:14px;
+      flex-wrap:wrap;
+    }
+    .test-roulette-title{
+      font-size:1rem;
+      font-weight:850;
+      color:var(--text);
+    }
+    .test-roulette-sub{
+      margin-top:4px;
+      color:var(--text-dim);
+      font-size:.82rem;
+      line-height:1.45;
+    }
+    .test-roulette-result{
+      display:none;
+      margin-top:15px;
+      padding-top:15px;
+      border-top:1px solid var(--border);
+      text-align:center;
+    }
+    .test-roulette-name{
+      font-size:1.2rem;
+      font-weight:900;
+      color:var(--primary);
+      margin-top:4px;
+    }
+    .test-roulette-slot{
+      animation:testRoulettePulse .12s ease-in-out infinite alternate;
+    }
+    @keyframes testRoulettePulse{
+      from{opacity:.48;transform:scale(.985)}
+      to{opacity:1;transform:scale(1)}
+    }
+    .roulette-required-note{
+      margin-top:8px;
+      font-size:.76rem;
+      color:var(--warning);
+      font-weight:700;
+    }
+
     .test-review-card,.test-result-row{border:1px solid var(--border);border-radius:11px;padding:14px;margin-bottom:10px;background:var(--surface)}
     .test-review-answer{margin-top:9px;padding:10px 12px;border-radius:9px;border:1px solid var(--border);background:var(--bg);white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.5}
     .test-review-toggle{display:flex;gap:10px;align-items:flex-start;padding:12px;border:1px solid var(--border);border-radius:10px;background:var(--surface)}.test-review-toggle input{width:auto;margin-top:3px}
@@ -9413,7 +9477,290 @@ let testDraft=null,testEditId=null,activeTest=null,activeTestStartedAt=0,activeT
 function openSimpleOverlay(id){document.getElementById(id)?.classList.add("open")}function closeSimpleOverlay(id){document.getElementById(id)?.classList.remove("open")}function isTestsAdmin(){return localStorage.getItem("ft_role")==="admin"}
 async function loadTests(){const list=document.getElementById("testsList");if(!list)return;list.innerHTML='<div style="text-align:center;color:var(--text-faint);padding:30px;">Загрузка тестов...</div>';try{const r=await authenticatedFetch(`/api/tests?t=${Date.now()}`,{cache:"no-store"});const d=await r.json();if(!r.ok||!d.success)throw new Error(d.error||"Ошибка загрузки");testsData=Array.isArray(d.tests)?d.tests:[];renderTests()}catch(e){list.innerHTML='<div style="text-align:center;color:var(--danger);padding:30px;">Не удалось загрузить тесты</div>'}}
 function testStatusHtml(s){if(!s)return"";if(s.status==="approved")return `<span class="test-score-pill approved">✓ Проверено</span><span class="test-score-pill">${Number(s.percent||0)}%</span><span class="test-score-pill">${Number(s.points||0)} / ${Number(s.maxPoints||0)} баллов</span>`;return '<span class="test-score-pill pending">⏳ Ожидает проверки</span>'}
-function renderTests(){const list=document.getElementById("testsList");if(!list)return;if(!testsData.length){list.innerHTML='<div style="text-align:center;color:var(--text-faint);padding:30px;">Пока нет опубликованных тестов</div>';return}const admin=isTestsAdmin();list.innerHTML=testsData.map(t=>{const done=!!t.mySubmission;return `<div class="test-item"><div style="display:flex;justify-content:space-between;align-items:flex-start;gap:15px;flex-wrap:wrap;"><div style="flex:1;min-width:220px;"><div class="test-title">${escapeHtml(t.title||"Без названия")}</div><div class="test-description">${escapeHtml(t.description||"Без описания")}</div><div class="test-meta"><span class="test-pill">⏱ ${Number(t.durationMinutes||10)} мин.</span><span class="test-pill">❓ ${(t.questions||[]).length} вопросов</span><span class="test-pill">★ ${Number(t.totalPoints||0)} баллов</span>${t.requireReview?'<span class="test-pill">Проверка администрацией</span>':""}${testStatusHtml(t.mySubmission)}</div>${t.mySubmission?.status==="approved"&&t.mySubmission?.comment?`<div style="margin-top:9px;color:var(--text-dim);font-size:.8rem;">Комментарий: ${escapeHtml(t.mySubmission.comment)}</div>`:""}</div><div class="test-admin-actions">${admin?`<button class="btn" onclick="editPublishedTest('${escapeHtml(t.id)}')">Изменить</button><button class="btn" onclick="openTestResults('${escapeHtml(t.id)}')">Результаты</button>`:""}<button class="article-open-btn" ${done?"disabled":""} onclick="startPublishedTest('${escapeHtml(t.id)}')">${done?(t.mySubmission?.status==="approved"?"Завершён":"Отправлен"):"Начать тест"}</button></div></div></div>`}).join("")}
+function renderTests(){
+  const list=document.getElementById("testsList");
+  if(!list)return;
+
+  const admin=isTestsAdmin();
+
+  if(!testsData.length){
+    list.innerHTML='<div style="text-align:center;color:var(--text-faint);padding:30px;">Пока нет опубликованных тестов</div>';
+    return;
+  }
+
+  const assignment=!admin?getRouletteAssignment():null;
+
+  const rouletteHtml=admin?"":buildRouletteHtml();
+
+  const cards=testsData.map(t=>{
+    const done=!!t.mySubmission;
+    const assigned=assignment===t.id;
+
+    let employeeButton="";
+
+    if(!admin){
+      if(done){
+        employeeButton=`<button class="article-open-btn" disabled>${t.mySubmission?.status==="approved"?"Завершён":"Отправлен"}</button>`;
+      }else if(!assignment){
+        employeeButton=`<button class="article-open-btn" disabled title="Сначала прокрутите рулетку">Сначала рулетка</button>`;
+      }else if(assigned){
+        employeeButton=`<button class="article-open-btn" onclick="startPublishedTest('${escapeHtml(t.id)}')">Начать выпавший тест</button>`;
+      }else{
+        employeeButton=`<button class="article-open-btn" disabled title="Сначала завершите выпавший тест">Недоступно</button>`;
+      }
+    }
+
+    return `
+      <div class="test-item" ${assigned?'style="box-shadow:0 0 0 1px var(--primary) inset;"':""}>
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:15px;flex-wrap:wrap;">
+          <div style="flex:1;min-width:220px;">
+            <div class="test-title">
+              ${escapeHtml(t.title||"Без названия")}
+              ${assigned?'<span class="test-score-pill" style="margin-left:7px;">🎯 Выпал вам</span>':""}
+            </div>
+
+            <div class="test-description">${escapeHtml(t.description||"Без описания")}</div>
+
+            <div class="test-meta">
+              <span class="test-pill">⏱ ${Number(t.durationMinutes||10)} мин.</span>
+              <span class="test-pill">❓ ${(t.questions||[]).length} вопросов</span>
+              <span class="test-pill">★ ${Number(t.totalPoints||0)} баллов</span>
+              ${t.requireReview?'<span class="test-pill">Проверка администрацией</span>':""}
+              ${testStatusHtml(t.mySubmission)}
+            </div>
+
+            ${t.mySubmission?.status==="approved"&&t.mySubmission?.comment
+              ?`<div style="margin-top:9px;color:var(--text-dim);font-size:.8rem;">Комментарий: ${escapeHtml(t.mySubmission.comment)}</div>`
+              :""}
+
+            ${assigned&&!done
+              ?'<div class="roulette-required-note">Сначала необходимо пройти этот тест. После завершения рулетку можно будет крутить снова.</div>'
+              :""}
+          </div>
+
+          <div class="test-admin-actions">
+            ${admin
+              ?`
+                <button class="btn" onclick="editPublishedTest('${escapeHtml(t.id)}')">Изменить</button>
+                <button class="btn" onclick="openTestResults('${escapeHtml(t.id)}')">Результаты</button>
+                <button class="btn test-delete-btn" onclick="deletePublishedTest('${escapeHtml(t.id)}')">Удалить тест</button>
+              `
+              :employeeButton}
+          </div>
+        </div>
+      </div>
+    `;
+  }).join("");
+
+  list.innerHTML=rouletteHtml+cards;
+
+  if(!admin){
+    bindRouletteButton();
+  }
+}
+
+
+function rouletteStorageKey(){
+  const login=localStorage.getItem("ft_username")||"user";
+  return `ft_test_roulette_${login}`;
+}
+
+function getRouletteAssignment(){
+  const id=localStorage.getItem(rouletteStorageKey());
+  if(!id)return null;
+
+  const test=testsData.find(t=>t.id===id);
+
+  if(!test){
+    localStorage.removeItem(rouletteStorageKey());
+    return null;
+  }
+
+  if(test.mySubmission){
+    localStorage.removeItem(rouletteStorageKey());
+    return null;
+  }
+
+  return id;
+}
+
+function setRouletteAssignment(id){
+  localStorage.setItem(rouletteStorageKey(),id);
+}
+
+function clearRouletteAssignment(){
+  localStorage.removeItem(rouletteStorageKey());
+}
+
+function availableRouletteTests(){
+  return (testsData||[]).filter(t=>!t.mySubmission);
+}
+
+function buildRouletteHtml(){
+  const assignedId=getRouletteAssignment();
+  const assigned=assignedId?testsData.find(t=>t.id===assignedId):null;
+  const available=availableRouletteTests();
+
+  return `
+    <div class="test-roulette" id="testRouletteBox">
+      <div class="test-roulette-top">
+        <div>
+          <div class="test-roulette-title">🎲 Рулетка тестов</div>
+          <div class="test-roulette-sub">
+            Рулетка случайно выбирает тест. После выпадения сначала нужно пройти именно его — повторно крутить рулетку можно только после отправки ответов.
+          </div>
+        </div>
+
+        <button
+          type="button"
+          class="btn"
+          id="spinTestRouletteBtn"
+          ${assigned||!available.length?"disabled":""}>
+          ${assigned?"Тест уже выбран":(!available.length?"Все тесты пройдены":"Крутить рулетку")}
+        </button>
+      </div>
+
+      <div
+        class="test-roulette-result"
+        id="testRouletteResult"
+        style="${assigned?"display:block;":""}">
+        ${assigned?rouletteSelectedHtml(assigned):""}
+      </div>
+    </div>
+  `;
+}
+
+function rouletteSelectedHtml(test){
+  return `
+    <div style="font-size:.74rem;color:var(--text-dim);font-weight:700;">🎯 Вам выпал тест</div>
+    <div class="test-roulette-name">${escapeHtml(test.title||"Без названия")}</div>
+
+    <div class="test-meta" style="justify-content:center;margin-top:10px;">
+      <span class="test-pill">⏱ ${Number(test.durationMinutes||10)} мин.</span>
+      <span class="test-pill">❓ ${(test.questions||[]).length} вопросов</span>
+      <span class="test-pill">★ ${Number(test.totalPoints||0)} баллов</span>
+    </div>
+
+    <button
+      type="button"
+      class="btn"
+      style="margin-top:13px;"
+      onclick="startPublishedTest('${escapeHtml(test.id)}')">
+      Начать тест
+    </button>
+  `;
+}
+
+function bindRouletteButton(){
+  const button=document.getElementById("spinTestRouletteBtn");
+  if(!button)return;
+
+  button.addEventListener("click",spinTestRoulette);
+}
+
+function spinTestRoulette(){
+  const button=document.getElementById("spinTestRouletteBtn");
+  const result=document.getElementById("testRouletteResult");
+  const available=availableRouletteTests();
+
+  if(!button||!result)return;
+
+  if(getRouletteAssignment()){
+    showToast("Сначала завершите уже выпавший тест.","warning","Рулетка заблокирована");
+    return;
+  }
+
+  if(!available.length){
+    showToast("Все доступные тесты уже пройдены.","info","Готово");
+    return;
+  }
+
+  button.disabled=true;
+  button.textContent="Крутим...";
+  result.style.display="block";
+
+  let tick=0;
+  const maxTicks=30;
+
+  const timer=setInterval(()=>{
+    const item=available[tick%available.length];
+
+    result.innerHTML=`
+      <div style="font-size:.74rem;color:var(--text-dim);">Выпадает...</div>
+      <div class="test-roulette-name test-roulette-slot">${escapeHtml(item.title||"Без названия")}</div>
+    `;
+
+    tick++;
+
+    if(tick>=maxTicks){
+      clearInterval(timer);
+
+      const selected=available[Math.floor(Math.random()*available.length)];
+
+      setRouletteAssignment(selected.id);
+
+      result.innerHTML=rouletteSelectedHtml(selected);
+
+      button.textContent="Тест выбран";
+      button.disabled=true;
+
+      showToast(
+        `Выпал тест «${selected.title}». Теперь необходимо его пройти.`,
+        "success",
+        "Рулетка остановилась"
+      );
+
+      renderTests();
+    }
+  },85);
+}
+
+window.deletePublishedTest=async function(id){
+  if(!isTestsAdmin()){
+    showToast("Удалять тесты может только администрация.","error","Доступ отклонён");
+    return;
+  }
+
+  const test=testsData.find(t=>t.id===id);
+  const title=test?.title||"этот тест";
+
+  if(!confirm(`Удалить тест «${title}»?\n\nБудут удалены сам тест и все результаты сотрудников. Это действие нельзя отменить.`)){
+    return;
+  }
+
+  try{
+    const r=await authenticatedFetch(
+      `/api/tests/${encodeURIComponent(id)}`,
+      {method:"DELETE"}
+    );
+
+    const d=await r.json();
+
+    if(!r.ok||!d.success){
+      throw new Error(d.error||"Не удалось удалить тест");
+    }
+
+    if(getRouletteAssignment()===id){
+      clearRouletteAssignment();
+    }
+
+    showToast(
+      `Тест «${title}» успешно удалён.`,
+      "success",
+      "Тест удалён"
+    );
+
+    await loadTests();
+
+  }catch(e){
+    showToast(
+      e.message||"Не удалось удалить тест.",
+      "error",
+      "Ошибка удаления"
+    );
+  }
+};
+
 
 document.getElementById("createTestBtn")?.addEventListener("click",()=>{if(!isTestsAdmin())return;testEditId=null;testDraft={title:"",description:"",questions:[],requireReview:false};document.getElementById("testTitleInput").value="";document.getElementById("testDescriptionInput").value="";document.getElementById("testRequireReviewInput").checked=false;openSimpleOverlay("testMetaOverlay")});
 window.editPublishedTest=async id=>{try{const r=await authenticatedFetch(`/api/tests/${encodeURIComponent(id)}/admin?t=${Date.now()}`,{cache:"no-store"});const d=await r.json();if(!r.ok||!d.success)throw new Error(d.error||"Ошибка");testEditId=id;testDraft=JSON.parse(JSON.stringify(d.test));document.getElementById("testTitleInput").value=testDraft.title||"";document.getElementById("testDescriptionInput").value=testDraft.description||"";document.getElementById("testDurationInput").value=Number(testDraft.durationMinutes||30);document.getElementById("testRequireReviewInput").checked=!!testDraft.requireReview;openSimpleOverlay("testMetaOverlay")}catch(e){showToast(e.message,"error","Ошибка")}};
@@ -9433,7 +9780,7 @@ window.startPublishedTest=id=>{const t=testsData.find(x=>x.id===id);if(!t)return
 function startTimer(min){if(activeTestTimer)clearInterval(activeTestTimer);const end=activeTestStartedAt+min*60000;const tick=()=>{const left=Math.max(0,end-Date.now()),sec=Math.ceil(left/1000);document.getElementById("takeTestTimer").textContent=`${String(Math.floor(sec/60)).padStart(2,"0")}:${String(sec%60).padStart(2,"0")}`;if(!left){clearInterval(activeTestTimer);activeTestTimer=null;submitActiveTest(true)}};tick();activeTestTimer=setInterval(tick,1000)}
 function collectAnswers(){return(activeTest.questions||[]).map(q=>q.type==="written"?{questionId:q.id,type:"written",text:document.querySelector(`.test-user-written[data-question-id="${CSS.escape(q.id)}"]`)?.value.trim()||""}:{questionId:q.id,type:q.type,optionIds:[...document.querySelectorAll(`input[data-question-id="${CSS.escape(q.id)}"]:checked`)].map(x=>x.value)})}
 document.getElementById("submitTakeTestBtn")?.addEventListener("click",()=>submitActiveTest(false));document.getElementById("closeTakeTestBtn")?.addEventListener("click",()=>closeSimpleOverlay("takeTestOverlay"));
-async function submitActiveTest(timedOut){if(!activeTest)return;const b=document.getElementById("submitTakeTestBtn"),t=activeTest;b.disabled=true;try{const r=await authenticatedFetch(`/api/tests/${encodeURIComponent(t.id)}/submit`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({answers:collectAnswers(),startedAt:new Date(activeTestStartedAt).toISOString(),timedOut})});const d=await r.json();if(!r.ok||!d.success)throw new Error(d.error||"Ошибка");if(activeTestTimer)clearInterval(activeTestTimer);closeSimpleOverlay("takeTestOverlay");activeTest=null;showToast(d.submission?.status==="approved"?`Результат: ${d.submission.percent}% — ${d.submission.points}/${d.submission.maxPoints} баллов.`:"Ответы отправлены. Результат появится после одобрения администрации.","success","Тест завершён");await loadTests()}catch(e){showToast(e.message,"error","Ошибка")}finally{b.disabled=false}}
+async function submitActiveTest(timedOut){if(!activeTest)return;const b=document.getElementById("submitTakeTestBtn"),t=activeTest;b.disabled=true;try{const r=await authenticatedFetch(`/api/tests/${encodeURIComponent(t.id)}/submit`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({answers:collectAnswers(),startedAt:new Date(activeTestStartedAt).toISOString(),timedOut})});const d=await r.json();if(!r.ok||!d.success)throw new Error(d.error||"Ошибка");if(activeTestTimer)clearInterval(activeTestTimer);closeSimpleOverlay("takeTestOverlay");if(getRouletteAssignment()===t.id)clearRouletteAssignment();activeTest=null;showToast(d.submission?.status==="approved"?`Результат: ${d.submission.percent}% — ${d.submission.points}/${d.submission.maxPoints} баллов.`:"Ответы отправлены. Результат появится после одобрения администрации.","success","Тест завершён");await loadTests()}catch(e){showToast(e.message,"error","Ошибка")}finally{b.disabled=false}}
 window.openTestResults=async id=>{adminResultsTestId=id;openSimpleOverlay("testResultsOverlay");await loadAdminResults()};
 async function loadAdminResults(){const list=document.getElementById("testResultsList");list.innerHTML='<div style="text-align:center;padding:25px;color:var(--text-faint);">Загрузка...</div>';try{const r=await authenticatedFetch(`/api/tests/${encodeURIComponent(adminResultsTestId)}/results?t=${Date.now()}`,{cache:"no-store"});const d=await r.json();if(!r.ok||!d.success)throw new Error(d.error);document.getElementById("testResultsHeading").textContent=`Результаты: ${d.test.title}`;list.innerHTML=d.submissions.length?d.submissions.map(x=>`<div class="test-result-row"><div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;"><div><strong>${escapeHtml(x.login)}</strong><div style="font-size:.78rem;color:var(--text-dim);margin-top:4px;">Сдан: ${fmtDate(x.submittedAt)} · Время: ${fmtDur(x.durationSeconds)}</div><div class="test-meta">${testStatusHtml(x)}</div></div><button class="btn" onclick="openSubmissionReview('${escapeHtml(x.id)}')">${x.status==="pending"?"Проверить":"Посмотреть"}</button></div></div>`).join(""):'<div style="text-align:center;padding:25px;color:var(--text-faint);">Пока никто не прошёл тест</div>'}catch(e){list.innerHTML='<div style="text-align:center;padding:25px;color:var(--danger);">Ошибка загрузки</div>'}}
 function fmtDate(v){return v?new Date(v).toLocaleString("ru-RU"):"—"}function fmtDur(s){s=Math.max(0,Number(s||0));return`${Math.floor(s/60)} мин. ${String(s%60).padStart(2,"0")} сек.`}
