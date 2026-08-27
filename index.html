@@ -2928,8 +2928,31 @@
 
 <div class="modal-overlay" id="testReviewOverlay"><div class="modal test-builder-modal">
   <div class="modal-head"><div><h3 id="testReviewHeading">Проверка работы</h3><p id="testReviewSubheading"></p></div><button class="icon-btn del" id="closeTestReviewBtn" style="padding:4px 8px;border:none;background:none;font-size:16px;">✕</button></div>
-  <div class="modal-body"><div id="testReviewQuestions"></div><div class="form-group" style="margin-top:14px;"><label>Комментарий сотруднику</label><textarea id="testReviewComment" rows="3" maxlength="1000" style="width:100%;padding:.7rem .85rem;border-radius:8px;border:1px solid var(--border);background:var(--bg);color:var(--text);outline:none;resize:vertical;" placeholder="Необязательно"></textarea></div></div>
-  <div class="modal-foot"><button type="button" class="btn" id="backToResultsBtn">Назад</button><button type="button" class="btn" id="approveTestResultBtn">Одобрить результат</button></div>
+  <div class="modal-body">
+    <div id="testReviewQuestions"></div>
+    <div class="form-group" style="margin-top:14px;">
+      <label>Комментарий сотруднику</label>
+      <textarea id="testReviewComment" rows="3" maxlength="1000" style="width:100%;padding:.7rem .85rem;border-radius:8px;border:1px solid var(--border);background:var(--bg);color:var(--text);outline:none;resize:vertical;" placeholder="Необязательно"></textarea>
+    </div>
+    <label class="test-review-toggle" style="margin-top:12px;">
+      <input type="checkbox" id="showCorrectionsInput">
+      <span>
+        <strong style="display:block;color:var(--text);margin-bottom:3px;">Показать работу над ошибками сотруднику</strong>
+        <span style="font-size:.8rem;color:var(--text-dim);line-height:1.45;">После одобрения сотрудник сможет посмотреть свои ответы, правильные ответы и ответ для администрации у письменных вопросов.</span>
+      </span>
+    </label>
+  </div>
+  <div class="modal-foot"><button type="button" class="btn" id="backToResultsBtn">Назад</button><button type="button" class="btn" id="saveCorrectionsVisibilityBtn" style="display:none;">Сохранить показ ошибок</button><button type="button" class="btn" id="approveTestResultBtn">Одобрить результат</button></div>
+</div></div>
+
+
+<div class="modal-overlay" id="testCorrectionsOverlay"><div class="modal test-builder-modal">
+  <div class="modal-head">
+    <div><h3 id="testCorrectionsHeading">Работа над ошибками</h3><p>Ваши ответы и правильные ответы после проверки администрации.</p></div>
+    <button class="icon-btn del" id="closeTestCorrectionsBtn" style="padding:4px 8px;border:none;background:none;font-size:16px;">✕</button>
+  </div>
+  <div class="modal-body"><div id="testCorrectionsList"></div></div>
+  <div class="modal-foot"><button type="button" class="btn" id="closeTestCorrectionsBottomBtn">Закрыть</button></div>
 </div></div>
 
 <!-- =========================================================
@@ -9532,6 +9555,9 @@ function renderTests(){
             ${t.mySubmission?.status==="approved"&&t.mySubmission?.comment
               ?`<div style="margin-top:9px;color:var(--text-dim);font-size:.8rem;">Комментарий: ${escapeHtml(t.mySubmission.comment)}</div>`
               :""}
+            ${t.mySubmission?.status==="approved"&&t.mySubmission?.showCorrections
+              ?`<div style="margin-top:10px;"><button class="btn" onclick="openTestCorrections('${escapeHtml(t.id)}')">Работа над ошибками</button></div>`
+              :""}
 
             ${assigned&&!done
               ?'<div class="roulette-required-note">Сначала необходимо пройти этот тест. После завершения рулетку можно будет крутить снова.</div>'
@@ -9767,10 +9793,33 @@ window.editPublishedTest=async id=>{try{const r=await authenticatedFetch(`/api/t
 ["closeTestMetaBtn","cancelTestMetaBtn"].forEach(id=>document.getElementById(id)?.addEventListener("click",()=>closeSimpleOverlay("testMetaOverlay")));
 document.getElementById("nextTestBuilderBtn")?.addEventListener("click",()=>{const title=document.getElementById("testTitleInput").value.trim();if(!title){showToast("Введите название теста.","warning","Не заполнено поле");return}testDraft.title=title;testDraft.description=document.getElementById("testDescriptionInput").value.trim();if(!testDraft.questions.length)testDraft.questions.push(emptyQ());document.getElementById("testBuilderHeading").textContent=`${testEditId?"Редактирование":"Конструктор"}: ${title}`;closeSimpleOverlay("testMetaOverlay");renderBuilder();openSimpleOverlay("testBuilderOverlay")});
 document.getElementById("backToTestMetaBtn")?.addEventListener("click",()=>{captureBuilder();closeSimpleOverlay("testBuilderOverlay");document.getElementById("testTitleInput").value=testDraft.title;document.getElementById("testDescriptionInput").value=testDraft.description;openSimpleOverlay("testMetaOverlay")});document.getElementById("closeTestBuilderBtn")?.addEventListener("click",()=>closeSimpleOverlay("testBuilderOverlay"));document.getElementById("addTestQuestionBtn")?.addEventListener("click",()=>{captureBuilder();testDraft.questions.push(emptyQ());renderBuilder()});
-function emptyQ(){return{id:crypto.randomUUID(),text:"",type:"single",image:"",points:1,options:[{id:crypto.randomUUID(),text:"",correct:true},{id:crypto.randomUUID(),text:"",correct:false}]}}
+function emptyQ(){return{id:crypto.randomUUID(),text:"",type:"single",image:"",points:1,adminAnswer:"",options:[{id:crypto.randomUUID(),text:"",correct:true},{id:crypto.randomUUID(),text:"",correct:false}]}}
 function renderBuilder(){const root=document.getElementById("testQuestionsBuilder");root.innerHTML=testDraft.questions.map((q,i)=>qHtml(q,i)).join("");root.querySelectorAll(".test-question-type").forEach(x=>x.addEventListener("change",()=>{captureBuilder();renderBuilder()}));root.querySelectorAll(".test-image-file").forEach(x=>x.addEventListener("change",async()=>{const f=x.files?.[0];if(!f)return;if(f.size>300*1024){showToast("Фото должно быть меньше 300 КБ.","warning","Слишком большой файл");return}captureBuilder();testDraft.questions[Number(x.dataset.index)].image=await fileDataUrl(f);renderBuilder()}))}
-function qHtml(q,i){const type=q.type||"single";const options=type==="written"?'<div style="padding:12px;border:1px dashed var(--border);border-radius:9px;color:var(--text-dim);font-size:.82rem;">Письменный ответ проверяет администрация вручную.</div>':`<div>${(q.options||[]).map((o,j)=>`<div class="test-answer-row"><input type="${type==="multiple"?"checkbox":"radio"}" name="correct_${i}" class="test-correct-input" ${o.correct?"checked":""}><input type="text" class="test-option-text" value="${escapeHtml(o.text||"")}" placeholder="Вариант ответа"><button class="icon-btn del" type="button" onclick="removeTestOption(${i},${j})">✕</button></div>`).join("")}<button class="add-btn" type="button" onclick="addTestOption(${i})">+ Вариант ответа</button></div>`;return `<div class="test-question-card" data-question-index="${i}"><div class="test-question-head"><div class="test-question-number">Вопрос ${i+1}</div><button class="icon-btn del" type="button" onclick="removeTestQuestion(${i})">Удалить</button></div><div class="test-points-row"><div class="form-group"><label>Текст вопроса</label><textarea class="test-question-text" rows="3" style="width:100%;padding:.7rem .85rem;border-radius:8px;border:1px solid var(--border);background:var(--bg);color:var(--text);outline:none;resize:vertical;">${escapeHtml(q.text||"")}</textarea></div><div class="form-group"><label>Баллы</label><input type="number" min="1" max="100" class="test-question-points" value="${Number(q.points||1)}"></div></div><div class="form-group"><label>Тип ответа</label><select class="test-question-type"><option value="single" ${type==="single"?"selected":""}>Один вариант</option><option value="multiple" ${type==="multiple"?"selected":""}>Несколько вариантов</option><option value="written" ${type==="written"?"selected":""}>Письменный ответ</option></select></div><div class="form-group"><label>Фото по ссылке</label><input class="test-question-image-url" value="${q.image&&!q.image.startsWith("data:")?escapeHtml(q.image):""}" placeholder="https://..."><div style="font-size:.76rem;color:var(--text-faint);margin:7px 0;">или загрузить</div><input type="file" class="test-image-file" data-index="${i}" accept="image/*">${q.image?`<img class="test-image-preview" src="${escapeHtml(q.image)}">`:""}</div>${options}</div>`}
-function captureBuilder(){document.querySelectorAll(".test-question-card[data-question-index]").forEach(card=>{const i=Number(card.dataset.questionIndex),q=testDraft.questions[i];q.text=card.querySelector(".test-question-text").value.trim();q.type=card.querySelector(".test-question-type").value;q.points=Math.max(1,Math.min(100,Math.round(Number(card.querySelector(".test-question-points").value||1))));const url=card.querySelector(".test-question-image-url").value.trim();if(url)q.image=url;if(q.type==="written"){q.options=[];return}const texts=[...card.querySelectorAll(".test-option-text")],checks=[...card.querySelectorAll(".test-correct-input")];q.options=texts.map((x,j)=>({id:q.options?.[j]?.id||crypto.randomUUID(),text:x.value.trim(),correct:!!checks[j]?.checked}))})}
+function qHtml(q,i){
+  const type=q.type||"single";
+  const options=type==="written"
+    ?`<div>
+        <div style="padding:12px;border:1px dashed var(--border);border-radius:9px;color:var(--text-dim);font-size:.82rem;margin-bottom:10px;">Письменный ответ проверяет администрация вручную.</div>
+        <div class="form-group">
+          <label>Ответ для администрации</label>
+          <textarea class="test-admin-answer" rows="3" style="width:100%;padding:.7rem .85rem;border-radius:8px;border:1px solid var(--border);background:var(--bg);color:var(--text);outline:none;resize:vertical;" placeholder="Эталонный ответ или подсказка для проверки">${escapeHtml(q.adminAnswer||"")}</textarea>
+          <div style="font-size:.74rem;color:var(--text-faint);margin-top:6px;">Сотрудник не увидит этот текст во время прохождения. Он появится только в работе над ошибками, если администрация разрешит её показать.</div>
+        </div>
+      </div>`
+    :`<div>${(q.options||[]).map((o,j)=>`<div class="test-answer-row"><input type="${type==="multiple"?"checkbox":"radio"}" name="correct_${i}" class="test-correct-input" ${o.correct?"checked":""}><input type="text" class="test-option-text" value="${escapeHtml(o.text||"")}" placeholder="Вариант ответа"><button class="icon-btn del" type="button" onclick="removeTestOption(${i},${j})">✕</button></div>`).join("")}<button class="add-btn" type="button" onclick="addTestOption(${i})">+ Вариант ответа</button></div>`;
+
+  return `<div class="test-question-card" data-question-index="${i}">
+    <div class="test-question-head"><div class="test-question-number">Вопрос ${i+1}</div><button class="icon-btn del" type="button" onclick="removeTestQuestion(${i})">Удалить</button></div>
+    <div class="test-points-row">
+      <div class="form-group"><label>Текст вопроса</label><textarea class="test-question-text" rows="3" style="width:100%;padding:.7rem .85rem;border-radius:8px;border:1px solid var(--border);background:var(--bg);color:var(--text);outline:none;resize:vertical;">${escapeHtml(q.text||"")}</textarea></div>
+      <div class="form-group"><label>Баллы</label><input type="number" min="1" max="100" class="test-question-points" value="${Number(q.points||1)}"></div>
+    </div>
+    <div class="form-group"><label>Тип ответа</label><select class="test-question-type"><option value="single" ${type==="single"?"selected":""}>Один вариант</option><option value="multiple" ${type==="multiple"?"selected":""}>Несколько вариантов</option><option value="written" ${type==="written"?"selected":""}>Письменный ответ</option></select></div>
+    <div class="form-group"><label>Фото по ссылке</label><input class="test-question-image-url" value="${q.image&&!q.image.startsWith("data:")?escapeHtml(q.image):""}" placeholder="https://..."><div style="font-size:.76rem;color:var(--text-faint);margin:7px 0;">или загрузить</div><input type="file" class="test-image-file" data-index="${i}" accept="image/*">${q.image?`<img class="test-image-preview" src="${escapeHtml(q.image)}">`:""}</div>
+    ${options}
+  </div>`;
+}
+function captureBuilder(){document.querySelectorAll(".test-question-card[data-question-index]").forEach(card=>{const i=Number(card.dataset.questionIndex),q=testDraft.questions[i];q.text=card.querySelector(".test-question-text").value.trim();q.type=card.querySelector(".test-question-type").value;q.points=Math.max(1,Math.min(100,Math.round(Number(card.querySelector(".test-question-points").value||1))));const url=card.querySelector(".test-question-image-url").value.trim();if(url)q.image=url;if(q.type==="written"){q.adminAnswer=card.querySelector(".test-admin-answer")?.value.trim()||"";q.options=[];return}const texts=[...card.querySelectorAll(".test-option-text")],checks=[...card.querySelectorAll(".test-correct-input")];q.options=texts.map((x,j)=>({id:q.options?.[j]?.id||crypto.randomUUID(),text:x.value.trim(),correct:!!checks[j]?.checked}))})}
 window.addTestOption=i=>{captureBuilder();testDraft.questions[i].options.push({id:crypto.randomUUID(),text:"",correct:false});renderBuilder()};window.removeTestOption=(i,j)=>{captureBuilder();if(testDraft.questions[i].options.length<=2){showToast("Минимум два варианта.","warning","Нельзя удалить");return}testDraft.questions[i].options.splice(j,1);renderBuilder()};window.removeTestQuestion=i=>{captureBuilder();if(testDraft.questions.length<=1)return;testDraft.questions.splice(i,1);renderBuilder()};
 function validateDraft(){captureBuilder();for(let i=0;i<testDraft.questions.length;i++){const q=testDraft.questions[i];if(!q.text)return`Заполните вопрос ${i+1}.`;if(q.type!=="written"){if((q.options||[]).length<2||q.options.some(o=>!o.text))return`Заполните варианты в вопросе ${i+1}.`;const c=q.options.filter(o=>o.correct).length;if(!c)return`Выберите правильный ответ в вопросе ${i+1}.`;if(q.type==="single"&&c!==1)return`В вопросе ${i+1} нужен один правильный ответ.`}}return""}
 document.getElementById("openTestPublishBtn")?.addEventListener("click",()=>{const e=validateDraft();if(e){showToast(e,"warning","Проверьте тест");return}const written=testDraft.questions.some(q=>q.type==="written");document.getElementById("testRequireReviewInput").disabled=written;if(written)document.getElementById("testRequireReviewInput").checked=true;else document.getElementById("testRequireReviewInput").checked=!!testDraft.requireReview;closeSimpleOverlay("testBuilderOverlay");openSimpleOverlay("testPublishOverlay")});document.getElementById("cancelTestPublishBtn")?.addEventListener("click",()=>{closeSimpleOverlay("testPublishOverlay");openSimpleOverlay("testBuilderOverlay")});
@@ -9784,8 +9833,107 @@ async function submitActiveTest(timedOut){if(!activeTest)return;const b=document
 window.openTestResults=async id=>{adminResultsTestId=id;openSimpleOverlay("testResultsOverlay");await loadAdminResults()};
 async function loadAdminResults(){const list=document.getElementById("testResultsList");list.innerHTML='<div style="text-align:center;padding:25px;color:var(--text-faint);">Загрузка...</div>';try{const r=await authenticatedFetch(`/api/tests/${encodeURIComponent(adminResultsTestId)}/results?t=${Date.now()}`,{cache:"no-store"});const d=await r.json();if(!r.ok||!d.success)throw new Error(d.error);document.getElementById("testResultsHeading").textContent=`Результаты: ${d.test.title}`;list.innerHTML=d.submissions.length?d.submissions.map(x=>`<div class="test-result-row"><div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;"><div><strong>${escapeHtml(x.login)}</strong><div style="font-size:.78rem;color:var(--text-dim);margin-top:4px;">Сдан: ${fmtDate(x.submittedAt)} · Время: ${fmtDur(x.durationSeconds)}</div><div class="test-meta">${testStatusHtml(x)}</div></div><button class="btn" onclick="openSubmissionReview('${escapeHtml(x.id)}')">${x.status==="pending"?"Проверить":"Посмотреть"}</button></div></div>`).join(""):'<div style="text-align:center;padding:25px;color:var(--text-faint);">Пока никто не прошёл тест</div>'}catch(e){list.innerHTML='<div style="text-align:center;padding:25px;color:var(--danger);">Ошибка загрузки</div>'}}
 function fmtDate(v){return v?new Date(v).toLocaleString("ru-RU"):"—"}function fmtDur(s){s=Math.max(0,Number(s||0));return`${Math.floor(s/60)} мин. ${String(s%60).padStart(2,"0")} сек.`}
-window.openSubmissionReview=async id=>{const r=await authenticatedFetch(`/api/test-submissions/${encodeURIComponent(id)}?t=${Date.now()}`,{cache:"no-store"});const d=await r.json();if(!r.ok||!d.success)return showToast(d.error||"Ошибка","error","Ошибка");activeReviewSubmissionId=id;document.getElementById("testReviewHeading").textContent=`Проверка: ${d.submission.login}`;document.getElementById("testReviewSubheading").textContent=`${d.test.title} · ${fmtDate(d.submission.submittedAt)} · ${fmtDur(d.submission.durationSeconds)}`;document.getElementById("testReviewComment").value=d.submission.comment||"";document.getElementById("testReviewQuestions").innerHTML=d.questions.map((q,i)=>`<div class="test-review-card"><div style="display:flex;justify-content:space-between;gap:10px;"><strong>${i+1}. ${escapeHtml(q.text)}</strong><span class="test-pill">${q.points} б.</span></div>${q.type==="written"?`<div class="test-review-answer">${escapeHtml(q.writtenAnswer||"Ответ не указан")}</div><div class="form-group" style="margin-top:10px;max-width:220px;"><label>Баллы 0–${q.points}</label><input type="number" min="0" max="${q.points}" class="manual-written-score" data-question-id="${escapeHtml(q.id)}" value="${q.awardedPoints||0}" ${d.submission.status==="approved"?"disabled":""}></div>`:`<div class="test-review-answer">${q.options.map(o=>`<div style="${q.selectedOptionIds.includes(o.id)?"font-weight:800;":""}">${q.selectedOptionIds.includes(o.id)?"→ ":""}${escapeHtml(o.text)} ${o.correct?"✓":""}</div>`).join("")}</div><div style="margin-top:7px;font-size:.8rem;color:var(--text-dim);">Авто: ${q.awardedPoints}/${q.points} баллов</div>`}</div>`).join("");document.getElementById("approveTestResultBtn").style.display=d.submission.status==="approved"?"none":"inline-flex";closeSimpleOverlay("testResultsOverlay");openSimpleOverlay("testReviewOverlay")};
-document.getElementById("approveTestResultBtn")?.addEventListener("click",async()=>{const scores=[...document.querySelectorAll(".manual-written-score")].map(x=>({questionId:x.dataset.questionId,points:Number(x.value||0)}));const r=await authenticatedFetch(`/api/test-submissions/${encodeURIComponent(activeReviewSubmissionId)}/approve`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({manualScores:scores,comment:document.getElementById("testReviewComment").value.trim()})});const d=await r.json();if(!r.ok||!d.success)return showToast(d.error||"Ошибка","error","Ошибка");showToast(`Одобрено: ${d.submission.percent}% — ${d.submission.points}/${d.submission.maxPoints} баллов.`,"success","Проверка завершена");closeSimpleOverlay("testReviewOverlay");openSimpleOverlay("testResultsOverlay");await loadAdminResults()});
+window.openSubmissionReview=async id=>{
+  const r=await authenticatedFetch(`/api/test-submissions/${encodeURIComponent(id)}?t=${Date.now()}`,{cache:"no-store"});
+  const d=await r.json();
+  if(!r.ok||!d.success)return showToast(d.error||"Ошибка","error","Ошибка");
+
+  activeReviewSubmissionId=id;
+  document.getElementById("testReviewHeading").textContent=`Проверка: ${d.submission.login}`;
+  document.getElementById("testReviewSubheading").textContent=`${d.test.title} · ${fmtDate(d.submission.submittedAt)} · ${fmtDur(d.submission.durationSeconds)}`;
+  document.getElementById("testReviewComment").value=d.submission.comment||"";
+  document.getElementById("showCorrectionsInput").checked=!!d.submission.showCorrections;
+
+  document.getElementById("testReviewQuestions").innerHTML=d.questions.map((q,i)=>`
+    <div class="test-review-card">
+      <div style="display:flex;justify-content:space-between;gap:10px;">
+        <strong>${i+1}. ${escapeHtml(q.text)}</strong>
+        <span class="test-pill">${q.points} б.</span>
+      </div>
+      ${q.type==="written"
+        ?`
+          <div style="margin-top:10px;font-size:.76rem;color:var(--text-dim);font-weight:800;">Ответ сотрудника</div>
+          <div class="test-review-answer">${escapeHtml(q.writtenAnswer||"Ответ не указан")}</div>
+          <div style="margin-top:10px;font-size:.76rem;color:var(--text-dim);font-weight:800;">Ответ для администрации</div>
+          <div class="test-review-answer">${escapeHtml(q.adminAnswer||"Эталонный ответ не указан")}</div>
+          <div class="form-group" style="margin-top:10px;max-width:220px;">
+            <label>Баллы 0–${q.points}</label>
+            <input type="number" min="0" max="${q.points}" class="manual-written-score" data-question-id="${escapeHtml(q.id)}" value="${q.awardedPoints||0}" ${d.submission.status==="approved"?"disabled":""}>
+          </div>
+        `
+        :`
+          <div class="test-review-answer">${q.options.map(o=>`<div style="${q.selectedOptionIds.includes(o.id)?"font-weight:800;":""}">${q.selectedOptionIds.includes(o.id)?"→ ":""}${escapeHtml(o.text)} ${o.correct?"✓":""}</div>`).join("")}</div>
+          <div style="margin-top:7px;font-size:.8rem;color:var(--text-dim);">Авто: ${q.awardedPoints}/${q.points} баллов</div>
+        `}
+    </div>
+  `).join("");
+
+  const approved=d.submission.status==="approved";
+  document.getElementById("approveTestResultBtn").style.display=approved?"none":"inline-flex";
+  document.getElementById("saveCorrectionsVisibilityBtn").style.display=approved?"inline-flex":"none";
+  closeSimpleOverlay("testResultsOverlay");
+  openSimpleOverlay("testReviewOverlay");
+};
+document.getElementById("approveTestResultBtn")?.addEventListener("click",async()=>{const scores=[...document.querySelectorAll(".manual-written-score")].map(x=>({questionId:x.dataset.questionId,points:Number(x.value||0)}));const r=await authenticatedFetch(`/api/test-submissions/${encodeURIComponent(activeReviewSubmissionId)}/approve`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({manualScores:scores,comment:document.getElementById("testReviewComment").value.trim(),showCorrections:document.getElementById("showCorrectionsInput").checked})});const d=await r.json();if(!r.ok||!d.success)return showToast(d.error||"Ошибка","error","Ошибка");showToast(`Одобрено: ${d.submission.percent}% — ${d.submission.points}/${d.submission.maxPoints} баллов.`,"success","Проверка завершена");closeSimpleOverlay("testReviewOverlay");openSimpleOverlay("testResultsOverlay");await loadAdminResults()});
+
+document.getElementById("saveCorrectionsVisibilityBtn")?.addEventListener("click",async()=>{
+  if(!activeReviewSubmissionId)return;
+  const b=document.getElementById("saveCorrectionsVisibilityBtn");
+  b.disabled=true;
+  try{
+    const r=await authenticatedFetch(`/api/test-submissions/${encodeURIComponent(activeReviewSubmissionId)}/corrections`,{
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({showCorrections:document.getElementById("showCorrectionsInput").checked})
+    });
+    const d=await r.json();
+    if(!r.ok||!d.success)throw new Error(d.error||"Ошибка");
+    showToast(d.submission.showCorrections?"Работа над ошибками теперь доступна сотруднику.":"Работа над ошибками скрыта от сотрудника.","success","Сохранено");
+    await loadTests();
+  }catch(e){
+    showToast(e.message||"Не удалось сохранить настройку.","error","Ошибка");
+  }finally{
+    b.disabled=false;
+  }
+});
+
+window.openTestCorrections=function(testId){
+  const test=testsData.find(t=>t.id===testId);
+  const sub=test?.mySubmission;
+  if(!test||!sub||sub.status!=="approved"||!sub.showCorrections||!Array.isArray(sub.corrections)){
+    showToast("Работа над ошибками для этого результата недоступна.","info","Недоступно");
+    return;
+  }
+
+  document.getElementById("testCorrectionsHeading").textContent=`Работа над ошибками: ${test.title}`;
+  document.getElementById("testCorrectionsList").innerHTML=sub.corrections.map(c=>`
+    <div class="test-review-card">
+      <div style="display:flex;justify-content:space-between;gap:10px;">
+        <strong>${c.number}. ${escapeHtml(c.text)}</strong>
+        <span class="test-pill">${Number(c.awardedPoints||0)} / ${Number(c.points||0)} б.</span>
+      </div>
+
+      ${c.type==="written"
+        ?`
+          <div style="margin-top:10px;font-size:.76rem;color:var(--text-dim);font-weight:800;">Ваш ответ</div>
+          <div class="test-review-answer">${escapeHtml(c.userAnswer||"Ответ не указан")}</div>
+          <div style="margin-top:10px;font-size:.76rem;color:var(--text-dim);font-weight:800;">Правильный / эталонный ответ</div>
+          <div class="test-review-answer">${escapeHtml(c.adminAnswer||"Эталонный ответ не указан")}</div>
+        `
+        :`
+          <div style="margin-top:10px;font-size:.76rem;color:var(--text-dim);font-weight:800;">Ваш ответ</div>
+          <div class="test-review-answer">${(c.userAnswers||[]).length?(c.userAnswers||[]).map(x=>escapeHtml(x)).join("<br>"):"Ответ не выбран"}</div>
+          <div style="margin-top:10px;font-size:.76rem;color:var(--text-dim);font-weight:800;">Правильный ответ</div>
+          <div class="test-review-answer">${(c.correctAnswers||[]).map(x=>escapeHtml(x)).join("<br>")}</div>
+        `}
+    </div>
+  `).join("");
+
+  openSimpleOverlay("testCorrectionsOverlay");
+};
+
+["closeTestCorrectionsBtn","closeTestCorrectionsBottomBtn"].forEach(id=>document.getElementById(id)?.addEventListener("click",()=>closeSimpleOverlay("testCorrectionsOverlay")));
+
 ["closeTestResultsBtn","closeTestResultsBottomBtn"].forEach(id=>document.getElementById(id)?.addEventListener("click",()=>closeSimpleOverlay("testResultsOverlay")));document.getElementById("refreshTestResultsBtn")?.addEventListener("click",loadAdminResults);document.getElementById("closeTestReviewBtn")?.addEventListener("click",()=>closeSimpleOverlay("testReviewOverlay"));document.getElementById("backToResultsBtn")?.addEventListener("click",()=>{closeSimpleOverlay("testReviewOverlay");openSimpleOverlay("testResultsOverlay")});
 
 </script>
