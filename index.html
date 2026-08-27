@@ -2942,7 +2942,7 @@
       </span>
     </label>
   </div>
-  <div class="modal-foot"><button type="button" class="btn" id="backToResultsBtn">Назад</button><button type="button" class="btn" id="saveCorrectionsVisibilityBtn" style="display:none;">Сохранить показ ошибок</button><button type="button" class="btn" id="approveTestResultBtn">Одобрить результат</button></div>
+  <div class="modal-foot"><button type="button" class="btn" id="backToResultsBtn">Назад</button><button type="button" class="btn" id="sendTestRetakeBtn" style="background:#d97706;color:#fff;border-color:#d97706;">Отправить на пересдачу</button><button type="button" class="btn" id="saveCorrectionsVisibilityBtn" style="display:none;">Сохранить показ ошибок</button><button type="button" class="btn" id="approveTestResultBtn">Одобрить результат</button></div>
 </div></div>
 
 
@@ -9622,7 +9622,7 @@ window.deleteArticle =
 let testDraft=null,testEditId=null,activeTest=null,activeTestStartedAt=0,activeTestTimer=null,adminResultsTestId=null,activeReviewSubmissionId=null;
 function openSimpleOverlay(id){document.getElementById(id)?.classList.add("open")}function closeSimpleOverlay(id){document.getElementById(id)?.classList.remove("open")}function isTestsAdmin(){return localStorage.getItem("ft_role")==="admin"}
 async function loadTests(){const list=document.getElementById("testsList");if(!list)return;list.innerHTML='<div style="text-align:center;color:var(--text-faint);padding:30px;">Загрузка тестов...</div>';try{const r=await authenticatedFetch(`/api/tests?t=${Date.now()}`,{cache:"no-store"});const d=await r.json();if(!r.ok||!d.success)throw new Error(d.error||"Ошибка загрузки");testsData=Array.isArray(d.tests)?d.tests:[];renderTests()}catch(e){list.innerHTML='<div style="text-align:center;color:var(--danger);padding:30px;">Не удалось загрузить тесты</div>'}}
-function testStatusHtml(s){if(!s)return"";if(s.status==="approved")return `<span class="test-score-pill approved">✓ Проверено</span><span class="test-score-pill">${Number(s.percent||0)}%</span><span class="test-score-pill">${Number(s.points||0)} / ${Number(s.maxPoints||0)} баллов</span>`;return '<span class="test-score-pill pending">⏳ Ожидает проверки</span>'}
+function testStatusHtml(s){if(!s)return"";if(s.status==="approved")return `<span class="test-score-pill approved">✓ Проверено</span><span class="test-score-pill">${Number(s.percent||0)}%</span><span class="test-score-pill">${Number(s.points||0)} / ${Number(s.maxPoints||0)} баллов</span>`;if(s.status==="retake")return '<span class="test-score-pill" style="border-color:var(--warning);color:var(--warning);">↻ Отправлен на пересдачу</span>';return '<span class="test-score-pill pending">⏳ Ожидает проверки</span>'}
 function renderTests(){
   const list=document.getElementById("testsList");
   if(!list)return;
@@ -10017,7 +10017,7 @@ function collectAnswers(){return(activeTest.questions||[]).map(q=>q.type==="writ
 document.getElementById("submitTakeTestBtn")?.addEventListener("click",()=>submitActiveTest(false));document.getElementById("closeTakeTestBtn")?.addEventListener("click",()=>closeSimpleOverlay("takeTestOverlay"));
 async function submitActiveTest(timedOut){if(!activeTest)return;const b=document.getElementById("submitTakeTestBtn"),t=activeTest;b.disabled=true;try{const r=await authenticatedFetch(`/api/tests/${encodeURIComponent(t.id)}/submit`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({answers:collectAnswers(),startedAt:new Date(activeTestStartedAt).toISOString(),timedOut})});const d=await r.json();if(!r.ok||!d.success)throw new Error(d.error||"Ошибка");if(activeTestTimer)clearInterval(activeTestTimer);closeSimpleOverlay("takeTestOverlay");if(getRouletteAssignment()===t.id)clearRouletteAssignment();activeTest=null;showToast(d.submission?.status==="approved"?`Результат: ${d.submission.percent}% — ${d.submission.points}/${d.submission.maxPoints} баллов.`:"Ответы отправлены. Результат появится после одобрения администрации.","success","Тест завершён");await loadTests()}catch(e){showToast(e.message,"error","Ошибка")}finally{b.disabled=false}}
 window.openTestResults=async id=>{adminResultsTestId=id;openSimpleOverlay("testResultsOverlay");await loadAdminResults()};
-async function loadAdminResults(){const list=document.getElementById("testResultsList");list.innerHTML='<div style="text-align:center;padding:25px;color:var(--text-faint);">Загрузка...</div>';try{const r=await authenticatedFetch(`/api/tests/${encodeURIComponent(adminResultsTestId)}/results?t=${Date.now()}`,{cache:"no-store"});const d=await r.json();if(!r.ok||!d.success)throw new Error(d.error);document.getElementById("testResultsHeading").textContent=`Результаты: ${d.test.title}`;list.innerHTML=d.submissions.length?d.submissions.map(x=>`<div class="test-result-row"><div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;"><div><strong>${escapeHtml(x.login)}</strong><div style="font-size:.78rem;color:var(--text-dim);margin-top:4px;">Сдан: ${fmtDate(x.submittedAt)} · Время: ${fmtDur(x.durationSeconds)}</div><div class="test-meta">${testStatusHtml(x)}</div></div><button class="btn" onclick="openSubmissionReview('${escapeHtml(x.id)}')">${x.status==="pending"?"Проверить":"Посмотреть"}</button></div></div>`).join(""):'<div style="text-align:center;padding:25px;color:var(--text-faint);">Пока никто не прошёл тест</div>'}catch(e){list.innerHTML='<div style="text-align:center;padding:25px;color:var(--danger);">Ошибка загрузки</div>'}}
+async function loadAdminResults(){const list=document.getElementById("testResultsList");list.innerHTML='<div style="text-align:center;padding:25px;color:var(--text-faint);">Загрузка...</div>';try{const r=await authenticatedFetch(`/api/tests/${encodeURIComponent(adminResultsTestId)}/results?t=${Date.now()}`,{cache:"no-store"});const d=await r.json();if(!r.ok||!d.success)throw new Error(d.error);document.getElementById("testResultsHeading").textContent=`Результаты: ${d.test.title}`;list.innerHTML=d.submissions.length?d.submissions.map(x=>`<div class="test-result-row"><div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;"><div><strong>${escapeHtml(x.login)}</strong><div style="font-size:.78rem;color:var(--text-dim);margin-top:4px;">Сдан: ${fmtDate(x.submittedAt)} · Время: ${fmtDur(x.durationSeconds)}</div><div class="test-meta">${testStatusHtml(x)}</div></div><button class="btn" onclick="openSubmissionReview('${escapeHtml(x.id)}')">${x.status==="pending"?"Проверить":(x.status==="retake"?"Пересдача":"Посмотреть")}</button></div></div>`).join(""):'<div style="text-align:center;padding:25px;color:var(--text-faint);">Пока никто не прошёл тест</div>'}catch(e){list.innerHTML='<div style="text-align:center;padding:25px;color:var(--danger);">Ошибка загрузки</div>'}}
 function fmtDate(v){return v?new Date(v).toLocaleString("ru-RU"):"—"}function fmtDur(s){s=Math.max(0,Number(s||0));return`${Math.floor(s/60)} мин. ${String(s%60).padStart(2,"0")} сек.`}
 window.openSubmissionReview=async id=>{
   const r=await authenticatedFetch(`/api/test-submissions/${encodeURIComponent(id)}?t=${Date.now()}`,{cache:"no-store"});
@@ -10055,12 +10055,60 @@ window.openSubmissionReview=async id=>{
   `).join("");
 
   const approved=d.submission.status==="approved";
-  document.getElementById("approveTestResultBtn").style.display=approved?"none":"inline-flex";
+  const retake=d.submission.status==="retake";
+  document.getElementById("approveTestResultBtn").style.display=approved||retake?"none":"inline-flex";
   document.getElementById("saveCorrectionsVisibilityBtn").style.display=approved?"inline-flex":"none";
+  document.getElementById("sendTestRetakeBtn").style.display=retake?"none":"inline-flex";
   closeSimpleOverlay("testResultsOverlay");
   openSimpleOverlay("testReviewOverlay");
 };
 document.getElementById("approveTestResultBtn")?.addEventListener("click",async()=>{const scores=[...document.querySelectorAll(".manual-written-score")].map(x=>({questionId:x.dataset.questionId,points:Number(x.value||0)}));const r=await authenticatedFetch(`/api/test-submissions/${encodeURIComponent(activeReviewSubmissionId)}/approve`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({manualScores:scores,comment:document.getElementById("testReviewComment").value.trim(),showCorrections:document.getElementById("showCorrectionsInput").checked})});const d=await r.json();if(!r.ok||!d.success)return showToast(d.error||"Ошибка","error","Ошибка");showToast(`Одобрено: ${d.submission.percent}% — ${d.submission.points}/${d.submission.maxPoints} баллов.`,"success","Проверка завершена");closeSimpleOverlay("testReviewOverlay");openSimpleOverlay("testResultsOverlay");await loadAdminResults()});
+
+
+document.getElementById("sendTestRetakeBtn")?.addEventListener("click",async()=>{
+  if(!activeReviewSubmissionId)return;
+
+  if(!confirm("Отправить эту работу на пересдачу?\n\nСотрудник сможет снова пройти этот тест. Текущая работа останется в истории как отправленная на пересдачу.")){
+    return;
+  }
+
+  const btn=document.getElementById("sendTestRetakeBtn");
+  btn.disabled=true;
+
+  try{
+    const r=await authenticatedFetch(
+      `/api/test-submissions/${encodeURIComponent(activeReviewSubmissionId)}/retake`,
+      {
+        method:"POST"
+      }
+    );
+
+    const d=await r.json();
+
+    if(!r.ok||!d.success){
+      throw new Error(d.error||"Не удалось отправить на пересдачу");
+    }
+
+    showToast(
+      `Сотрудник ${d.login||""} отправлен на пересдачу.`,
+      "success",
+      "Пересдача назначена"
+    );
+
+    closeSimpleOverlay("testReviewOverlay");
+    openSimpleOverlay("testResultsOverlay");
+    await loadAdminResults();
+
+  }catch(e){
+    showToast(
+      e.message||"Не удалось отправить работу на пересдачу.",
+      "error",
+      "Ошибка"
+    );
+  }finally{
+    btn.disabled=false;
+  }
+});
 
 document.getElementById("saveCorrectionsVisibilityBtn")?.addEventListener("click",async()=>{
   if(!activeReviewSubmissionId)return;
