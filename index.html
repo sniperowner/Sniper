@@ -9104,11 +9104,8 @@ document
       button.className = "copy-button";
       button.setAttribute("data-copy-text", copyText);
       button.setAttribute("contenteditable", "false");
+      button.setAttribute("onclick", "copyArticleButton(event, this)");
       button.textContent = buttonText;
-
-      button.addEventListener("click", function(event) {
-        copyArticleButton(event, this);
-      });
 
       range.deleteContents();
       range.insertNode(button);
@@ -9141,87 +9138,81 @@ window.copyArticleButton =
     element
   ) {
 
-    event.preventDefault();
-    event.stopPropagation();
-
+    if (event) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
 
     const text =
       element.getAttribute(
         "data-copy-text"
       ) || "";
 
-
-    try {
-
-      await navigator
-        .clipboard
-        .writeText(text);
-
-
-      const oldText =
-        element.textContent;
-
-
-      element.textContent =
-        "✓ Скопировано";
-
-
-      setTimeout(
-        () => {
-
-          element.textContent =
-            oldText;
-
-        },
-        1500
+    if (!text) {
+      showToast(
+        "У этой кнопки не указан текст для копирования.",
+        "warning",
+        "Нечего копировать"
       );
-
-
-    } catch (error) {
-
-      const textarea =
-        document.createElement(
-          "textarea"
-        );
-
-      textarea.value = text;
-      textarea.style.position = "fixed";
-      textarea.style.opacity = "0";
-
-      document.body.appendChild(
-        textarea
-      );
-
-      textarea.select();
-
-      try {
-
-        document.execCommand(
-          "copy"
-        );
-
-        const oldText =
-          element.textContent;
-
-        element.textContent =
-          "✓ Скопировано";
-
-        setTimeout(
-          () => {
-            element.textContent =
-              oldText;
-          },
-          1500
-        );
-
-      } finally {
-
-        textarea.remove();
-
-      }
-
+      return;
     }
 
+    let copied = false;
+
+    // Современный Clipboard API работает только в безопасном контексте.
+    try {
+      if (
+        navigator.clipboard &&
+        window.isSecureContext
+      ) {
+        await navigator.clipboard.writeText(text);
+        copied = true;
+      }
+    } catch (_) {}
+
+    // Запасной вариант для браузеров/страниц, где clipboard API недоступен.
+    if (!copied) {
+      try {
+        const textarea = document.createElement("textarea");
+        textarea.value = text;
+        textarea.setAttribute("readonly", "");
+        textarea.style.position = "fixed";
+        textarea.style.left = "-9999px";
+        textarea.style.top = "0";
+        document.body.appendChild(textarea);
+        textarea.focus();
+        textarea.select();
+        textarea.setSelectionRange(0, textarea.value.length);
+        copied = document.execCommand("copy");
+        textarea.remove();
+      } catch (_) {
+        copied = false;
+      }
+    }
+
+    if (!copied) {
+      showToast(
+        "Браузер не разрешил доступ к буферу обмена.",
+        "error",
+        "Не удалось скопировать"
+      );
+      return;
+    }
+
+    const oldText = element.textContent;
+    element.textContent = "✓ Скопировано";
+
+    showToast(
+      "Текст скопирован в буфер обмена.",
+      "success",
+      "Скопировано"
+    );
+
+    setTimeout(() => {
+      if (element && element.isConnected) {
+        element.textContent = oldText;
+      }
+    }, 1200);
   };
 
 /* =========================================================
@@ -9560,6 +9551,22 @@ window.openArticle =
 
   };
 
+
+// Поддержка уже сохранённых статей: старые кнопки могли не иметь onclick.
+document.addEventListener("click", function(event) {
+  const button = event.target.closest(".article-content .copy-button");
+
+  if (!button) {
+    return;
+  }
+
+  // Если у кнопки уже есть inline onclick, повторно не вызываем функцию.
+  if (button.getAttribute("onclick")) {
+    return;
+  }
+
+  copyArticleButton(event, button);
+});
 
 /* =========================================================
    РЕДАКТИРОВАНИЕ СТАТЬИ
