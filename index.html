@@ -3961,6 +3961,7 @@
         <button
           type="button"
           class="icon-btn"
+          onmousedown="saveArticleEditorRange()"
           onclick="insertArticleButton()">
 
           📋 Кнопка для копирования
@@ -8891,11 +8892,67 @@ window.formatArticle =
 
 
 /* =========================================================
+   ПОЗИЦИЯ КУРСОРА В РЕДАКТОРЕ
+   ========================================================= */
+
+let articleSavedRange = null;
+
+function saveArticleEditorRange() {
+  const editor = document.getElementById("articleEditor");
+  const selection = window.getSelection();
+
+  if (!editor || !selection || selection.rangeCount === 0) return;
+
+  const range = selection.getRangeAt(0);
+
+  if (editor.contains(range.commonAncestorContainer)) {
+    articleSavedRange = range.cloneRange();
+  }
+}
+
+function restoreArticleEditorRange() {
+  const editor = document.getElementById("articleEditor");
+  const selection = window.getSelection();
+
+  if (!editor || !selection) return null;
+
+  let range;
+
+  if (articleSavedRange) {
+    range = articleSavedRange.cloneRange();
+  } else {
+    range = document.createRange();
+    range.selectNodeContents(editor);
+    range.collapse(false);
+  }
+
+  selection.removeAllRanges();
+  selection.addRange(range);
+  editor.focus();
+  return range;
+}
+
+document.addEventListener("selectionchange", () => {
+  const editor = document.getElementById("articleEditor");
+  const selection = window.getSelection();
+
+  if (!editor || !selection || selection.rangeCount === 0) return;
+
+  const range = selection.getRangeAt(0);
+
+  if (editor.contains(range.commonAncestorContainer)) {
+    articleSavedRange = range.cloneRange();
+  }
+});
+
+/* =========================================================
    ДОБАВИТЬ КНОПКУ
    ========================================================= */
 
 window.insertArticleButton =
   function() {
+
+    saveArticleEditorRange();
 
     document
       .getElementById(
@@ -9015,38 +9072,6 @@ document
         );
 
 
-      editor.focus();
-
-
-      const html = `
-
-        <button
-          type="button"
-          class="copy-button"
-          data-copy-text="${escapeHtml(
-            copyText
-          )}"
-          onclick="
-            copyArticleButton(
-              event,
-              this
-            )
-          ">
-
-          ${escapeHtml(buttonText)}
-
-        </button>
-
-      `;
-
-
-      document.execCommand(
-        "insertHTML",
-        false,
-        html
-      );
-
-
       document
         .getElementById(
           "articleButtonModal"
@@ -9054,6 +9079,54 @@ document
         .classList.remove(
           "open"
         );
+
+
+      const range =
+        restoreArticleEditorRange();
+
+
+      if (!range) {
+        showToast(
+          "Не удалось определить место вставки. Поставьте курсор в текст и попробуйте ещё раз.",
+          "warning",
+          "Курсор не найден"
+        );
+        return;
+      }
+
+
+      const button =
+        document.createElement(
+          "button"
+        );
+
+      button.type = "button";
+      button.className = "copy-button";
+      button.setAttribute("data-copy-text", copyText);
+      button.setAttribute("contenteditable", "false");
+      button.textContent = buttonText;
+
+      button.addEventListener("click", function(event) {
+        copyArticleButton(event, this);
+      });
+
+      range.deleteContents();
+      range.insertNode(button);
+
+      const spacer = document.createTextNode("\u00A0");
+      button.after(spacer);
+
+      const selection = window.getSelection();
+      const newRange = document.createRange();
+
+      newRange.setStartAfter(spacer);
+      newRange.collapse(true);
+
+      selection.removeAllRanges();
+      selection.addRange(newRange);
+
+      articleSavedRange = newRange.cloneRange();
+      editor.focus();
 
     }
   );
